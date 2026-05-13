@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Arsip Laporan Keuangan (Publik){% endblock %}
+
+{% block content %}
+<section class="bg-white rounded-2xl border p-6 shadow-sm">
+  <h1 class="text-2xl font-bold text-emerald-700 mb-4">Arsip Laporan Keuangan (Publik)</h1>
+
+  <!-- Form pencarian -->
+  <form method="get" class="mb-4">
+    <div class="flex gap-2">
+      <input type="text" name="periode" value="{{ search }}" placeholder="Cari periode: mis. Jan 2025"
+             class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+      <button type="submit"
+              class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition">
+        🔍 Cari
+      </button>
+    </div>
+  </form>
+
+  {% if reports %}
+    <ul class="space-y-3">
+      {% for r in reports %}
+        <li class="p-4 border rounded-xl bg-emerald-50/40 flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <a href="{% url 'report_public_detail' r.pk %}"
+               class="text-emerald-700 font-semibold hover:underline">
+              {{ r.title }}
+            </a>
+            <div class="text-xs text-gray-600 mt-1">
+              {% if r.period %}Periode: {{ r.period }} • {% endif %}
+              Diunggah: {{ r.uploaded_at|date:"d M Y H:i" }}
+            </div>
+          </div>
+
+          {% if request.user.is_authenticated %}
+          <!-- Tombol hapus muncul hanya jika login -->
+          <div class="shrink-0">
+            <form method="post" action="{% url 'report_delete_from_archive' r.pk %}"
+                  onsubmit="return confirm('Yakin hapus laporan ini? Tindakan tidak bisa dibatalkan.');">
+              {% csrf_token %}
+              <button type="submit"
+                      class="px-3 py-1 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm">
+                🗑 Hapus
+              </button>
+            </form>
+          </div>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-sm text-gray-500">Belum ada laporan publik.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% block title %}Beranda – Masjid Al Huda{% endblock %}
+{% block content %}
+
+<!-- BAGIAN SAMBUTAN -->
+<section class="bg-white rounded-2xl border p-6 mb-6 shadow-sm text-center">
+  <h1 class="text-3xl font-bold text-emerald-700 mb-2">
+    Selamat Datang di Website {{ mosque.name|default:"Masjid Al Huda" }}
+  </h1>
+  <p class="text-gray-700 max-w-2xl mx-auto leading-relaxed">
+    Assalamu’alaikum Warahmatullahi Wabarakatuh 🌿<br>
+    Website ini dibuat untuk memberikan akses informasi bagi jamaah — mulai dari kegiatan ibadah,
+    laporan keuangan yang transparan, saluran donasi, hingga dokumen legalitas masjid.
+  </p>
+  <div class="mt-5 flex items-center justify-center gap-3">
+    <a href="{% url 'mosque_profile' %}" class="bg-emerald-600 text-white px-5 py-2 rounded-lg hover:bg-emerald-700 transition">
+      📖 Lihat Profil Masjid
+    </a>
+    <a href="{% url 'legalitas_public' %}" class="px-5 py-2 rounded-lg border hover:bg-emerald-50 transition">
+      📄 Legalitas Masjid
+    </a>
+  </div>
+</section>
+
+<!-- BAGIAN FOTO MASJID -->
+<section class="mb-8">
+  <div class="rounded-2xl overflow-hidden shadow border bg-gray-100 max-w-5xl mx-auto">
+    {% if mosque.logo_url %}
+      <img src="{{ mosque.logo_url }}" alt="{{ mosque.name }}" class="w-full h-80 object-cover">
+    {% else %}
+      <img src="https://images.unsplash.com/photo-1601987077681-ec8d6ecf1c73?auto=format&fit=crop&w=1200&q=60"
+           alt="Masjid Al Huda Bekasi" class="w-full h-80 object-cover">
+    {% endif %}
+  </div>
+  <p class="text-center text-sm text-gray-500 mt-2">
+    {% if mosque.logo_url %}
+      Foto: {{ mosque.name }}
+    {% else %}
+      *Foto ilustrasi – ganti dengan foto asli Masjid melalui menu “Kelola Profil” → kolom URL Logo*
+    {% endif %}
+  </p>
+</section>
+
+<!-- INFORMASI UTAMA -->
+<section class="grid md:grid-cols-3 gap-6">
+  <!-- Informasi Profil -->
+  <div class="bg-white border rounded-2xl p-5 shadow-sm">
+    <h2 class="text-lg font-semibold text-emerald-700 mb-2">Profil Singkat</h2>
+    <p class="text-gray-600 text-sm leading-relaxed">
+      {% if mosque.about %}
+        {{ mosque.about|linebreaksbr }}
+      {% else %}
+        Belum ada deskripsi singkat. Silakan isi di menu <strong>Panel → Kelola Profil</strong>.
+      {% endif %}
+    </p>
+  </div>
+
+  <!-- Kegiatan & Program (dinamis) -->
+  <div id="program" class="bg-white border rounded-2xl p-5 shadow-sm">
+    <h2 class="text-lg font-semibold text-emerald-700 mb-2">Kegiatan & Program</h2>
+    {% if programs %}
+      <ul class="list-disc text-sm text-gray-700 pl-5">
+        {% for p in programs %}
+          <li>
+            {{ p.title }}
+            {% if not p.is_active %}
+              <span class="text-xs text-gray-500">(nonaktif)</span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+      <a href="{% url 'mosque_profile' %}" class="inline-block mt-3 text-emerald-700 underline text-sm">
+        Kelola program →
+      </a>
+    {% else %}
+      <p class="text-sm text-gray-500">Belum ada program aktif.</p>
+      <a href="{% url 'program_add' %}" class="inline-block mt-3 text-emerald-700 underline text-sm">
+        + Tambah program
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- Legalitas Terbaru -->
+  <div class="bg-white border rounded-2xl p-5 shadow-sm">
+    <h2 class="text-lg font-semibold text-emerald-700 mb-2">Legalitas Terbaru</h2>
+    {% if docs %}
+      <ul class="text-sm text-gray-700 space-y-2">
+        {% for d in docs|slice:":5" %}
+          <li class="flex items-center justify-between">
+            <div>
+              <span class="font-medium">{{ d.get_doc_type_display }}</span> — {{ d.title }}
+              <span class="text-xs text-gray-500">({{ d.uploaded_at|date:"d M Y" }})</span>
+            </div>
+            <a href="{{ d.file.url }}" target="_blank" class="underline text-emerald-700">Lihat</a>
+          </li>
+        {% endfor %}
+      </ul>
+      <a href="{% url 'legalitas_public' %}" class="inline-block mt-3 text-emerald-700 underline text-sm">
+        Lihat semua legalitas →
+      </a>
+    {% else %}
+      <p class="text-sm text-gray-500">Belum ada dokumen legalitas publik.</p>
+      <a href="{% url 'legalitas_public' %}" class="inline-block mt-3 text-emerald-700 underline text-sm">
+        Buka halaman legalitas →
+      </a>
+    {% endif %}
+  </div>
+</section>
+
+<!-- DONASI & LAPORAN TERBARU -->
+<section class="mt-10 grid md:grid-cols-2 gap-6">
+  <!-- Donasi -->
+  <div id="donasi" class="bg-white border rounded-2xl p-6 shadow-sm">
+    <h2 class="text-lg font-semibold text-emerald-700 mb-3">Saluran Donasi</h2>
+    {% if channels %}
+      <ul class="text-sm text-gray-700 space-y-3">
+        {% for c in channels %}
+          <li class="border-b pb-3">
+            <strong>{{ c.title }}</strong><br>
+            {% if c.bank %}<span class="text-gray-600">{{ c.bank }} – {{ c.account }}</span>{% endif %}
+            {% if c.qris_image %}
+              <img src="{{ c.qris_image.url }}" alt="QRIS" class="mt-2 rounded border w-32">
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-sm text-gray-500">
+        Assalamu’alaikum 🌿 Donasi untuk masjid bisa ditransfer ke BSI 1234 5678 90 a.n. Masjid Al-Huda atau lewat QRIS di spreadsheet Donasi. Jangan lupa input partisipasi zakat/infaq/sedekah dan lampirkan bukti transfer di bagian donasi ya, supaya bisa kami update secara berkala 🤲✨
+      </p>
+    {% endif %}
+  </div>
+
+  <!-- Laporan Keuangan Terbaru -->
+  <div class="bg-white border rounded-2xl p-6 shadow-sm">
+    <h2 class="text-lg font-semibold text-emerald-700 mb-3">Laporan Keuangan Terbaru</h2>
+    {% if latest_report %}
+      <div class="text-sm">
+        <p>📄 <strong>{{ latest_report.title }}</strong></p>
+        <p class="text-gray-600">Periode: {{ latest_report.period }}</p>
+        <a href="/r/{{ latest_report.pk }}/" class="text-emerald-700 underline text-sm mt-2 inline-block">
+          Lihat Laporan →
+        </a>
+      </div>
+    {% else %}
+      <p class="text-gray-500 text-sm">Belum ada laporan yang diunggah.</p>
+    {% endif %}
+  </div>
+</section>
+
+<!-- PENGURUS & KONTAK -->
+<section class="mt-10 grid md:grid-cols-2 gap-6">
+  <!-- Pengurus (dinamis) -->
+  <div id="pengurus" class="bg-white border rounded-2xl p-6 shadow-sm">
+    <h2 class="text-lg font-semibold text-emerald-700 mb-3">Pengurus (Ringkas)</h2>
+
+    {% if pengurus %}
+      <ul class="text-sm text-gray-700 space-y-1">
+        {% for m in pengurus %}
+          <li>
+            {{ m.name }} — <span class="text-gray-600">{{ m.get_role_display }}</span>
+            {% if m.phone %}<span class="text-xs text-gray-500"> ({{ m.phone }})</span>{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+      <a href="{% url 'mosque_profile' %}" class="inline-block mt-3 text-emerald-700 underline text-sm">
+        Lihat semua pengurus →
+      </a>
+    {% else %}
+      <p class="text-sm text-gray-500">Belum ada data pengurus.</p>
+      <a href="{% url 'management_add' %}" class="inline-block mt-3 text-emerald-700 underline text-sm">
+        + Tambah pengurus
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- Kontak -->
+  <div id="kontak" class="bg-white border rounded-2xl p-6 shadow-sm">
+    <h2 class="text-lg font-semibold text-emerald-700 mb-3">Kontak & Alamat</h2>
+    <p class="text-sm text-gray-600">
+      📍{% if mosque.address %}
+        {{ mosque.name }} – {{ mosque.address }},
+        {% if mosque.city %}{{ mosque.city }}, {% endif %}
+        {% if mosque.province %}{{ mosque.province }}{% endif %}<br>
+      {% endif %}
+      {% if mosque.contact_phone %}
+        📞  Telp/WA: {{ mosque.contact_phone }}<br>
+      {% endif %}
+      {% if mosque.email %}
+        📄  Email: {{ mosque.email }}<br>
+      {% endif %}
+    </p>
+    <p class="text-xs text-gray-500 mt-2"></p>
+  </div>
+</section>
+
+{% endblock %}

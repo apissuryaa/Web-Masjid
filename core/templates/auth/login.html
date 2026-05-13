@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Masuk – Web Masjid{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Masuk Pengurus</h1>
+
+{% if form.errors %}
+  <div class="mb-3 p-3 rounded bg-red-50 border border-red-200 text-red-700">
+    Username atau password salah. Silakan coba lagi.
+  </div>
+{% endif %}
+
+<form method="post" class="bg-white p-4 rounded-xl border max-w-md">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label class="block text-sm font-medium mb-1">Username</label>
+    {{ form.username }}
+  </div>
+  <div class="mb-4">
+    <label class="block text-sm font-medium mb-1">Password</label>
+    {{ form.password }}
+  </div>
+  <button class="px-4 py-2 rounded bg-emerald-600 text-white">Masuk</button>
+</form>
+{% endblock %}

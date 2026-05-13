@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Laporan (PDF) – {{ rf.title }}{% endblock %}
+
+{% block content %}
+<section class="bg-white rounded-2xl border p-6 shadow-sm">
+  <div class="flex items-start justify-between gap-3 mb-3">
+    <div>
+      <h1 class="text-2xl font-bold text-emerald-700">{{ rf.title }}</h1>
+      <p class="text-gray-600 text-sm">
+        {% if rf.period %}📅 Periode: <strong>{{ rf.period }}</strong> • {% endif %}
+        Diunggah: {{ rf.uploaded_at|date:"d M Y H:i" }}
+      </p>
+    </div>
+
+    <!-- Tombol Hapus (form POST) -->
+    <form method="post" action="{% url 'report_delete' rf.pk %}" onsubmit="return confirm('Yakin hapus laporan ini? Tindakan tidak bisa dibatalkan.');">
+      {% csrf_token %}
+      <button type="submit" class="px-3 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">
+        🗑 Hapus
+      </button>
+    </form>
+  </div>
+
+  <div class="bg-gray-50 border rounded-xl overflow-hidden">
+    <iframe src="{{ rf.file.url }}" class="w-full" style="height:80vh; border:0" title="Laporan PDF"></iframe>
+  </div>
+
+  <div class="mt-4 flex flex-wrap gap-2">
+    <a class="px-4 py-2 rounded-lg border bg-white hover:bg-emerald-50" href="{{ rf.file.url }}" download>⬇️ Unduh PDF Asli</a>
+    <a class="px-4 py-2 rounded-lg border bg-white hover:bg-emerald-50" href="{% url 'dashboard' %}">⬅ Kembali ke Panel</a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Upload Bukti Donasi – Masjid Al Huda{% endblock %}
+{% block content %}
+
+<div class="max-w-xl mx-auto bg-white border rounded-2xl p-6 shadow-sm">
+  <h1 class="text-2xl font-bold text-emerald-700 text-center mb-2">
+    Upload Bukti
+    {% if dtype == 'ZKT' %}Zakat{% elif dtype == 'SDK' %}Sedekah{% else %}Infak{% endif %}
+  </h1>
+  <p class="text-sm text-gray-600 text-center mb-6">
+    Unggah bukti transfer agar bendahara bisa melakukan pencatatan.
+  </p>
+
+  {% if messages %}
+    {% for m in messages %}
+      <div class="mb-3 p-3 rounded bg-emerald-100 border border-emerald-300 text-emerald-800">{{ m }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <form id="donation-form" method="post" enctype="multipart/form-data" class="space-y-4">
+    {% csrf_token %}
+    {{ form.donation_type.as_hidden }}
+
+    {# Tampilkan error di atas field (kalau ada) #}
+    {% if form.non_field_errors %}
+      <div class="p-3 rounded border bg-red-50 border-red-200 text-red-700 text-sm">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div>
+      <label class="block text-sm font-medium mb-1">Nama Donatur</label>
+      {{ form.donor_name }}
+      {{ form.donor_name.errors }}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium mb-1">No. HP/WA</label>
+      {{ form.phone }}
+      {{ form.phone.errors }}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium mb-1">Jumlah (Rp)</label>
+      {{ form.amount }}
+      <p class="text-xs text-gray-500 mt-1">Contoh penulisan: <b>150.000</b> atau <b>150.000,50</b></p>
+      {{ form.amount.errors }}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium mb-1">Tanggal Transfer</label>
+      {{ form.paid_at }}
+      {{ form.paid_at.errors }}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium mb-1">Catatan</label>
+      {{ form.note }}
+      {{ form.note.errors }}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium mb-1">Bukti Transfer (jpg/png/pdf)</label>
+      {{ form.proof }}
+      {{ form.proof.errors }}
+    </div>
+
+    <div class="flex items-center gap-2">
+      {{ form.is_public }} <span class="text-sm text-gray-700">Tampilkan ke publik?</span>
+      {{ form.is_public.errors }}
+    </div>
+
+    <button class="w-full py-2.5 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700">
+      Unggah
+    </button>
+  </form>
+</div>
+
+<script>
+(function () {
+  const input = document.getElementById('id_amount');
+  const form  = document.getElementById('donation-form');
+
+  if (!input) return;
+
+  // Format "ketika mengetik": 150000 -> 150.000 / 150000,5 -> 150.000,5
+  const formatRupiah = (val) => {
+    // buang semua kecuali digit & koma
+    val = (val || '').toString().replace(/[^\d,]/g, '');
+    const parts = val.split(',');
+    let num = parts[0].replace(/^0+/, ''); // buang nol di depan
+    if (num === '') num = '0';
+    // tambahkan titik tiap 3 digit
+    num = num.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    if (parts.length > 1) {
+      return num + ',' + parts[1].slice(0, 2); // maksimal 2 desimal
+    }
+    return num;
+  };
+
+  let last = input.value;
+  input.addEventListener('input', () => {
+    const start = input.selectionStart;
+    input.value = formatRupiah(input.value);
+    last = input.value;
+    // caret sederhana (tidak selalu sempurna di semua situasi)
+    input.setSelectionRange(input.value.length, input.value.length);
+  });
+
+  // Sebelum submit → normalisasi ke format backend: hapus titik, koma -> titik
+  form.addEventListener('submit', () => {
+    if (input.value) {
+      input.value = input.value.replace(/\./g, '').replace(',', '.');
+    }
+  });
+})();
+</script>
+
+{% endblock %}

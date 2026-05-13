@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Laporan Keuangan – {{ rf.title|default:"Masjid Al Huda" }}{% endblock %}
+
+{% block content %}
+<section class="bg-white rounded-2xl border p-6 shadow-sm">
+  <h1 class="text-2xl font-bold text-emerald-700 mb-2">Laporan Keuangan Masjid</h1>
+
+  <p class="text-gray-600 text-sm mb-2">
+    {% if rf.period %}📅 Periode: <strong>{{ rf.period }}</strong> • {% endif %}
+    Diunggah: {{ rf.uploaded_at|date:"d M Y H:i" }}
+  </p>
+
+  {# ========= PDF ========= #}
+  {% if rf.file.url|lower|endswith:".pdf" %}
+    <div class="border rounded-lg overflow-hidden bg-gray-50 shadow-sm">
+      {# ✅ Gunakan route Django agar bisa tampil di iframe tanpa “refused to connect” #}
+      <iframe 
+        src="{% url 'report_pdf_inline' rf.pk %}"
+        width="100%" 
+        height="750px"
+        class="block rounded"
+        style="border:0;"
+        loading="lazy"
+      >
+      </iframe>
+
+      <div class="p-4 text-center text-sm text-gray-600">
+        Jika PDF tidak muncul, 
+        <a href="{% url 'report_pdf_inline' rf.pk %}" target="_blank" rel="noopener" class="underline text-emerald-700">klik di sini untuk membuka di tab baru</a>.
+      </div>
+    </div>
+
+    <div class="mt-5 flex flex-wrap gap-2">
+      <a href="{{ rf.file.url }}" download
+         class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition">
+        ⬇️ Unduh PDF Asli
+      </a>
+      <a href="{% url 'report_pdf_inline' rf.pk %}" target="_blank" rel="noopener"
+         class="px-4 py-2 border rounded-lg hover:bg-gray-100 transition">
+        🔎 Buka di Tab Baru
+      </a>
+      <a href="{% url 'report_archive' %}"
+         class="px-4 py-2 border rounded-lg hover:bg-gray-100 transition">
+        ⬅ Kembali ke Arsip
+      </a>
+    </div>
+
+  {# ========= EXCEL (.xlsx) ========= #}
+  {% else %}
+    <div class="grid md:grid-cols-3 gap-3">
+      {% for s in sheets %}
+        <a href="{% url 'report_public_sheet' rf.pk s.slug %}"
+           class="block p-4 rounded-xl border bg-white hover:shadow transition">
+          <div class="font-medium text-emerald-700">{{ s.label }}</div>
+          <div class="text-xs text-gray-500">Sheet: {{ s.raw }}</div>
+          {% if summary_map %}
+            {% for key, val in summary_map.items %}
+              {% if key == s.slug %}
+                <div class="text-xs text-emerald-700 mt-1">
+                  {{ val.label }}: {{ val.value|floatformat:2 }}
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
+
+    <div class="mt-6 flex flex-wrap gap-2">
+      <a href="{{ rf.file.url }}" download
+         class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition">
+        ⬇️ Unduh File Excel Asli
+      </a>
+      <a href="{% url 'report_archive' %}"
+         class="px-4 py-2 border rounded-lg hover:bg-gray-100 transition">
+        ⬅ Kembali ke Arsip
+      </a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

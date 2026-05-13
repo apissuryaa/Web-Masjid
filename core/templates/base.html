@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}Masjid Al Huda{% endblock %}</title>
+  <meta name="description" content="Portal informasi Masjid Al Huda, Bekasi – Tambun Utara." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .table-wrap{overflow:auto}
+    thead th{position:sticky;top:0;background:#fff}
+    table.min-w-full tbody tr:nth-child(even){background-color:#f9fafb}
+    .link-card:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body class="bg-emerald-50 text-gray-800">
+
+  <!-- TOP BAR -->
+  <header class="bg-emerald-700 text-white">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
+      <a href="{% url 'home' %}" class="flex items-center gap-2 text-xl font-semibold">
+        <span>🕌</span> <span>Masjid Al Huda</span>
+      </a>
+
+      <nav class="ml-auto text-sm flex items-center gap-4">
+        <a class="hover:underline {% if request.path == '/' %}underline font-medium{% endif %}"
+           href="{% url 'home' %}">Beranda</a>
+        <a class="hover:underline {% if request.path|slice:':7' == '/arsip/' %}underline font-medium{% endif %}"
+           href="{% url 'report_archive' %}">Arsip Laporan</a>
+
+        {% if request.user.is_authenticated %}
+          <a class="hover:underline {% if request.path|slice:':10' == '/dashboard' %}underline font-medium{% endif %}"
+             href="{% url 'dashboard' %}">Panel</a>
+          <span class="hidden sm:inline">•</span>
+          <span class="hidden sm:inline">Halo, <span class="font-medium">{{ request.user.username }}</span></span>
+          <a class="underline" href="{% url 'logout' %}">Keluar</a>
+        {% else %}
+          <a class="underline" href="{% url 'login' %}">Masuk Pengurus</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <!-- QUICK ACCESS ICONS -->
+  <section class="bg-white/70 border-b">
+    <div class="max-w-6xl mx-auto px-4 py-4">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+
+        <!-- (4) DIPERBAIKI: link Legalitas ke halaman /legalitas/ -->
+        <a href="{% url 'legalitas_public' %}"
+           class="link-card bg-white border rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
+          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/>
+            <path d="M14 3v6h6"/>
+            <path d="M9 13h6M9 17h6"/>
+          </svg>
+          <div>
+            <div class="text-sm font-medium">Legalitas</div>
+            <div class="text-xs text-gray-500">Surat Wakaf, SK, NPWP</div>
+          </div>
+        </a>
+
+        <a href="{% url 'report_archive' %}"
+           class="link-card bg-white border rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
+          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M3 7h18M5 7v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7"/>
+            <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
+            <path d="M8 12h8M8 16h6"/>
+          </svg>
+          <div>
+            <div class="text-sm font-medium">Arsip Laporan</div>
+            <div class="text-xs text-gray-500"></div>
+          </div>
+        </a>
+
+<a href="{% url 'donation_page' %}"
+   class="link-card bg-white border rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
+  <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
+    <path d="M12 21C7 21 3 17 3 12a9 9 0 1 1 18 0c0 5-4 9-9 9z"/>
+    <path d="M12 8v8M9.5 10.5h5"/>
+  </svg>
+  <div>
+    <div class="text-sm font-medium">Donasi</div>
+    <div class="text-xs text-gray-500">Zakat, Infaq, Sedekah</div>
+  </div>
+</a>
+
+        <a href="{% url 'home' %}#program"
+           class="link-card bg-white border rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
+          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M8 2v4M16 2v4M4 10h16M5 22h14a1 1 0 0 0 1-1V10H4v11a1 1 0 0 0 1 1z"/>
+            <path d="M8 14h3v3H8z"/>
+          </svg>
+          <div>
+            <div class="text-sm font-medium">Program</div>
+            <div class="text-xs text-gray-500">Kajian & Kegiatan</div>
+          </div>
+        </a>
+
+        <a href="{% url 'home' %}#pengurus"
+           class="link-card bg-white border rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
+          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"/>
+            <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+          </svg>
+          <div>
+            <div class="text-sm font-medium">Pengurus</div>
+            <div class="text-xs text-gray-500">Struktur DKM</div>
+          </div>
+        </a>
+
+        <a href="{% url 'home' %}#kontak"
+           class="link-card bg-white border rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
+          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 1 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          <div>
+            <div class="text-sm font-medium">Kontak & Alamat</div>
+            <div class="text-xs text-gray-500">Lokasi & info umum</div>
+          </div>
+        </a>
+
+        <a href="{% url 'dashboard' %}"
+           class="link-card bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
+          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M3 13h8V3H3zM13 21h8v-8h-8zM3 21h8v-6H3zM13 11h8V3h-8z"/>
+          </svg>
+          <div>
+            <div class="text-sm font-semibold">Panel Pengurus</div>
+            <div class="text-xs text-emerald-700">Kelola data</div>
+          </div>
+        </a>
+
+        <!-- Upload Laporan: teks netral (Excel/PDF) -->
+        <a href="{% url 'report_upload' %}"
+           class="link-card bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
+          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M12 16V4M7 9l5-5 5 5"/>
+            <path d="M20 16v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2"/>
+          </svg>
+          <div>
+            <div class="text-sm font-semibold">Upload Laporan</div>
+            <div class="text-xs text-emerald-700">PDF (.pdf)</div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FLASH & KONTEN HALAMAN -->
+  <main class="max-w-6xl mx-auto p-4">
+    {% for m in messages %}
+      <div class="mb-3 p-3 rounded bg-emerald-100 border border-emerald-300 text-emerald-800">{{ m }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="mt-10 border-t">
+    <div class="max-w-6xl mx-auto px-4 py-6 text-sm text-gray-600">
+      <div>© {{ now|date:"Y" }} Masjid Al Huda – Bekasi, Tambun Utara.</div>
+      <div class="text-xs">Portal ini memudahkan jamaah melihat informasi umum masjid, arsip laporan, dan saluran donasi.</div>
+    </div>
+  </footer>
+
+</body>
+</html>

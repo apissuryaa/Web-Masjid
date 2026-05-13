@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Upload Laporan Keuangan – Masjid Al Huda{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 rounded-2xl shadow border max-w-xl mx-auto">
+  <h1 class="text-2xl font-bold mb-3">Upload Laporan Keuangan</h1>
+  <p class="text-sm text-gray-600 mb-4">
+    Silakan unggah laporan keuangan Masjid <strong>Al Huda</strong> dalam format 
+    <strong>Excel (.xlsx)</strong> atau <strong>PDF (.pdf)</strong>.
+    Pastikan file sudah sesuai periode dan struktur laporan.
+  </p>
+
+  <form method="post" enctype="multipart/form-data" class="space-y-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit"
+      class="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition">
+      ⬆️ Upload Laporan
+    </button>
+  </form>
+
+  <div class="mt-6 flex justify-between text-sm">
+    <a href="/profil/" class="text-emerald-700 underline">⬅ Kembali ke Profil Masjid</a>
+    <a href="/arsip/" class="text-gray-500 underline">📁 Lihat Arsip Laporan</a>
+  </div>
+</div>
+{% endblock %}

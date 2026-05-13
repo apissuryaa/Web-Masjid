@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Donasi – Masjid Al Huda{% endblock %}
+{% block content %}
+
+<div class="bg-white p-6 rounded-2xl border shadow-sm max-w-2xl mx-auto">
+  <h1 class="text-2xl font-bold text-emerald-700 mb-4 text-center">
+    Pilih Jenis Donasi
+  </h1>
+
+  <p class="text-gray-600 text-center mb-6">
+    Silakan pilih jenis donasi yang ingin Anda catat.
+    Setiap tombol akan membuka Google Spreadsheet terkait,
+    sehingga jamaah dapat langsung mengisi data donasi secara mandiri.
+  </p>
+
+  <div class="grid gap-4">
+    <a href="{{ zakat_url }}" target="_blank"
+       class="block w-full text-center py-3 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition">
+      🕌 Donasi Zakat
+    </a>
+
+    <a href="{{ infaq_url }}" target="_blank"
+       class="block w-full text-center py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
+      🫶 Donasi Infak
+    </a>
+
+    <a href="{{ sedekah_url }}" target="_blank"
+       class="block w-full text-center py-3 rounded-lg bg-amber-600 text-white font-semibold hover:bg-amber-700 transition">
+      💛 Donasi Sedekah
+    </a>
+  </div>
+
+  <hr class="my-6">
+
+  <h2 class="text-lg font-semibold text-emerald-700 mb-2">Upload Bukti Transfer</h2>
+  <div class="grid sm:grid-cols-3 gap-3">
+    <a href="{% url 'donation_proof_upload' 'zakat' %}" class="px-3 py-2 text-center rounded border hover:bg-emerald-50">Upload Zakat</a>
+    <a href="{% url 'donation_proof_upload' 'infaq' %}" class="px-3 py-2 text-center rounded border hover:bg-emerald-50">Upload Infak</a>
+    <a href="{% url 'donation_proof_upload' 'sedekah' %}" class="px-3 py-2 text-center rounded border hover:bg-emerald-50">Upload Sedekah</a>
+  </div>
+
+  <p class="text-xs text-gray-500 text-center mt-6">
+    *Spreadsheet dibuka melalui Google Sheets untuk memudahkan pencatatan dan transparansi.
+  </p>
+</div>
+
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Legalitas Masjid – Masjid Al Huda{% endblock %}
+
+{% block content %}
+<section class="bg-white rounded-2xl border p-6 shadow-sm">
+  <h1 class="text-2xl font-bold text-emerald-700 mb-3">Legalitas Masjid</h1>
+
+  {% if mosque %}
+    <p class="text-sm text-gray-600 mb-4">
+      Daftar dokumen legalitas Masjid <strong>{{ mosque.name }}</strong>
+      {% if mosque.city %}– {{ mosque.city }}{% endif %}{% if mosque.province %}, {{ mosque.province }}{% endif %}.
+    </p>
+  {% endif %}
+
+  {% if docs %}
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm border border-gray-200 rounded-lg">
+        <thead class="bg-emerald-100 text-emerald-800 font-semibold">
+          <tr>
+            <th class="text-left p-2 border-b">Jenis Dokumen</th>
+            <th class="text-left p-2 border-b">Judul</th>
+            <th class="text-left p-2 border-b">Diunggah</th>
+            <th class="text-left p-2 border-b">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in docs %}
+            <tr class="hover:bg-emerald-50 transition">
+              <td class="p-2 border-b">{{ d.get_doc_type_display }}</td>
+              <td class="p-2 border-b">{{ d.title }}</td>
+              <td class="p-2 border-b text-gray-600">{{ d.uploaded_at|date:"d M Y H:i" }}</td>
+              <td class="p-2 border-b">
+                <div class="flex flex-wrap items-center gap-2">
+                  <a href="{{ d.file.url }}" target="_blank" rel="noopener" class="underline text-emerald-700">Lihat</a>
+                  <span class="text-gray-400">·</span>
+                  <a href="{{ d.file.url }}" download class="underline text-gray-700">Unduh</a>
+
+                  {% if request.user.is_authenticated %}
+                    <span class="text-gray-400">·</span>
+                    <form method="post" action="{% url 'document_delete' d.pk %}"
+                          onsubmit="return confirm('Yakin ingin menghapus dokumen ini? Tindakan tidak bisa dibatalkan.');">
+                      {% csrf_token %}
+                      <button type="submit" class="underline text-red-600 hover:text-red-700">
+                        🗑 Hapus
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="text-gray-500">Belum ada dokumen legalitas yang dipublikasikan.</p>
+  {% endif %}
+</section>
+{% endblock %}
+

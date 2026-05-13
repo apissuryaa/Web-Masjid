@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Upload Dokumen Legalitas – Masjid Al Huda{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 rounded-2xl shadow border max-w-xl mx-auto">
+  <h1 class="text-2xl font-bold mb-3">Upload Dokumen Legalitas</h1>
+  <p class="text-sm text-gray-600 mb-4">
+    Unggah dokumen legalitas seperti <strong>Surat Wakaf</strong>, 
+    <strong>SK Pengurus</strong>, atau <strong>NPWP</strong> 
+    dalam format <strong>PDF</strong> saja.
+  </p>
+
+  <form method="post" enctype="multipart/form-data" class="space-y-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit"
+      class="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition">
+      ⬆️ Upload Dokumen
+    </button>
+  </form>
+
+  <div class="mt-6 flex justify-between text-sm">
+    <a href="/profil/" class="text-emerald-700 underline">⬅ Kembali ke Profil Masjid</a>
+    <a href="/arsip/" class="text-gray-500 underline">📁 Arsip Laporan Keuangan</a>
+  </div>
+</div>
+{% endblock %}

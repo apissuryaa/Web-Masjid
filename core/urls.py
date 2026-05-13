@@ -32,8 +32,9 @@ path('donasi/admin/<int:pk>/hapus/', views.donation_proof_delete, name='donation
     path('dashboard/', views.dashboard, name='dashboard'),
     path('profil/', views.mosque_profile, name='mosque_profile'),
 
-    # ====== DOKUMEN LEGALITAS ======
+    # ====== DOKUMEN LEGALITAS & SOP ======
     path('dokumen/upload/', views.document_upload, name='document_upload'),
+    path('sop/upload/', views.sop_upload, name='sop_upload'),
     path('dokumen/<int:pk>/hapus/', views.document_delete, name='document_delete'),
 
     # ====== MASTER DATA ======

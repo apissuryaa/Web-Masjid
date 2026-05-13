@@ -21,7 +21,7 @@ from .models import (
 )
 from .forms import (
     MosqueForm, DocumentForm, ManagementForm, ProgramForm,
-    DonorForm, ReportUploadForm, DonationChannelForm, DonationProofForm, CashFlowForm
+    DonorForm, ReportUploadForm, DonationChannelForm, DonationProofForm, CashFlowForm, SOPForm
 )
 from .excel_to_html import list_sheets, sheet_to_html, quick_summary
 
@@ -123,44 +123,79 @@ def legalitas_public(request):
 
 def sop_public(request):
     """
-    Halaman publik: menampilkan daftar dokumen SOP (is_public=True).
+    Halaman publik: menampilkan dokumen SOP (is_public=True).
     """
     mosque = Mosque.objects.first()
-    docs = Document.objects.filter(doc_type='SOP', is_public=True).order_by('-uploaded_at')
+    sop_doc = Document.objects.filter(doc_type='SOP', is_public=True).order_by('-uploaded_at').first()
     return render(request, 'public/sop.html', {
         'mosque': mosque,
-        'docs': docs,
+        'sop_doc': sop_doc,
     })
 
 
+import datetime
 import json
+
 def cashflow_public(request):
     mosque = Mosque.objects.first()
-    # Mengambil data dari db
-    cfs = CashFlow.objects.order_by('date')
     
-    # Kelompokkan per bulan untuk grafik (YYYY-MM)
-    summary = {}
+    # Dapatkan daftar tahun yang memiliki data kas
+    available_dates = CashFlow.objects.dates('date', 'year', order='DESC')
+    years_list = [d.year for d in available_dates]
+    
+    # Default ke tahun ini jika tidak ada data
+    current_year = datetime.datetime.now().year
+    if not years_list:
+        years_list = [current_year]
+        
+    # Ambil parameter tahun dari URL (GET)
+    try:
+        selected_year = int(request.GET.get('year', years_list[0]))
+    except ValueError:
+        selected_year = years_list[0]
+        
+    if selected_year not in years_list and CashFlow.objects.exists():
+        selected_year = years_list[0]
+    elif selected_year not in years_list:
+        years_list.append(selected_year)
+        years_list.sort(reverse=True)
+        
+    # Filter data kas berdasarkan tahun terpilih
+    cfs = CashFlow.objects.filter(date__year=selected_year).order_by('date')
+    
+    # Inisialisasi ringkasan untuk 12 bulan (Jan - Des)
+    summary = {f"{selected_year}-{str(m).zfill(2)}": {'in': 0, 'out': 0} for m in range(1, 13)}
+    
     for cf in cfs:
         month_key = cf.date.strftime('%Y-%m')
-        if month_key not in summary:
-            summary[month_key] = {'in': 0, 'out': 0}
-        
-        if cf.flow_type == 'IN':
-            summary[month_key]['in'] += float(cf.amount)
-        else:
-            summary[month_key]['out'] += float(cf.amount)
+        if month_key in summary:
+            if cf.flow_type == 'IN':
+                summary[month_key]['in'] += float(cf.amount)
+            else:
+                summary[month_key]['out'] += float(cf.amount)
             
-    labels = sorted(list(summary.keys()))
-    data_in = [summary[m]['in'] for m in labels]
-    data_out = [summary[m]['out'] for m in labels]
+    # Siapkan label dan data untuk Chart.js
+    month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+    labels = []
+    data_in = []
+    data_out = []
+    
+    for i in range(1, 13):
+        month_key = f"{selected_year}-{str(i).zfill(2)}"
+        labels.append(f"{month_names[i-1]} {selected_year}")
+        data_in.append(summary[month_key]['in'])
+        data_out.append(summary[month_key]['out'])
+    
+    recent_cashflows = cfs.order_by('-date')[:10]
     
     context = {
         'mosque': mosque,
         'chart_labels': json.dumps(labels),
         'chart_in': json.dumps(data_in),
         'chart_out': json.dumps(data_out),
-        'recent_cashflows': cfs.order_by('-date')[:10]
+        'recent_cashflows': recent_cashflows,
+        'years_list': years_list,
+        'selected_year': selected_year,
     }
     return render(request, 'public/rekap_kas.html', context)
 
@@ -270,12 +305,14 @@ def report_public_export_csv(request, pk, sheet):
 def dashboard(request):
     mosque = Mosque.objects.first()
     reports = ReportFile.objects.order_by('-uploaded_at')[:10]
-    docs = Document.objects.order_by('-uploaded_at')[:10]
+    legal_docs = Document.objects.exclude(doc_type='SOP').order_by('-uploaded_at')[:10]
+    sop_docs = Document.objects.filter(doc_type='SOP').order_by('-uploaded_at')[:10]
     cashflows = CashFlow.objects.order_by('-date')[:5]
     return render(request, 'dashboard.html', {
         'mosque': mosque, 
         'reports': reports, 
-        'docs': docs,
+        'legal_docs': legal_docs,
+        'sop_docs': sop_docs,
         'cashflows': cashflows
     })
 
@@ -362,6 +399,33 @@ def document_upload(request):
     else:
         form = DocumentForm()
     return render(request, 'docs/upload.html', {'form': form})
+
+
+@login_required
+def sop_upload(request):
+    mosque = ensure_mosque()
+    if request.method == 'POST':
+        form = SOPForm(request.POST, request.FILES)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.mosque = mosque
+            obj.doc_type = 'SOP'
+            
+            # Jika hanya boleh 1 SOP, hapus yang lama
+            old_sops = Document.objects.filter(mosque=mosque, doc_type='SOP')
+            for old_sop in old_sops:
+                delete_filefield(old_sop.file)
+                old_sop.delete()
+                
+            obj.save()
+            log(request, 'UPLOAD', f'SOP {obj.title}')
+            messages.success(request, 'SOP berhasil diunggah dan menggantikan yang lama.')
+            return redirect('mosque_profile')
+        else:
+            messages.error(request, 'Gagal mengunggah SOP. Periksa isian.')
+    else:
+        form = SOPForm()
+    return render(request, 'docs/upload_sop.html', {'form': form})
 
 
 # === HAPUS DOKUMEN LEGALITAS (Storage API)

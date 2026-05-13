@@ -46,9 +46,25 @@ class MosqueForm(forms.ModelForm):
 # FORM DOKUMEN LEGALITAS
 # ==========================
 class DocumentForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Sembunyikan 'SOP' dari pilihan karena sudah punya form sendiri
+        choices = [c for c in Document.DOC_TYPES if c[0] != 'SOP']
+        self.fields['doc_type'].choices = choices
+
     class Meta:
         model = Document
         fields = ['doc_type', 'title', 'file', 'is_public']
+
+class SOPForm(forms.ModelForm):
+    class Meta:
+        model = Document
+        fields = ['title', 'file', 'is_public']
+        labels = {
+            'title': 'Judul Dokumen SOP',
+            'file': 'Pilih File (PDF)',
+            'is_public': 'Publikasikan ke jamaah?',
+        }
 
 # ==========================
 # FORM MASTER DATA

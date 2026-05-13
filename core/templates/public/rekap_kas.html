@@ -7,10 +7,25 @@
   <h1 class="text-2xl font-bold text-emerald-700 mb-3">Rekapitulasi Arus Kas</h1>
 
   {% if mosque %}
-    <p class="text-sm text-gray-600 mb-6">
+    <p class="text-sm text-gray-600 mb-4">
       Grafik rekapitulasi pemasukan dan pengeluaran kas Masjid <strong>{{ mosque.name }}</strong>.
     </p>
   {% endif %}
+
+  <!-- NAVIGASI TAHUN (Pagination) -->
+  <div class="flex flex-wrap gap-2 mb-6">
+    {% for y in years_list %}
+      <a href="?year={{ y }}" 
+         class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors border
+                {% if y == selected_year %}
+                  bg-emerald-600 text-white border-emerald-600
+                {% else %}
+                  bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50
+                {% endif %}">
+        {{ y }}
+      </a>
+    {% endfor %}
+  </div>
 
   <!-- AREA GRAFIK -->
   <div class="w-full h-80 mb-8 relative">

@@ -1,7 +1,7 @@
 from django import forms
 from .models import (
     Mosque, Document, Management, Program, Donor,
-    ReportFile, DonationChannel, DonationProof
+    ReportFile, DonationChannel, DonationProof, CashFlow
 )
 import decimal, re
 
@@ -185,3 +185,24 @@ class DonationProofForm(forms.ModelForm):
         if f.size > 10 * 1024 * 1024:
             raise forms.ValidationError('Ukuran berkas maksimal 10 MB.')
         return f
+
+# ==========================
+# FORM REKAP KAS
+# ==========================
+class CashFlowForm(forms.ModelForm):
+    class Meta:
+        model = CashFlow
+        fields = ['date', 'flow_type', 'amount', 'description']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'w-full rounded border px-3 py-2'}),
+            'flow_type': forms.Select(attrs={'class': 'w-full rounded border px-3 py-2'}),
+            'amount': forms.NumberInput(attrs={'class': 'w-full rounded border px-3 py-2', 'placeholder': 'Contoh: 150000'}),
+            'description': forms.TextInput(attrs={'class': 'w-full rounded border px-3 py-2', 'placeholder': 'Keterangan transaksi'}),
+        }
+        labels = {
+            'date': 'Tanggal',
+            'flow_type': 'Tipe',
+            'amount': 'Nominal (Rp)',
+            'description': 'Keterangan',
+        }
+

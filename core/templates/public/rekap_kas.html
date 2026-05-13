@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Rekap Kas – Masjid Al Huda{% endblock %}
+
+{% block content %}
+<section class="bg-white rounded-2xl border p-6 shadow-sm mb-6">
+  <h1 class="text-2xl font-bold text-emerald-700 mb-3">Rekapitulasi Arus Kas</h1>
+
+  {% if mosque %}
+    <p class="text-sm text-gray-600 mb-6">
+      Grafik rekapitulasi pemasukan dan pengeluaran kas Masjid <strong>{{ mosque.name }}</strong>.
+    </p>
+  {% endif %}
+
+  <!-- AREA GRAFIK -->
+  <div class="w-full h-80 mb-8 relative">
+    <canvas id="cashflowChart"></canvas>
+  </div>
+  
+  <hr class="mb-6">
+  
+  <h2 class="text-xl font-bold text-emerald-700 mb-4">Transaksi Kas Terbaru</h2>
+  {% if recent_cashflows %}
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm border border-gray-200 rounded-lg">
+        <thead class="bg-emerald-100 text-emerald-800 font-semibold">
+          <tr>
+            <th class="text-left p-3 border-b">Tanggal</th>
+            <th class="text-left p-3 border-b">Tipe</th>
+            <th class="text-left p-3 border-b">Keterangan</th>
+            <th class="text-right p-3 border-b">Nominal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cf in recent_cashflows %}
+            <tr class="hover:bg-emerald-50 transition border-b">
+              <td class="p-3">{{ cf.date|date:"d M Y" }}</td>
+              <td class="p-3">
+                {% if cf.flow_type == 'IN' %}
+                  <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Pemasukan</span>
+                {% else %}
+                  <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">Pengeluaran</span>
+                {% endif %}
+              </td>
+              <td class="p-3">{{ cf.description }}</td>
+              <td class="p-3 text-right font-medium {% if cf.flow_type == 'IN' %}text-green-700{% else %}text-red-700{% endif %}">
+                Rp {{ cf.amount|floatformat:0|intcomma }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="text-gray-500 bg-gray-50 p-4 rounded-lg border text-center">Belum ada catatan transaksi kas.</p>
+  {% endif %}
+
+</section>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const ctx = document.getElementById('cashflowChart').getContext('2d');
+    
+    // Parse data dari backend (dikirim dalam bentuk string JSON via context)
+    const labels = JSON.parse('{{ chart_labels|safe }}');
+    const dataIn = JSON.parse('{{ chart_in|safe }}');
+    const dataOut = JSON.parse('{{ chart_out|safe }}');
+    
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels.map(l => l.replace('-', '/')), // ubah YYYY-MM jadi YYYY/MM untuk tampilan
+        datasets: [
+          {
+            label: 'Pemasukan (Rp)',
+            data: dataIn,
+            backgroundColor: 'rgba(16, 185, 129, 0.7)', // emerald-500
+            borderColor: 'rgba(16, 185, 129, 1)',
+            borderWidth: 1,
+            borderRadius: 4
+          },
+          {
+            label: 'Pengeluaran (Rp)',
+            data: dataOut,
+            backgroundColor: 'rgba(239, 68, 68, 0.7)', // red-500
+            borderColor: 'rgba(239, 68, 68, 1)',
+            borderWidth: 1,
+            borderRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.parsed.y !== null) {
+                  label += new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(context.parsed.y);
+                }
+                return label;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value, index, values) {
+                if (value >= 1000000) {
+                  return 'Rp ' + (value / 1000000) + ' Jt';
+                } else if (value >= 1000) {
+                  return 'Rp ' + (value / 1000) + ' Rb';
+                }
+                return 'Rp ' + value;
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

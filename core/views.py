@@ -17,11 +17,11 @@ import pandas as pd
 
 from .models import (
     Mosque, Document, Management, Program, Donor,
-    ReportFile, DonationChannel, AuditLog, DonationProof
+    ReportFile, DonationChannel, AuditLog, DonationProof, CashFlow
 )
 from .forms import (
     MosqueForm, DocumentForm, ManagementForm, ProgramForm,
-    DonorForm, ReportUploadForm, DonationChannelForm, DonationProofForm
+    DonorForm, ReportUploadForm, DonationChannelForm, DonationProofForm, CashFlowForm
 )
 from .excel_to_html import list_sheets, sheet_to_html, quick_summary
 
@@ -109,15 +109,61 @@ def home(request):
 
 def legalitas_public(request):
     """
-    Halaman publik: menampilkan daftar dokumen legalitas (is_public=True).
+    Halaman publik: menampilkan daftar dokumen legalitas (is_public=True), kecuali SOP.
     Arahkan menu ke URL name: 'legalitas_public'
     """
     mosque = Mosque.objects.first()
-    docs = Document.objects.filter(is_public=True).order_by('-uploaded_at')
+    # Exclude SOP agar tidak campur aduk dengan legalitas biasa
+    docs = Document.objects.filter(is_public=True).exclude(doc_type='SOP').order_by('-uploaded_at')
     return render(request, 'public/legalitas.html', {
         'mosque': mosque,
         'docs': docs,
     })
+
+
+def sop_public(request):
+    """
+    Halaman publik: menampilkan daftar dokumen SOP (is_public=True).
+    """
+    mosque = Mosque.objects.first()
+    docs = Document.objects.filter(doc_type='SOP', is_public=True).order_by('-uploaded_at')
+    return render(request, 'public/sop.html', {
+        'mosque': mosque,
+        'docs': docs,
+    })
+
+
+import json
+def cashflow_public(request):
+    mosque = Mosque.objects.first()
+    # Mengambil data dari db
+    cfs = CashFlow.objects.order_by('date')
+    
+    # Kelompokkan per bulan untuk grafik (YYYY-MM)
+    summary = {}
+    for cf in cfs:
+        month_key = cf.date.strftime('%Y-%m')
+        if month_key not in summary:
+            summary[month_key] = {'in': 0, 'out': 0}
+        
+        if cf.flow_type == 'IN':
+            summary[month_key]['in'] += float(cf.amount)
+        else:
+            summary[month_key]['out'] += float(cf.amount)
+            
+    labels = sorted(list(summary.keys()))
+    data_in = [summary[m]['in'] for m in labels]
+    data_out = [summary[m]['out'] for m in labels]
+    
+    context = {
+        'mosque': mosque,
+        'chart_labels': json.dumps(labels),
+        'chart_in': json.dumps(data_in),
+        'chart_out': json.dumps(data_out),
+        'recent_cashflows': cfs.order_by('-date')[:10]
+    }
+    return render(request, 'public/rekap_kas.html', context)
+
 
 
 def report_archive(request):
@@ -225,7 +271,13 @@ def dashboard(request):
     mosque = Mosque.objects.first()
     reports = ReportFile.objects.order_by('-uploaded_at')[:10]
     docs = Document.objects.order_by('-uploaded_at')[:10]
-    return render(request, 'dashboard.html', {'mosque': mosque, 'reports': reports, 'docs': docs})
+    cashflows = CashFlow.objects.order_by('-date')[:5]
+    return render(request, 'dashboard.html', {
+        'mosque': mosque, 
+        'reports': reports, 
+        'docs': docs,
+        'cashflows': cashflows
+    })
 
 
 @login_required
@@ -253,6 +305,8 @@ def mosque_profile(request):
 
     # >>> Tambahan: preview 10 bukti donasi terakhir
     proofs = DonationProof.objects.filter(mosque=mosque).select_related('uploaded_by').order_by('-uploaded_at')[:10]
+    
+    cashflows = CashFlow.objects.filter(mosque=mosque).order_by('-date')
 
     ctx = {
         'form': form,
@@ -264,6 +318,7 @@ def mosque_profile(request):
         'reports': reports,
         'channels': channels,
         'proofs': proofs,   # <<< kirim ke template
+        'cashflows': cashflows,
     }
     return render(request, 'mosque/profile.html', ctx)
 
@@ -323,8 +378,7 @@ def document_delete(request, pk):
     d.delete()
     log(request, "DELETE", f"Document {title}")
     messages.success(request, f"Dokumen '{title}' berhasil dihapus.")
-    # Boleh diarahkan ke halaman legalitas agar terasa konsisten
-    return redirect("legalitas_public")
+    return redirect(request.META.get('HTTP_REFERER', 'mosque_profile'))
 
 
 # ----------------------------- Master data internal
@@ -396,6 +450,40 @@ def channel_add(request):
     return render(request, 'channel/form.html', {'form': form})
 
 
+@login_required
+def cashflow_add(request):
+    mosque = ensure_mosque()
+    if request.method == 'POST':
+        form = CashFlowForm(request.POST)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.mosque = mosque
+            obj.save()
+            log(request, 'CREATE', f'CashFlow {obj.get_flow_type_display()} Rp{obj.amount}')
+            messages.success(request, 'Data kas berhasil ditambahkan.')
+            return redirect('mosque_profile')
+    else:
+        form = CashFlowForm()
+    return render(request, 'cashflow/form.html', {'form': form, 'title': 'Catat Arus Kas'})
+
+@login_required
+def cashflow_edit(request, pk):
+    obj = get_object_or_404(CashFlow, pk=pk)
+    if request.method == 'POST':
+        form = CashFlowForm(request.POST, instance=obj)
+        if form.is_valid():
+            form.save()
+            log(request, 'UPDATE', f'CashFlow {obj.get_flow_type_display()} Rp{obj.amount}')
+            messages.success(request, 'Data kas berhasil diperbarui.')
+            return redirect('mosque_profile')
+    else:
+        form = CashFlowForm(instance=obj)
+    return render(request, 'cashflow/form.html', {'form': form, 'title': 'Edit Arus Kas'})
+
+
+
+
+
 # ---------- HAPUS PENGURUS & PROGRAM (BARU DITAMBAHKAN)
 @login_required
 @require_http_methods(["POST"])
@@ -417,7 +505,17 @@ def program_delete(request, pk):
     log(request, "DELETE", f"Program {title}")
     messages.success(request, f"Program '{title}' dihapus.")
     return redirect("mosque_profile")
-# ---------- /HAPUS PENGURUS & PROGRAM
+
+@login_required
+@require_http_methods(["POST"])
+def cashflow_delete(request, pk):
+    obj = get_object_or_404(CashFlow, pk=pk)
+    desc = obj.description
+    obj.delete()
+    log(request, "DELETE", f"CashFlow {desc}")
+    messages.success(request, f"Data kas '{desc}' dihapus.")
+    return redirect("mosque_profile")
+# ---------- /HAPUS PENGURUS & PROGRAM & KAS
 
 
 # ----------------------------- Laporan

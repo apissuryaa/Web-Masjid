@@ -46,6 +46,7 @@ class Document(models.Model):
         ('SK',   'SK Pengurus/Organisasi'),
         ('NPWP', 'NPWP'),
         ('REK',  'Buku Rek Bank'),
+        ('SOP',  'Standar Operasional Prosedur'),
         ('LAIN', 'Dokumen Lain'),
     ]
     mosque = models.ForeignKey(Mosque, on_delete=models.CASCADE, related_name='documents')
@@ -186,3 +187,21 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.action} @ {self.created_at:%Y-%m-%d %H:%M}"
+
+
+class CashFlow(models.Model):
+    FLOW_CHOICES = [
+        ('IN', 'Pemasukan'),
+        ('OUT', 'Pengeluaran'),
+    ]
+    mosque = models.ForeignKey(Mosque, on_delete=models.CASCADE, related_name='cashflows')
+    date = models.DateField('Tanggal')
+    flow_type = models.CharField('Tipe', max_length=10, choices=FLOW_CHOICES, default='IN')
+    amount = models.DecimalField('Nominal (Rp)', max_digits=14, decimal_places=2)
+    description = models.CharField('Keterangan', max_length=255)
+
+    class Meta:
+        ordering = ['-date']
+
+    def __str__(self):
+        return f"{self.get_flow_type_display()} - Rp {self.amount} ({self.date})"

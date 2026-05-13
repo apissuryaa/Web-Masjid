@@ -7,6 +7,8 @@ urlpatterns = [
     path('legalitas/', views.legalitas_public, name='legalitas_public'),
     path('arsip/', views.report_archive, name='report_archive'),
     path('arsip/hapus/<int:pk>/', views.report_delete_from_archive, name='report_delete_from_archive'),
+    path('sop/', views.sop_public, name='sop_public'),
+    path('rekap-kas/', views.cashflow_public, name='cashflow_public'),
 
 # ====== DONASI (Publik + Admin) ======
 path('donasi/', views.donation_page, name='donation_page'),
@@ -39,10 +41,13 @@ path('donasi/admin/<int:pk>/hapus/', views.donation_proof_delete, name='donation
     path('program/add/', views.program_add, name='program_add'),
     path('donatur/add/', views.donor_add, name='donor_add'),
     path('channel/add/', views.channel_add, name='channel_add'),
+    path('kas/add/', views.cashflow_add, name='cashflow_add'),
+    path('kas/<int:pk>/edit/', views.cashflow_edit, name='cashflow_edit'),
 
-    # ✅ Tambahan baru — hapus pengurus & program
+    # ✅ Tambahan baru — hapus pengurus & program & kas
     path('pengurus/<int:pk>/hapus/', views.management_delete, name='management_delete'),
     path('program/<int:pk>/hapus/', views.program_delete, name='program_delete'),
+    path('kas/<int:pk>/hapus/', views.cashflow_delete, name='cashflow_delete'),
 
     # ====== LAPORAN KEUANGAN (PANEL) ======
     path('laporan/upload/', views.report_upload, name='report_upload'),

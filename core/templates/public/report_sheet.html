@@ -5,7 +5,7 @@
 {% if summary %}
 <p class="text-sm mb-2"><span class="font-medium">{{ summary.label }}</span>: {{ summary.value|floatformat:2 }}</p>
 {% endif %}
-<p class="text-gray-500 mb-4"><a class="underline" href="csv/">⬇️ Unduh CSV</a></p>
+<p class="text-gray-500 mb-4"><a class="underline" href="csv/"><i data-lucide='download' class='inline-block w-1em h-1em'></i> Unduh CSV</a></p>
 <div class="bg-white rounded-xl border p-3"><div class="table-wrap">{{ table_html|safe }}</div></div>
 {% endblock %}
 {% extends 'base.html' %}
@@ -30,6 +30,6 @@
   {% endfor %}
 </div>
 <div class="mt-6">
-  <a class="inline-block px-4 py-2 rounded-lg border bg-white hover:bg-emerald-50" href="{{ rf.file.url }}" download>⬇️ Unduh Excel Asli</a>
+  <a class="inline-block px-4 py-2 rounded-lg border bg-white hover:bg-emerald-50" href="{{ rf.file.url }}" download><i data-lucide='download' class='inline-block w-1em h-1em'></i> Unduh Excel Asli</a>
 </div>
 {% endblock %}

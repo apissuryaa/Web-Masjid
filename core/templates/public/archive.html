@@ -7,7 +7,7 @@
   <!-- Header -->
   <div class="bg-emerald-700 px-6 py-5 flex items-center justify-between">
     <div class="flex items-center gap-3">
-      <span class="text-2xl">📁</span>
+      <span class="text-2xl"><i data-lucide='folder' class='inline-block w-1em h-1em'></i></span>
       <div>
         <h1 class="text-lg font-bold text-white">Arsip Laporan Keuangan</h1>
         <p class="text-emerald-200 text-xs mt-0.5">Daftar laporan posisi keuangan, aktivitas, dan arus kas publik</p>
@@ -15,7 +15,7 @@
     </div>
     {% if request.user.is_authenticated %}
       <a href="{% url 'report_upload' %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-white/20 hover:bg-white/30 text-white rounded-lg transition">
-        ⬆️ Upload Laporan
+        <i data-lucide='upload' class='inline-block w-1em h-1em'></i> Upload Laporan
       </a>
     {% endif %}
   </div>
@@ -27,7 +27,7 @@
              class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition" />
       <button type="submit"
               class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition shadow-sm">
-        🔍 Cari
+        <i data-lucide='search' class='inline-block w-1em h-1em'></i> Cari
       </button>
     </form>
   </div>
@@ -46,7 +46,7 @@
               <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 mt-1.5">
                 {% if r.period %}
                   <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-medium">
-                    🗓️ {{ r.period }}
+                    <i data-lucide='calendar-days' class='inline-block w-1em h-1em'></i> {{ r.period }}
                   </span>
                 {% endif %}
                 <span>Diunggah: {{ r.uploaded_at|date:"d M Y H:i" }}</span>
@@ -65,7 +65,7 @@
                   {% csrf_token %}
                   <button type="submit"
                           class="px-2.5 py-1.5 rounded-lg border border-red-200 hover:bg-red-600 hover:text-white text-red-600 text-xs font-medium transition">
-                    🗑 Hapus
+                    <i data-lucide='trash-2' class='inline-block w-1em h-1em'></i> Hapus
                   </button>
                 </form>
               {% endif %}
@@ -75,11 +75,11 @@
       </div>
     {% else %}
       <div class="py-12 text-center">
-        <div class="text-4xl mb-3">📁</div>
+        <div class="text-4xl mb-3"><i data-lucide='folder' class='inline-block w-1em h-1em'></i></div>
         <p class="text-gray-400 italic text-sm">Belum ada laporan publik yang sesuai pencarian.</p>
         {% if request.user.is_authenticated %}
           <a href="{% url 'report_upload' %}" class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg transition">
-            ⬆️ Upload Sekarang
+            <i data-lucide='upload' class='inline-block w-1em h-1em'></i> Upload Sekarang
           </a>
         {% endif %}
       </div>

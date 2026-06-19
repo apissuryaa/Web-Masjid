@@ -6,14 +6,14 @@
   <h1 class="text-2xl font-bold text-emerald-700 mb-2">Laporan Keuangan Masjid</h1>
 
   <p class="text-gray-600 text-sm mb-2">
-    {% if rf.period %}📅 Periode: <strong>{{ rf.period }}</strong> • {% endif %}
+    {% if rf.period %}<i data-lucide='calendar' class='inline-block w-1em h-1em'></i> Periode: <strong>{{ rf.period }}</strong> • {% endif %}
     Diunggah: {{ rf.uploaded_at|date:"d M Y H:i" }}
   </p>
 
   {# ========= PDF ========= #}
   {% if rf.file.url|lower|endswith:".pdf" %}
     <div class="border rounded-lg overflow-hidden bg-gray-50 shadow-sm">
-      {# ✅ Gunakan route Django agar bisa tampil di iframe tanpa “refused to connect” #}
+      {# <i data-lucide='check-circle' class='inline-block w-1em h-1em'></i> Gunakan route Django agar bisa tampil di iframe tanpa “refused to connect” #}
       <iframe 
         src="{% url 'report_pdf_inline' rf.pk %}"
         width="100%" 
@@ -33,15 +33,15 @@
     <div class="mt-5 flex flex-wrap gap-2">
       <a href="{{ rf.file.url }}" download
          class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition">
-        ⬇️ Unduh PDF Asli
+        <i data-lucide='download' class='inline-block w-1em h-1em'></i> Unduh PDF Asli
       </a>
       <a href="{% url 'report_pdf_inline' rf.pk %}" target="_blank" rel="noopener"
          class="px-4 py-2 border rounded-lg hover:bg-gray-100 transition">
-        🔎 Buka di Tab Baru
+        <i data-lucide='zoom-in' class='inline-block w-1em h-1em'></i> Buka di Tab Baru
       </a>
       <a href="{% url 'report_archive' %}"
          class="px-4 py-2 border rounded-lg hover:bg-gray-100 transition">
-        ⬅ Kembali ke Arsip
+        <i data-lucide='arrow-left' class='inline-block w-1em h-1em'></i> Kembali ke Arsip
       </a>
     </div>
 
@@ -69,11 +69,11 @@
     <div class="mt-6 flex flex-wrap gap-2">
       <a href="{{ rf.file.url }}" download
          class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition">
-        ⬇️ Unduh File Excel Asli
+        <i data-lucide='download' class='inline-block w-1em h-1em'></i> Unduh File Excel Asli
       </a>
       <a href="{% url 'report_archive' %}"
          class="px-4 py-2 border rounded-lg hover:bg-gray-100 transition">
-        ⬅ Kembali ke Arsip
+        <i data-lucide='arrow-left' class='inline-block w-1em h-1em'></i> Kembali ke Arsip
       </a>
     </div>
   {% endif %}

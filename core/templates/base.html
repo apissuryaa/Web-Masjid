@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     /* ── Typography ── */
     *, body { font-family: 'Inter', system-ui, sans-serif; }
@@ -123,12 +125,14 @@
 
   <!-- TOP BAR (Sticky Glassmorphism) -->
   <header class="bg-emerald-950/80 backdrop-blur-md border-b border-emerald-500/20 text-white shadow-lg sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
+    <div class="max-w-[80%] mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
       <a href="{% url 'home' %}" class="group flex items-center gap-3 shrink-0 text-white transition duration-200">
         <!-- High-Tech Glassmorphic Logo Badge -->
         <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400/10 to-teal-500/10 border border-emerald-400/20 flex items-center justify-center shadow-[0_4px_15px_rgba(16,185,129,0.1)] relative overflow-hidden group-hover:border-emerald-400/40 group-hover:shadow-[0_4px_20px_rgba(16,185,129,0.2)] transition duration-300">
           <div class="absolute inset-0 bg-emerald-500/10 blur-sm pointer-events-none"></div>
-          <span class="text-lg relative z-10 select-none transform group-hover:scale-110 transition duration-300">🕌</span>
+          <span class="text-emerald-500 relative z-10 select-none transform group-hover:scale-110 transition duration-300">
+            <i data-lucide="moon-star" class="w-5 h-5"></i>
+          </span>
         </div>
         
         <!-- Premium Brand Typography -->
@@ -175,17 +179,17 @@
 
     <!-- Mobile Drawer -->
     <div id="mobile-menu" class="md:hidden flex-col px-4 pb-4 gap-1 border-t border-emerald-600/40">
-      <a href="{% url 'home' %}" class="block py-2 px-3 rounded-lg text-emerald-100 hover:bg-emerald-600/50 text-sm">🏠 Beranda</a>
-      <a href="{% url 'report_archive' %}" class="block py-2 px-3 rounded-lg text-emerald-100 hover:bg-emerald-600/50 text-sm">📁 Arsip Laporan</a>
-      <a href="{% url 'cashflow_public' %}" class="block py-2 px-3 rounded-lg text-emerald-100 hover:bg-emerald-600/50 text-sm">📊 Rekap Kas</a>
-      <a href="{% url 'sop_public' %}" class="block py-2 px-3 rounded-lg text-emerald-100 hover:bg-emerald-600/50 text-sm">📄 SOP</a>
+      <a href="{% url 'home' %}" class="flex items-center gap-2 py-2 px-3 rounded-lg text-emerald-100 hover:bg-emerald-600/50 text-sm"><i data-lucide="home" class="w-4 h-4"></i> Beranda</a>
+      <a href="{% url 'report_archive' %}" class="flex items-center gap-2 py-2 px-3 rounded-lg text-emerald-100 hover:bg-emerald-600/50 text-sm"><i data-lucide="folder" class="w-4 h-4"></i> Arsip Laporan</a>
+      <a href="{% url 'cashflow_public' %}" class="flex items-center gap-2 py-2 px-3 rounded-lg text-emerald-100 hover:bg-emerald-600/50 text-sm"><i data-lucide="bar-chart-2" class="w-4 h-4"></i> Rekap Kas</a>
+      <a href="{% url 'sop_public' %}" class="flex items-center gap-2 py-2 px-3 rounded-lg text-emerald-100 hover:bg-emerald-600/50 text-sm"><i data-lucide="file-text" class="w-4 h-4"></i> SOP</a>
       {% if request.user.is_authenticated %}
         <hr class="border-emerald-600/40 my-1">
-        <a href="{% url 'dashboard' %}" class="block py-2 px-3 rounded-lg text-emerald-100 hover:bg-emerald-600/50 text-sm">⚙️ Panel Pengurus</a>
-        <a href="{% url 'logout' %}" class="block py-2 px-3 rounded-lg text-red-300 hover:bg-red-500/20 text-sm">🚪 Keluar</a>
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-2 py-2 px-3 rounded-lg text-emerald-100 hover:bg-emerald-600/50 text-sm"><i data-lucide="settings" class="w-4 h-4"></i> Panel Pengurus</a>
+        <a href="{% url 'logout' %}" class="flex items-center gap-2 py-2 px-3 rounded-lg text-red-300 hover:bg-red-500/20 text-sm"><i data-lucide="log-out" class="w-4 h-4"></i> Keluar</a>
       {% else %}
         <hr class="border-emerald-600/40 my-1">
-        <a href="{% url 'login' %}" class="block py-2 px-3 rounded-lg bg-white/20 text-white font-medium text-sm">🔐 Masuk Pengurus</a>
+        <a href="{% url 'login' %}" class="flex items-center gap-2 py-2 px-3 rounded-lg bg-white/20 text-white font-medium text-sm"><i data-lucide="lock" class="w-4 h-4"></i> Masuk Pengurus</a>
       {% endif %}
     </div>
   </header>
@@ -195,58 +199,58 @@
   <section class="bg-emerald-950/5 border-b border-emerald-950/10 animate-fade-in">
     <div class="max-w-6xl mx-auto px-4 py-3">
       <div class="flex items-center gap-2 text-xs overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap">
-        <span class="text-[10px] font-extrabold text-emerald-900 uppercase tracking-widest mr-2 shrink-0 hidden sm:inline-block">⚡ Akses Cepat:</span>
+        <span class="text-[10px] font-extrabold text-emerald-900 uppercase tracking-widest mr-2 shrink-0 hidden sm:inline-flex items-center gap-1"><i data-lucide="zap" class="w-3 h-3"></i> Akses Cepat:</span>
 
         <a href="{% url 'legalitas_public' %}"
            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-full transition shadow-sm hover:shadow text-gray-700 font-medium">
-          <span>📁</span> Legalitas
+          <i data-lucide="folder" class="w-4 h-4 text-emerald-600"></i> Legalitas
         </a>
 
         <a href="{% url 'report_archive' %}"
            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-full transition shadow-sm hover:shadow text-gray-700 font-medium">
-          <span>📄</span> Arsip Laporan
+          <i data-lucide="file-text" class="w-4 h-4 text-emerald-600"></i> Arsip Laporan
         </a>
 
         <a href="{% url 'cashflow_public' %}"
            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-full transition shadow-sm hover:shadow text-gray-700 font-medium">
-          <span>📈</span> Rekap Kas
+          <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i> Rekap Kas
         </a>
 
         <a href="{% url 'sop_public' %}"
            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-full transition shadow-sm hover:shadow text-gray-700 font-medium">
-          <span>📋</span> SOP Masjid
+          <i data-lucide="clipboard" class="w-4 h-4 text-emerald-600"></i> SOP Masjid
         </a>
 
         <a href="{% url 'donation_page' %}"
            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-full transition shadow-sm hover:shadow text-emerald-800 font-bold">
-          <span>🤲</span> Donasi
+          <i data-lucide="hand-heart" class="w-4 h-4 text-emerald-600"></i> Donasi
         </a>
 
         <a href="{% url 'home' %}#program"
            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-full transition shadow-sm hover:shadow text-gray-700 font-medium">
-          <span>📅</span> Program Kajian
+          <i data-lucide="calendar" class="w-4 h-4 text-emerald-600"></i> Program Kajian
         </a>
 
         <a href="{% url 'home' %}#pengurus"
            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-full transition shadow-sm hover:shadow text-gray-700 font-medium">
-          <span>👥</span> DKM
+          <i data-lucide="users" class="w-4 h-4 text-emerald-600"></i> DKM
         </a>
 
         <a href="{% url 'home' %}#kontak"
            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-full transition shadow-sm hover:shadow text-gray-700 font-medium">
-          <span>📍</span> Lokasi
+          <i data-lucide="map-pin" class="w-4 h-4 text-emerald-600"></i> Lokasi
         </a>
 
         {% if request.user.is_authenticated %}
         <span class="text-emerald-300 px-1 hidden sm:inline">|</span>
         <a href="{% url 'dashboard' %}"
            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 border border-emerald-600 rounded-full transition shadow-sm hover:shadow text-white font-bold">
-          <span>⚡</span> Panel Kelola
+          <i data-lucide="zap" class="w-4 h-4"></i> Panel Kelola
         </a>
 
         <a href="{% url 'report_upload' %}"
            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 border border-teal-600 rounded-full transition shadow-sm hover:shadow text-white font-bold">
-          <span>📤</span> Upload PDF
+          <i data-lucide="upload" class="w-4 h-4"></i> Upload PDF
         </a>
         {% endif %}
 
@@ -256,13 +260,13 @@
   {% endif %}
 
   <!-- MAIN CONTENT -->
-  <main class="max-w-6xl mx-auto px-4 py-6">
+  <main class="max-w-[80%] mx-auto px-4 py-6">
     {% for m in messages %}
       <div class="mb-4 p-3 rounded-xl border text-sm flex items-center gap-2
         {% if 'success' in m.tags %}bg-emerald-50 border-emerald-200 text-emerald-800
         {% elif 'error' in m.tags %}bg-red-50 border-red-200 text-red-800
         {% else %}bg-blue-50 border-blue-200 text-blue-800{% endif %}">
-        {% if 'success' in m.tags %}✅{% elif 'error' in m.tags %}❌{% else %}ℹ️{% endif %}
+        {% if 'success' in m.tags %}<i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i>{% elif 'error' in m.tags %}<i data-lucide="x-circle" class="w-4 h-4 shrink-0"></i>{% else %}<i data-lucide="info" class="w-4 h-4 shrink-0"></i>{% endif %}
         {{ m }}
       </div>
     {% endfor %}
@@ -271,12 +275,12 @@
 
   <!-- FOOTER -->
   <footer class="mt-16 bg-gradient-to-b from-emerald-950 to-black text-emerald-100 border-t border-emerald-500/20">
-    <div class="max-w-6xl mx-auto px-6 py-12 grid md:grid-cols-3 gap-8">
+    <div class="max-w-[80%] mx-auto px-6 py-12 grid md:grid-cols-3 gap-8">
       
       <!-- Kolom 1: Branding -->
       <div>
-        <div class="flex items-center gap-2.5 mb-4">
-          <span class="text-3xl drop-shadow-[0_2px_10px_rgba(16,185,129,0.3)]">🕌</span>
+        <div class="flex items-center gap-2.5 mb-4 text-emerald-400">
+          <i data-lucide="moon-star" class="w-8 h-8 drop-shadow-[0_2px_10px_rgba(16,185,129,0.3)]"></i>
           <span class="font-extrabold text-white text-xl tracking-tight bg-gradient-to-r from-emerald-50 to-emerald-300 bg-clip-text text-transparent">Masjid Al Huda</span>
         </div>
         <p class="text-xs text-emerald-300/80 leading-relaxed max-w-sm">
@@ -287,33 +291,33 @@
       <!-- Kolom 2: Navigasi Cepat -->
       <div>
         <h3 class="font-bold text-white mb-4 text-xs uppercase tracking-widest border-b border-emerald-500/10 pb-2">Navigasi Portal</h3>
-        <ul class="grid grid-cols-2 gap-2 text-xs text-emerald-300/80">
-          <li><a href="{% url 'home' %}" class="hover:text-emerald-400 transition flex items-center gap-1">🌿 Beranda</a></li>
-          <li><a href="{% url 'report_archive' %}" class="hover:text-emerald-400 transition flex items-center gap-1">📁 Arsip Laporan</a></li>
-          <li><a href="{% url 'cashflow_public' %}" class="hover:text-emerald-400 transition flex items-center gap-1">📈 Rekap Kas</a></li>
-          <li><a href="{% url 'sop_public' %}" class="hover:text-emerald-400 transition flex items-center gap-1">📋 SOP Masjid</a></li>
-          <li><a href="{% url 'legalitas_public' %}" class="hover:text-emerald-400 transition flex items-center gap-1">🔑 Legalitas</a></li>
-          <li><a href="{% url 'donation_page' %}" class="hover:text-emerald-400 transition flex items-center gap-1">🤲 Layanan Donasi</a></li>
+        <ul class="grid grid-cols-2 gap-3 text-xs text-emerald-300/80">
+          <li><a href="{% url 'home' %}" class="hover:text-emerald-400 transition flex items-center gap-2"><i data-lucide="leaf" class="w-3.5 h-3.5"></i> Beranda</a></li>
+          <li><a href="{% url 'report_archive' %}" class="hover:text-emerald-400 transition flex items-center gap-2"><i data-lucide="folder" class="w-3.5 h-3.5"></i> Arsip Laporan</a></li>
+          <li><a href="{% url 'cashflow_public' %}" class="hover:text-emerald-400 transition flex items-center gap-2"><i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Rekap Kas</a></li>
+          <li><a href="{% url 'sop_public' %}" class="hover:text-emerald-400 transition flex items-center gap-2"><i data-lucide="clipboard" class="w-3.5 h-3.5"></i> SOP Masjid</a></li>
+          <li><a href="{% url 'legalitas_public' %}" class="hover:text-emerald-400 transition flex items-center gap-2"><i data-lucide="key" class="w-3.5 h-3.5"></i> Legalitas</a></li>
+          <li><a href="{% url 'donation_page' %}" class="hover:text-emerald-400 transition flex items-center gap-2"><i data-lucide="hand-heart" class="w-3.5 h-3.5"></i> Layanan Donasi</a></li>
         </ul>
       </div>
 
       <!-- Kolom 3: Kontak & Informasi -->
       <div>
         <h3 class="font-bold text-white mb-4 text-xs uppercase tracking-widest border-b border-emerald-500/10 pb-2">Hubungi Kami</h3>
-        <ul class="space-y-2.5 text-xs text-emerald-300/80">
+        <ul class="space-y-3 text-xs text-emerald-300/80">
           <li class="flex items-start gap-2">
-            <span class="text-emerald-400 shrink-0">📍</span>
+            <i data-lucide="map-pin" class="w-4 h-4 text-emerald-400 shrink-0"></i>
             <span>Tambun Utara, Bekasi, Jawa Barat, Indonesia</span>
           </li>
           {% if mosque.contact_phone %}
           <li class="flex items-center gap-2">
-            <span class="text-emerald-400 shrink-0">📞</span>
+            <i data-lucide="phone" class="w-4 h-4 text-emerald-400 shrink-0"></i>
             <span>{{ mosque.contact_phone }}</span>
           </li>
           {% endif %}
           {% if mosque.email %}
           <li class="flex items-center gap-2">
-            <span class="text-emerald-400 shrink-0">✉️</span>
+            <i data-lucide="mail" class="w-4 h-4 text-emerald-400 shrink-0"></i>
             <span>{{ mosque.email }}</span>
           </li>
           {% endif %}
@@ -328,6 +332,9 @@
   </footer>
 
   <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
     // Hamburger Menu Toggle
     const btn = document.getElementById('hamburger');
     const menu = document.getElementById('mobile-menu');

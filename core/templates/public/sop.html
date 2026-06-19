@@ -7,7 +7,7 @@
   <!-- Header -->
   <div class="bg-emerald-700 px-6 py-5 flex items-center justify-between flex-wrap gap-3">
     <div class="flex items-center gap-3">
-      <span class="text-2xl">📋</span>
+      <span class="text-2xl"><i data-lucide='clipboard' class='inline-block w-1em h-1em'></i></span>
       <div>
         <h1 class="text-lg font-bold text-white">Standar Operasional Prosedur (SOP)</h1>
         <p class="text-emerald-200 text-xs mt-0.5">
@@ -24,7 +24,7 @@
       <div class="flex items-center gap-2">
         <a href="{{ sop_doc.file.url }}" download 
            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white text-emerald-800 rounded-lg hover:bg-emerald-50 transition shadow-sm">
-          ⬇️ Unduh PDF
+          <i data-lucide='download' class='inline-block w-1em h-1em'></i> Unduh PDF
         </a>
         {% if request.user.is_authenticated %}
           <form method="post" action="{% url 'document_delete' sop_doc.pk %}"
@@ -32,7 +32,7 @@
             {% csrf_token %}
             <button type="submit" 
                     class="px-3 py-1.5 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg transition shadow-sm">
-              🗑 Hapus SOP
+              <i data-lucide='trash-2' class='inline-block w-1em h-1em'></i> Hapus SOP
             </button>
           </form>
         {% endif %}
@@ -54,12 +54,12 @@
       </div>
     {% else %}
       <div class="py-16 text-center">
-        <div class="text-4xl mb-3">📭</div>
+        <div class="text-4xl mb-3"><i data-lucide='inbox' class='inline-block w-1em h-1em'></i></div>
         <p class="text-gray-400 italic text-sm">Belum ada dokumen SOP yang dipublikasikan.</p>
         {% if request.user.is_authenticated %}
           <a href="{% url 'sop_upload' %}" 
              class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg transition">
-            ⬆️ Upload Sekarang
+            <i data-lucide='upload' class='inline-block w-1em h-1em'></i> Upload Sekarang
           </a>
         {% endif %}
       </div>

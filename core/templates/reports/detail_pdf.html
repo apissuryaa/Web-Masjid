@@ -7,7 +7,7 @@
     <div>
       <h1 class="text-2xl font-bold text-emerald-700">{{ rf.title }}</h1>
       <p class="text-gray-600 text-sm">
-        {% if rf.period %}📅 Periode: <strong>{{ rf.period }}</strong> • {% endif %}
+        {% if rf.period %}<i data-lucide='calendar' class='inline-block w-1em h-1em'></i> Periode: <strong>{{ rf.period }}</strong> • {% endif %}
         Diunggah: {{ rf.uploaded_at|date:"d M Y H:i" }}
       </p>
     </div>
@@ -16,7 +16,7 @@
     <form method="post" action="{% url 'report_delete' rf.pk %}" onsubmit="return confirm('Yakin hapus laporan ini? Tindakan tidak bisa dibatalkan.');">
       {% csrf_token %}
       <button type="submit" class="px-3 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">
-        🗑 Hapus
+        <i data-lucide='trash-2' class='inline-block w-1em h-1em'></i> Hapus
       </button>
     </form>
   </div>
@@ -26,8 +26,8 @@
   </div>
 
   <div class="mt-4 flex flex-wrap gap-2">
-    <a class="px-4 py-2 rounded-lg border bg-white hover:bg-emerald-50" href="{{ rf.file.url }}" download>⬇️ Unduh PDF Asli</a>
-    <a class="px-4 py-2 rounded-lg border bg-white hover:bg-emerald-50" href="{% url 'dashboard' %}">⬅ Kembali ke Panel</a>
+    <a class="px-4 py-2 rounded-lg border bg-white hover:bg-emerald-50" href="{{ rf.file.url }}" download><i data-lucide='download' class='inline-block w-1em h-1em'></i> Unduh PDF Asli</a>
+    <a class="px-4 py-2 rounded-lg border bg-white hover:bg-emerald-50" href="{% url 'dashboard' %}"><i data-lucide='arrow-left' class='inline-block w-1em h-1em'></i> Kembali ke Panel</a>
   </div>
 </section>
 {% endblock %}

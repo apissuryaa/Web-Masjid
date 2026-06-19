@@ -12,7 +12,7 @@
         {% if msg.tags == 'success' %}bg-emerald-50 text-emerald-800 border-emerald-200
         {% elif msg.tags == 'error' %}bg-red-50 text-red-800 border-red-200
         {% else %}bg-blue-50 text-blue-800 border-blue-200{% endif %}">
-        {% if msg.tags == 'success' %}✅{% elif msg.tags == 'error' %}❌{% else %}ℹ️{% endif %}
+        {% if msg.tags == 'success' %}<i data-lucide='check-circle' class='inline-block w-1em h-1em'></i>{% elif msg.tags == 'error' %}<i data-lucide='x-circle' class='inline-block w-1em h-1em'></i>{% else %}<i data-lucide='info' class='inline-block w-1em h-1em'></i>{% endif %}
         {{ msg }}
       </div>
     {% endfor %}
@@ -24,7 +24,7 @@
   <!-- Header -->
   <div class="bg-emerald-700 px-6 py-5 flex items-center justify-between">
     <div class="flex items-center gap-3">
-      <span class="text-2xl">📊</span>
+      <span class="text-2xl"><i data-lucide='bar-chart' class='inline-block w-1em h-1em'></i></span>
       <div>
         <h1 class="text-lg font-bold text-white">Rekapitulasi Arus Kas</h1>
         <p class="text-emerald-200 text-xs mt-0.5">
@@ -70,7 +70,7 @@
 
       <!-- Total Pemasukan -->
       <div class="bg-gradient-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200/60 rounded-2xl p-5 hover:scale-[1.02] transition duration-300 shadow-sm flex items-center gap-4">
-        <span class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-700 flex items-center justify-center text-2xl shrink-0">📈</span>
+        <span class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-700 flex items-center justify-center text-2xl shrink-0"><i data-lucide='trending-up' class='inline-block w-1em h-1em'></i></span>
         <div>
           <div class="text-[10px] uppercase tracking-widest text-emerald-800 font-bold">Total Pemasukan</div>
           <div class="text-lg font-extrabold text-emerald-950 mt-0.5">Rp {{ total_year_in|floatformat:0|intcomma }}</div>
@@ -80,7 +80,7 @@
 
       <!-- Total Pengeluaran -->
       <div class="bg-gradient-to-br from-red-50 to-red-100/50 border border-red-200/60 rounded-2xl p-5 hover:scale-[1.02] transition duration-300 shadow-sm flex items-center gap-4">
-        <span class="w-12 h-12 rounded-xl bg-red-500/10 text-red-700 flex items-center justify-center text-2xl shrink-0">📉</span>
+        <span class="w-12 h-12 rounded-xl bg-red-500/10 text-red-700 flex items-center justify-center text-2xl shrink-0"><i data-lucide='trending-down' class='inline-block w-1em h-1em'></i></span>
         <div>
           <div class="text-[10px] uppercase tracking-widest text-red-800 font-bold">Total Pengeluaran</div>
           <div class="text-lg font-extrabold text-red-950 mt-0.5">Rp {{ total_year_out|floatformat:0|intcomma }}</div>
@@ -90,7 +90,7 @@
 
       <!-- Saldo Kas Bersih -->
       <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/60 rounded-2xl p-5 hover:scale-[1.02] transition duration-300 shadow-sm flex items-center gap-4">
-        <span class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-700 flex items-center justify-center text-2xl shrink-0">💰</span>
+        <span class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-700 flex items-center justify-center text-2xl shrink-0"><i data-lucide='coins' class='inline-block w-1em h-1em'></i></span>
         <div>
           <div class="text-[10px] uppercase tracking-widest text-blue-800 font-bold">Selisih Kas Bersih</div>
           <div class="text-lg font-extrabold text-blue-950 mt-0.5">Rp {{ total_year_net|floatformat:0|intcomma }}</div>
@@ -123,7 +123,7 @@
       <div class="flex flex-wrap gap-2 w-full sm:w-auto">
         <!-- Month Filter -->
         <select id="cf-filter-month" class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold transition cursor-pointer">
-          <option value="all">📅 Semua Bulan</option>
+          <option value="all"><i data-lucide='calendar' class='inline-block w-1em h-1em'></i> Semua Bulan</option>
           <option value="01">Januari</option>
           <option value="02">Februari</option>
           <option value="03">Maret</option>
@@ -140,13 +140,13 @@
         
         <!-- Year Filter -->
         <select id="cf-filter-year" class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold transition cursor-pointer">
-          <option value="all">🗓️ Semua Tahun</option>
+          <option value="all"><i data-lucide='calendar-days' class='inline-block w-1em h-1em'></i> Semua Tahun</option>
         </select>
       </div>
       
       <!-- Live Search Box -->
       <div class="relative w-full sm:w-64">
-        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-xs">🔍</span>
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-xs"><i data-lucide='search' class='inline-block w-1em h-1em'></i></span>
         <input type="text" id="cf-search" placeholder="Cari keterangan, kategori, nominal..." class="w-full pl-8 pr-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white transition">
       </div>
     </div>
@@ -170,11 +170,11 @@
                 <td>
                   {% if cf.flow_type == 'IN' %}
                     <span class="inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
-                      🌱 {{ cf.category.name|default:"Pemasukan Umum" }}
+                      <i data-lucide='arrow-down-left' class='inline-block w-1em h-1em text-green-500'></i> {{ cf.category.name|default:"Pemasukan Umum" }}
                     </span>
                   {% else %}
                     <span class="inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-100">
-                      🍂 {{ cf.category.name|default:"Pengeluaran Umum" }}
+                      <i data-lucide='arrow-up-right' class='inline-block w-1em h-1em text-red-500'></i> {{ cf.category.name|default:"Pengeluaran Umum" }}
                     </span>
                   {% endif %}
                 </td>
@@ -186,7 +186,7 @@
                 <td class="text-center whitespace-nowrap">
                   <a href="{% url 'cashflow_edit' cf.pk %}?next=/rekap-kas/?year={{ selected_year }}"
                      class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition mr-1">
-                    ✏️ Edit
+                    <i data-lucide='edit' class='inline-block w-1em h-1em'></i> Edit
                   </a>
                   <form method="post" action="{% url 'cashflow_delete' cf.pk %}"
                         class="inline"
@@ -195,7 +195,7 @@
                     <input type="hidden" name="next" value="/rekap-kas/?year={{ selected_year }}">
                     <button type="submit"
                             class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition">
-                      🗑️ Hapus
+                      <i data-lucide='trash-2' class='inline-block w-1em h-1em'></i> Hapus
                     </button>
                   </form>
                 </td>
@@ -237,7 +237,7 @@
     <!-- Modal Header -->
     <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <span class="w-9 h-9 bg-white/15 rounded-lg flex items-center justify-center text-lg">💸</span>
+        <span class="w-9 h-9 bg-white/15 rounded-lg flex items-center justify-center text-lg"><i data-lucide='banknote' class='inline-block w-1em h-1em'></i></span>
         <div>
           <h2 id="modalTitle" class="text-base font-bold text-white">Catat Transaksi Kas</h2>
           <p class="text-emerald-200 text-xs">Pemasukan atau pengeluaran langsung tercatat</p>
@@ -255,13 +255,13 @@
 
       {% if cashflow_form.errors %}
       <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-xs text-red-700">
-        ❌ Ada kesalahan, silakan periksa isian kembali.
+        <i data-lucide='x-circle' class='inline-block w-1em h-1em'></i> Ada kesalahan, silakan periksa isian kembali.
       </div>
       {% endif %}
 
       <!-- Tanggal -->
       <div>
-        <label for="id_date" class="block text-xs font-semibold text-gray-600 mb-1">📅 Tanggal</label>
+        <label for="id_date" class="block text-xs font-semibold text-gray-600 mb-1"><i data-lucide='calendar' class='inline-block w-1em h-1em'></i> Tanggal</label>
         <input type="date" name="date" id="id_date"
                value="{{ cashflow_form.date.value|default:'' }}"
                required
@@ -273,7 +273,7 @@
 
       <!-- Kategori -->
       <div>
-        <label for="id_category" class="block text-xs font-semibold text-gray-600 mb-1">🏷️ Kategori Kas</label>
+        <label for="id_category" class="block text-xs font-semibold text-gray-600 mb-1"><i data-lucide='tag' class='inline-block w-1em h-1em'></i> Kategori Kas</label>
         <select name="category" id="id_category"
                 class="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition bg-white">
           {% for val, label in cashflow_form.fields.category.choices %}
@@ -291,7 +291,7 @@
 
       <!-- Nominal -->
       <div>
-        <label for="id_amount" class="block text-xs font-semibold text-gray-600 mb-1">💵 Nominal (Rp)</label>
+        <label for="id_amount" class="block text-xs font-semibold text-gray-600 mb-1"><i data-lucide='dollar-sign' class='inline-block w-1em h-1em'></i> Nominal (Rp)</label>
         <div class="relative">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">Rp</span>
           <input type="number" name="amount" id="id_amount"
@@ -307,7 +307,7 @@
 
       <!-- Keterangan -->
       <div>
-        <label for="id_description" class="block text-xs font-semibold text-gray-600 mb-1">📝 Keterangan</label>
+        <label for="id_description" class="block text-xs font-semibold text-gray-600 mb-1"><i data-lucide='edit-3' class='inline-block w-1em h-1em'></i> Keterangan</label>
         <input type="text" name="description" id="id_description"
                value="{{ cashflow_form.description.value|default:'' }}"
                placeholder="Keterangan singkat transaksi"
@@ -322,7 +322,7 @@
       <div class="flex items-center gap-3 pt-2 border-t border-gray-100">
         <button type="submit"
                 class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-sm font-semibold rounded-xl transition shadow-sm">
-          💾 Simpan Transaksi
+          <i data-lucide='save' class='inline-block w-1em h-1em'></i> Simpan Transaksi
         </button>
         <button type="button"
                 onclick="document.getElementById('modalTambahKas').classList.add('hidden')"

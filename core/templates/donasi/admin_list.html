@@ -8,7 +8,7 @@
   <!-- Header -->
   <div class="bg-emerald-700 px-6 py-5 flex items-center justify-between">
     <div class="flex items-center gap-3">
-      <span class="text-2xl">🧾</span>
+      <span class="text-2xl"><i data-lucide='receipt' class='inline-block w-1em h-1em'></i></span>
       <div>
         <h1 class="text-lg font-bold text-white">Bukti Donasi Jamaah</h1>
         <p class="text-emerald-200 text-xs mt-0.5">Kelola dan verifikasi bukti transfer donasi</p>
@@ -25,7 +25,7 @@
              class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition">
       <button type="submit"
               class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition">
-        🔍 Cari
+        <i data-lucide='search' class='inline-block w-1em h-1em'></i> Cari
       </button>
     </form>
   </div>
@@ -64,7 +64,7 @@
             {% if p.proof %}
               <a href="{{ p.proof.url }}" target="_blank"
                  class="inline-flex items-center gap-1 text-xs text-emerald-700 hover:underline font-medium">
-                📎 Lihat
+                <i data-lucide='paperclip' class='inline-block w-1em h-1em'></i> Lihat
               </a>
             {% else %}
               <span class="text-gray-300 text-xs">—</span>
@@ -72,7 +72,7 @@
           </td>
           <td>
             {% if p.is_public %}
-              <span class="text-xs text-emerald-600 font-medium">✅ Ya</span>
+              <span class="text-xs text-emerald-600 font-medium"><i data-lucide='check-circle' class='inline-block w-1em h-1em'></i> Ya</span>
             {% else %}
               <span class="text-xs text-gray-400">— Tidak</span>
             {% endif %}
@@ -82,7 +82,7 @@
                   onsubmit="return confirm('Hapus bukti donasi ini?');" class="inline">
               {% csrf_token %}
               <button class="px-3 py-1 rounded-lg bg-red-50 border border-red-200 text-red-600 hover:bg-red-600 hover:text-white text-xs font-medium transition">
-                🗑 Hapus
+                <i data-lucide='trash-2' class='inline-block w-1em h-1em'></i> Hapus
               </button>
             </form>
           </td>

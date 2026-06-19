@@ -4,7 +4,7 @@
 <div class="max-w-xl mx-auto">
   <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
     <div class="bg-emerald-700 px-6 py-5 flex items-center gap-3">
-      <span class="text-2xl">📋</span>
+      <span class="text-2xl"><i data-lucide='clipboard' class='inline-block w-1em h-1em'></i></span>
       <div>
         <h1 class="text-lg font-bold text-white">Upload SOP Baru</h1>
         <p class="text-emerald-200 text-xs mt-0.5">Standar Operasional Prosedur — format PDF</p>
@@ -14,12 +14,12 @@
       {% csrf_token %}
       {{ form.as_p }}
       <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg transition shadow-sm">
-        ⬆️ Upload SOP
+        <i data-lucide='upload' class='inline-block w-1em h-1em'></i> Upload SOP
       </button>
     </form>
     <div class="px-6 pb-5 flex justify-between text-sm">
       <a href="{% url 'dashboard' %}" class="text-emerald-700 hover:underline">← Kembali ke Profil</a>
-      <a href="{% url 'sop_public' %}" class="text-gray-500 hover:underline">📋 Lihat SOP Publik</a>
+      <a href="{% url 'sop_public' %}" class="text-gray-500 hover:underline"><i data-lucide='clipboard' class='inline-block w-1em h-1em'></i> Lihat SOP Publik</a>
     </div>
   </div>
 </div>

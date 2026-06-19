@@ -9,12 +9,12 @@
 
   <p class="text-gray-600 text-sm mb-2">
     {% if rf.period %}
-      📅 Periode: <strong>{{ rf.period }}</strong> • 
+      <i data-lucide='calendar' class='inline-block w-1em h-1em'></i> Periode: <strong>{{ rf.period }}</strong> • 
     {% endif %}
     Diunggah: {{ rf.uploaded_at|date:"d M Y H:i" }}
   </p>
 
-  <!-- ✅ PDF Viewer pakai <object> agar kompatibel di semua browser -->
+  <!-- <i data-lucide='check-circle' class='inline-block w-1em h-1em'></i> PDF Viewer pakai <object> agar kompatibel di semua browser -->
   <div class="border rounded-lg overflow-hidden bg-gray-50 shadow-sm">
     <object 
       data="{{ rf.file.url }}#toolbar=1&navpanes=1&scrollbar=1&view=FitH" 
@@ -32,16 +32,16 @@
     </object>
   </div>
 
-  <!-- ✅ Tombol Aksi -->
+  <!-- <i data-lucide='check-circle' class='inline-block w-1em h-1em'></i> Tombol Aksi -->
   <div class="mt-5 flex flex-wrap gap-2">
     <a href="{{ rf.file.url }}" 
        download 
        class="inline-block px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition">
-      ⬇️ Unduh PDF Asli
+      <i data-lucide='download' class='inline-block w-1em h-1em'></i> Unduh PDF Asli
     </a>
     <a href="{% url 'report_archive' %}" 
        class="inline-block px-4 py-2 border rounded-lg hover:bg-gray-100 transition">
-      ⬅ Kembali ke Arsip
+      <i data-lucide='arrow-left' class='inline-block w-1em h-1em'></i> Kembali ke Arsip
     </a>
   </div>
 </section>

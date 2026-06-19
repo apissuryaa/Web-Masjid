@@ -10,7 +10,7 @@
 
       <!-- Header -->
       <div class="bg-gradient-to-r from-emerald-800 to-emerald-600 px-8 py-8 text-center">
-        <div class="text-5xl mb-3">🕌</div>
+        <div class="text-5xl mb-3"><i data-lucide='moon-star' class='inline-block w-1em h-1em'></i></div>
         <h1 class="text-2xl font-bold text-white">Masuk Pengurus</h1>
         <p class="text-emerald-200 text-sm mt-1">Panel Admin Masjid Al Huda</p>
       </div>
@@ -20,7 +20,7 @@
 
         {% if form.errors %}
           <div class="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2">
-            ❌ Username atau password salah. Silakan coba lagi.
+            <i data-lucide='x-circle' class='inline-block w-1em h-1em'></i> Username atau password salah. Silakan coba lagi.
           </div>
         {% endif %}
 
@@ -43,7 +43,7 @@
 
           <button type="submit"
             class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg transition shadow-sm">
-            🔐 Masuk
+            <i data-lucide='lock' class='inline-block w-1em h-1em'></i> Masuk
           </button>
         </form>
 

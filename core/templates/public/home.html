@@ -15,23 +15,23 @@
   <div class="absolute bottom-6 left-6 right-6 md:left-10 md:bottom-10 max-w-xl backdrop-blur-md bg-emerald-950/45 hover:bg-emerald-950/50 border border-white/10 rounded-3xl p-6 md:p-8 text-white transition duration-300 shadow-xl">
     <p class="text-emerald-300 text-xs font-bold uppercase tracking-widest flex items-center gap-1.5 mb-2">
       <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-      Assalamu'alaikum Warahmatullahi Wabarakatuh 🌿
+      Assalamu'alaikum Warahmatullahi Wabarakatuh <i data-lucide='leaf' class='inline-block w-1em h-1em'></i>
     </p>
     <h1 class="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
       {{ mosque.name|default:"Masjid Al Huda" }}
     </h1>
     <p class="text-emerald-100/90 text-xs md:text-sm mt-3 font-medium flex items-start gap-1">
-      <span class="shrink-0">📍</span>
+      <span class="shrink-0"><i data-lucide='map-pin' class='inline-block w-1em h-1em'></i></span>
       <span>{% if mosque.address %}{{ mosque.address }}{% if mosque.city %}, {{ mosque.city }}{% endif %}{% else %}Tambun Utara, Bekasi, Jawa Barat{% endif %}</span>
     </p>
     <div class="flex flex-wrap gap-3 mt-6">
       <a href="{% url 'dashboard' %}"
          class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 px-6 py-2.5 rounded-full text-xs font-bold tracking-wide uppercase transition duration-300 shadow-lg shadow-emerald-500/20 hover:scale-[1.02]">
-        🕌 Profil Masjid
+        <i data-lucide='moon-star' class='inline-block w-1em h-1em'></i> Profil Masjid
       </a>
       <a href="{% url 'legalitas_public' %}"
          class="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm px-6 py-2.5 rounded-full text-xs font-bold tracking-wide uppercase transition duration-300 hover:scale-[1.02]">
-        🔑 Lihat Legalitas
+        <i data-lucide='key' class='inline-block w-1em h-1em'></i> Lihat Legalitas
       </a>
     </div>
   </div>
@@ -42,12 +42,12 @@
   <!-- Left column (Countdown info) -->
   <div class="bg-gradient-to-br from-emerald-900 to-emerald-950 text-white p-6 flex flex-col justify-between min-h-[160px] md:min-h-[200px]">
     <div>
-      <span class="text-[10px] uppercase tracking-widest text-emerald-300 font-bold block mb-1">🕌 Waktu Sholat Berikutnya</span>
+      <span class="text-[10px] uppercase tracking-widest text-emerald-300 font-bold block mb-1"><i data-lucide='moon-star' class='inline-block w-1em h-1em'></i> Waktu Sholat Berikutnya</span>
       <h2 id="next-prayer-name" class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white to-emerald-200 bg-clip-text text-transparent">-</h2>
     </div>
     <div class="mt-4">
       <div id="prayer-countdown" class="text-3xl font-mono font-extrabold tracking-widest text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]">-</div>
-      <span class="text-[10px] uppercase tracking-wider text-emerald-300/80 font-bold block mt-1">📍 {{ mosque.city|default:"Bekasi" }} & Sekitarnya</span>
+      <span class="text-[10px] uppercase tracking-wider text-emerald-300/80 font-bold block mt-1"><i data-lucide='map-pin' class='inline-block w-1em h-1em'></i> {{ mosque.city|default:"Bekasi" }} & Sekitarnya</span>
     </div>
   </div>
   
@@ -56,13 +56,13 @@
     <!-- Imsak -->
     <div id="prayer-card-imsak" class="bg-white border border-gray-100 rounded-xl p-3 flex flex-col items-center justify-between text-center shadow-sm transition duration-300 hover:shadow-md hover:scale-[1.02]">
       <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Imsak</span>
-      <span class="text-2xl my-1.5">🌇</span>
+      <span class="text-2xl my-1.5"><i data-lucide='sunset' class='inline-block w-1em h-1em'></i></span>
       <span id="prayer-time-imsak" class="text-sm font-bold text-gray-700">-</span>
     </div>
     <!-- Subuh -->
     <div id="prayer-card-subuh" class="bg-white border border-gray-100 rounded-xl p-3 flex flex-col items-center justify-between text-center shadow-sm transition duration-300 hover:shadow-md hover:scale-[1.02]">
       <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Subuh</span>
-      <span class="text-2xl my-1.5">🌅</span>
+      <span class="text-2xl my-1.5"><i data-lucide='sunrise' class='inline-block w-1em h-1em'></i></span>
       <span id="prayer-time-subuh" class="text-sm font-bold text-gray-700">-</span>
     </div>
     <!-- Dzuhur -->
@@ -80,13 +80,13 @@
     <!-- Maghrib -->
     <div id="prayer-card-maghrib" class="bg-white border border-gray-100 rounded-xl p-3 flex flex-col items-center justify-between text-center shadow-sm transition duration-300 hover:shadow-md hover:scale-[1.02]">
       <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Maghrib</span>
-      <span class="text-2xl my-1.5">🌇</span>
+      <span class="text-2xl my-1.5"><i data-lucide='sunset' class='inline-block w-1em h-1em'></i></span>
       <span id="prayer-time-maghrib" class="text-sm font-bold text-gray-700">-</span>
     </div>
     <!-- Isya -->
     <div id="prayer-card-isya" class="bg-white border border-gray-100 rounded-xl p-3 flex flex-col items-center justify-between text-center shadow-sm transition duration-300 hover:shadow-md hover:scale-[1.02]">
       <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Isya</span>
-      <span class="text-2xl my-1.5">🌙</span>
+      <span class="text-2xl my-1.5"><i data-lucide='moon' class='inline-block w-1em h-1em'></i></span>
       <span id="prayer-time-isya" class="text-sm font-bold text-gray-700">-</span>
     </div>
   </div>
@@ -109,7 +109,7 @@
       
       <div>
         <div class="flex justify-between items-center mb-4">
-          <span class="w-10 h-10 rounded-2xl bg-amber-400/20 text-amber-300 flex items-center justify-center text-lg font-bold shadow-sm shadow-amber-400/10">🤲</span>
+          <span class="w-10 h-10 rounded-2xl bg-amber-400/20 text-amber-300 flex items-center justify-center text-lg font-bold shadow-sm shadow-amber-400/10"><i data-lucide='hand-heart' class='inline-block w-1em h-1em'></i></span>
           <span class="text-[9px] uppercase tracking-widest text-emerald-300 font-extrabold bg-emerald-900/50 border border-emerald-800 px-2.5 py-1 rounded-full">Donasi Terbuka</span>
         </div>
         <h3 class="text-2xl font-extrabold tracking-tight">Saluran Infaq & Shodaqoh</h3>
@@ -126,7 +126,7 @@
         </div>
         <div class="flex gap-2">
           <button onclick="copyToClipboard('{{ mosque.bank_account }}', 'btn-copy-bento')" id="btn-copy-bento" class="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-emerald-900 bg-amber-400 hover:bg-amber-300 rounded-xl transition duration-200 shadow-sm shrink-0 flex items-center gap-1 border-0">
-            📋 Salin Rekening
+            <i data-lucide='clipboard' class='inline-block w-1em h-1em'></i> Salin Rekening
           </button>
           <a href="{% url 'donation_page' %}" class="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-white bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-sm rounded-xl transition duration-200 flex items-center justify-center shrink-0">
             Pilih Bank →
@@ -139,7 +139,7 @@
     <!-- CARD 2: REKAP KAS (Medium Span) -->
     <a href="{% url 'cashflow_public' %}" class="bg-white border border-gray-200/80 hover:border-emerald-400 rounded-[1.8rem] p-5 hover:shadow-xl hover:scale-[1.02] transition duration-300 flex flex-col justify-between group shadow-sm min-h-[140px]">
       <div class="flex items-center justify-between">
-        <span class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-emerald-50">📈</span>
+        <span class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-emerald-50"><i data-lucide='trending-up' class='inline-block w-1em h-1em'></i></span>
         <span class="text-[9px] uppercase tracking-widest text-emerald-700 font-bold bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md">Realtime</span>
       </div>
       <div class="mt-4">
@@ -151,7 +151,7 @@
     <!-- CARD 3: ARSIP LAPORAN (Medium Span) -->
     <a href="{% url 'report_archive' %}" class="bg-white border border-gray-200/80 hover:border-purple-400 rounded-[1.8rem] p-5 hover:shadow-xl hover:scale-[1.02] transition duration-300 flex flex-col justify-between group shadow-sm min-h-[140px]">
       <div class="flex items-center justify-between">
-        <span class="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-purple-50">📁</span>
+        <span class="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-purple-50"><i data-lucide='folder' class='inline-block w-1em h-1em'></i></span>
         <span class="text-[9px] uppercase tracking-widest text-purple-700 font-bold bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-md">Arsip PDF</span>
       </div>
       <div class="mt-4">
@@ -163,7 +163,7 @@
     <!-- CARD 4: PROGRAM KAJIAN (Small Card) -->
     <a href="#program" class="bg-white border border-gray-200/80 hover:border-blue-400 rounded-[1.8rem] p-5 hover:shadow-xl hover:scale-[1.02] transition duration-300 flex flex-col justify-between group shadow-sm min-h-[140px]">
       <div class="flex items-center justify-between">
-        <span class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-blue-50">📅</span>
+        <span class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-blue-50"><i data-lucide='calendar' class='inline-block w-1em h-1em'></i></span>
         <span class="text-[9px] uppercase tracking-widest text-blue-700 font-bold bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md">Kegiatan</span>
       </div>
       <div class="mt-4">
@@ -175,7 +175,7 @@
     <!-- CARD 5: PENGURUS DKM (Small Card) -->
     <a href="#pengurus" class="bg-white border border-gray-200/80 hover:border-sky-400 rounded-[1.8rem] p-5 hover:shadow-xl hover:scale-[1.02] transition duration-300 flex flex-col justify-between group shadow-sm min-h-[140px]">
       <div class="flex items-center justify-between">
-        <span class="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-sky-50">👥</span>
+        <span class="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-sky-50"><i data-lucide='users' class='inline-block w-1em h-1em'></i></span>
         <span class="text-[9px] uppercase tracking-widest text-sky-700 font-bold bg-sky-50 border border-sky-100 px-2 py-0.5 rounded-md">Pengurus</span>
       </div>
       <div class="mt-4">
@@ -187,7 +187,7 @@
     <!-- CARD 6: SOP MASJID (Small Card) -->
     <a href="{% url 'sop_public' %}" class="bg-white border border-gray-200/80 hover:border-amber-400 rounded-[1.8rem] p-5 hover:shadow-xl hover:scale-[1.02] transition duration-300 flex flex-col justify-between group shadow-sm min-h-[140px]">
       <div class="flex items-center justify-between">
-        <span class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-amber-50">📋</span>
+        <span class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-amber-50"><i data-lucide='clipboard' class='inline-block w-1em h-1em'></i></span>
         <span class="text-[9px] uppercase tracking-widest text-amber-700 font-bold bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-md">Regulasi</span>
       </div>
       <div class="mt-4">
@@ -199,7 +199,7 @@
     <!-- CARD 7: LOKASI & KONTAK (Small Card) -->
     <a href="#kontak" class="bg-white border border-gray-200/80 hover:border-rose-400 rounded-[1.8rem] p-5 hover:shadow-xl hover:scale-[1.02] transition duration-300 flex flex-col justify-between group shadow-sm min-h-[140px]">
       <div class="flex items-center justify-between">
-        <span class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-rose-50">📍</span>
+        <span class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-rose-50"><i data-lucide='map-pin' class='inline-block w-1em h-1em'></i></span>
         <span class="text-[9px] uppercase tracking-widest text-rose-700 font-bold bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-md">Kontak</span>
       </div>
       <div class="mt-4">
@@ -215,7 +215,7 @@
 <div class="flex items-center gap-4 my-12 animate-fade-in">
   <div class="h-[1px] bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent flex-grow"></div>
   <div class="text-center shrink-0">
-    <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1.5 rounded-full shadow-sm">🏛️ Portal Transparansi</span>
+    <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1.5 rounded-full shadow-sm"><i data-lucide='landmark' class='inline-block w-1em h-1em'></i> Portal Transparansi</span>
     <h2 class="text-2xl md:text-3xl font-black text-gray-800 tracking-tight mt-3">Layanan & Keuangan DKM</h2>
   </div>
   <div class="h-[1px] bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent flex-grow"></div>
@@ -234,12 +234,12 @@
     <!-- 1. Profil Singkat (Spans 2 columns: lg:col-span-2) -->
     <div class="lg:col-span-2 backdrop-blur-xl bg-white/80 border border-white/90 rounded-[2rem] p-6 sm:p-8 shadow-[0_20px_50px_rgba(4,47,31,0.02)] hover:shadow-[0_30px_60px_rgba(4,47,31,0.05)] hover:border-emerald-500/20 hover:scale-[1.005] transition duration-300 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
       <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-emerald-500/20 via-emerald-500/40 to-teal-500/20"></div>
-      <div class="absolute -right-6 -bottom-8 text-9xl opacity-[0.08] filter drop-shadow-[0_8px_24px_rgba(16,185,129,0.2)] pointer-events-none select-none -z-10 font-bold">🕌</div>
+      <div class="absolute -right-6 -bottom-8 text-9xl opacity-[0.08] filter drop-shadow-[0_8px_24px_rgba(16,185,129,0.2)] pointer-events-none select-none -z-10 font-bold"><i data-lucide='moon-star' class='inline-block w-1em h-1em'></i></div>
 
       <div>
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2.5">
-            <span class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm font-bold shadow-sm">📝</span>
+            <span class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm font-bold shadow-sm"><i data-lucide='edit-3' class='inline-block w-1em h-1em'></i></span>
             <span class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-700/80 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100/50">Tentang</span>
           </div>
         </div>
@@ -257,18 +257,18 @@
     <!-- 2. Laporan Keuangan Terbaru (Spans 1 column: lg:col-span-1) -->
     <div class="backdrop-blur-xl bg-white/80 border border-white/90 rounded-[2rem] p-6 shadow-[0_20px_50px_rgba(4,47,31,0.02)] hover:shadow-[0_30px_60px_rgba(4,47,31,0.05)] hover:border-purple-500/20 hover:scale-[1.005] transition duration-300 relative overflow-hidden flex flex-col justify-between">
       <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-purple-500/20 via-purple-500/40 to-indigo-50/20"></div>
-      <div class="absolute -right-6 -bottom-8 text-9xl opacity-[0.08] filter drop-shadow-[0_8px_24px_rgba(168,85,247,0.2)] pointer-events-none select-none -z-10 font-bold">📊</div>
+      <div class="absolute -right-6 -bottom-8 text-9xl opacity-[0.08] filter drop-shadow-[0_8px_24px_rgba(168,85,247,0.2)] pointer-events-none select-none -z-10 font-bold"><i data-lucide='bar-chart' class='inline-block w-1em h-1em'></i></div>
 
       <div>
         <div class="flex items-center gap-2.5 mb-4">
-          <span class="w-9 h-9 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center text-sm font-bold shadow-sm">📊</span>
+          <span class="w-9 h-9 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center text-sm font-bold shadow-sm"><i data-lucide='bar-chart' class='inline-block w-1em h-1em'></i></span>
           <span class="text-[9px] font-extrabold uppercase tracking-widest text-purple-700/80 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100/50">Keuangan</span>
         </div>
         <h3 class="font-extrabold text-gray-800 text-lg mb-2">Laporan Keuangan</h3>
         {% if latest_report %}
           <div class="border border-purple-100/50 rounded-xl p-3 bg-gradient-to-br from-purple-50/40 to-indigo-50/20 flex flex-col gap-2.5 shadow-sm">
             <div class="min-w-0">
-              <span class="text-xs font-bold text-gray-800 truncate block">📁 {{ latest_report.title }}</span>
+              <span class="text-xs font-bold text-gray-800 truncate block"><i data-lucide='folder' class='inline-block w-1em h-1em'></i> {{ latest_report.title }}</span>
               {% if latest_report.period %}
                 <span class="text-[9px] uppercase font-extrabold tracking-wider text-purple-800 mt-1 block">Periode: {{ latest_report.period }}</span>
               {% endif %}
@@ -291,12 +291,12 @@
     <!-- 3. Kegiatan & Program (Spans 1 column: lg:col-span-1) -->
     <div id="program" class="backdrop-blur-xl bg-white/80 border border-white/90 rounded-[2rem] p-6 shadow-[0_20px_50px_rgba(4,47,31,0.02)] hover:shadow-[0_30px_60px_rgba(4,47,31,0.05)] hover:border-blue-500/20 hover:scale-[1.005] transition duration-300 relative overflow-hidden flex flex-col justify-between">
       <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500/20 via-blue-500/40 to-sky-500/20"></div>
-      <div class="absolute -right-6 -bottom-8 text-9xl opacity-[0.08] filter drop-shadow-[0_8px_24px_rgba(59,130,246,0.2)] pointer-events-none select-none -z-10 font-bold">📅</div>
+      <div class="absolute -right-6 -bottom-8 text-9xl opacity-[0.08] filter drop-shadow-[0_8px_24px_rgba(59,130,246,0.2)] pointer-events-none select-none -z-10 font-bold"><i data-lucide='calendar' class='inline-block w-1em h-1em'></i></div>
 
       <div>
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2.5">
-            <span class="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-sm font-bold shadow-sm">📅</span>
+            <span class="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-sm font-bold shadow-sm"><i data-lucide='calendar' class='inline-block w-1em h-1em'></i></span>
             <span class="text-[9px] font-extrabold uppercase tracking-widest text-blue-700/80 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100/50">Agenda</span>
           </div>
           {% if request.user.is_authenticated %}
@@ -325,12 +325,12 @@
     <!-- 4. Pengurus DKM (Spans 1 column: lg:col-span-1) -->
     <div id="pengurus" class="backdrop-blur-xl bg-white/80 border border-white/90 rounded-[2rem] p-6 shadow-[0_20px_50px_rgba(4,47,31,0.02)] hover:shadow-[0_30px_60px_rgba(4,47,31,0.05)] hover:border-sky-500/20 hover:scale-[1.005] transition duration-300 relative overflow-hidden flex flex-col justify-between">
       <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-sky-500/20 via-sky-500/40 to-indigo-500/20"></div>
-      <div class="absolute -right-6 -bottom-8 text-9xl opacity-[0.08] filter drop-shadow-[0_8px_24px_rgba(14,165,233,0.2)] pointer-events-none select-none -z-10 font-bold">👥</div>
+      <div class="absolute -right-6 -bottom-8 text-9xl opacity-[0.08] filter drop-shadow-[0_8px_24px_rgba(14,165,233,0.2)] pointer-events-none select-none -z-10 font-bold"><i data-lucide='users' class='inline-block w-1em h-1em'></i></div>
 
       <div>
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2.5">
-            <span class="w-9 h-9 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center text-sm font-bold shadow-sm">👥</span>
+            <span class="w-9 h-9 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center text-sm font-bold shadow-sm"><i data-lucide='users' class='inline-block w-1em h-1em'></i></span>
             <span class="text-[9px] font-extrabold uppercase tracking-widest text-sky-700/80 bg-sky-50 px-2 py-0.5 rounded-md border border-sky-100/50">Struktur</span>
           </div>
           {% if request.user.is_authenticated %}
@@ -364,11 +364,11 @@
     <!-- 5. Legalitas & SOP Resmi (Spans 1 column: lg:col-span-1) -->
     <div class="backdrop-blur-xl bg-white/80 border border-white/90 rounded-[2rem] p-6 shadow-[0_20px_50px_rgba(4,47,31,0.02)] hover:shadow-[0_30px_60px_rgba(4,47,31,0.05)] hover:border-amber-500/20 hover:scale-[1.005] transition duration-300 relative overflow-hidden flex flex-col justify-between">
       <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-amber-500/20 via-amber-500/40 to-orange-500/20"></div>
-      <div class="absolute -right-6 -bottom-8 text-9xl opacity-[0.08] filter drop-shadow-[0_8px_24px_rgba(245,158,11,0.2)] pointer-events-none select-none -z-10 font-bold">🔑</div>
+      <div class="absolute -right-6 -bottom-8 text-9xl opacity-[0.08] filter drop-shadow-[0_8px_24px_rgba(245,158,11,0.2)] pointer-events-none select-none -z-10 font-bold"><i data-lucide='key' class='inline-block w-1em h-1em'></i></div>
 
       <div>
         <div class="flex items-center gap-2.5 mb-4">
-          <span class="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center text-sm font-bold shadow-sm">🔑</span>
+          <span class="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center text-sm font-bold shadow-sm"><i data-lucide='key' class='inline-block w-1em h-1em'></i></span>
           <span class="text-[9px] font-extrabold uppercase tracking-widest text-amber-700/80 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100/50">Dokumen</span>
         </div>
         <h3 class="font-extrabold text-gray-800 text-lg mb-2">Legalitas & SOP</h3>
@@ -400,10 +400,10 @@
     <!-- 6. Hubungi Kami (Spans 3 columns: lg:col-span-3 - Redesigned as wide layout to eradicate emptiness) -->
     <div id="kontak" class="lg:col-span-3 backdrop-blur-xl bg-white/80 border border-white/90 rounded-[2.5rem] p-6 sm:p-8 shadow-[0_20px_50px_rgba(4,47,31,0.02)] hover:shadow-[0_30px_60px_rgba(4,47,31,0.05)] hover:border-rose-500/20 hover:scale-[1.002] transition duration-300 relative overflow-hidden">
       <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-rose-500/20 via-rose-500/40 to-pink-500/20"></div>
-      <div class="absolute -right-6 -bottom-10 text-[12rem] opacity-[0.08] filter drop-shadow-[0_8px_30px_rgba(244,63,94,0.2)] pointer-events-none select-none -z-10 font-bold">📍</div>
+      <div class="absolute -right-6 -bottom-10 text-[12rem] opacity-[0.08] filter drop-shadow-[0_8px_30px_rgba(244,63,94,0.2)] pointer-events-none select-none -z-10 font-bold"><i data-lucide='map-pin' class='inline-block w-1em h-1em'></i></div>
 
       <div class="flex items-center gap-2.5 mb-6">
-        <span class="w-9 h-9 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center text-sm font-bold shadow-sm">📍</span>
+        <span class="w-9 h-9 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center text-sm font-bold shadow-sm"><i data-lucide='map-pin' class='inline-block w-1em h-1em'></i></span>
         <span class="text-[9px] font-extrabold uppercase tracking-widest text-rose-700/80 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100/50">Hubungi Kami</span>
         <h3 class="font-extrabold text-gray-800 text-lg ml-2">Sekretariat DKM & Layanan Jamaah</h3>
       </div>
@@ -413,7 +413,7 @@
         <!-- Sub-kolom 1: Alamat & Website (Spans 2 columns) -->
         <div class="md:col-span-2 bg-gradient-to-br from-gray-50/50 to-gray-50/10 border border-gray-100/60 rounded-2xl p-6 flex flex-col justify-between">
           <div>
-            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1.5">🏢 Alamat Sekretariat</span>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1.5"><i data-lucide='building' class='inline-block w-1em h-1em'></i> Alamat Sekretariat</span>
             <p class="text-sm text-gray-600 leading-relaxed font-medium">
               {% if mosque.address %}
                 <strong>{{ mosque.name }}</strong><br>
@@ -430,7 +430,7 @@
         <!-- Sub-kolom 2: Kontak Telepon & Email (Spans 1 column) -->
         <div class="bg-gradient-to-br from-gray-50/50 to-gray-50/10 border border-gray-100/60 rounded-2xl p-6 flex flex-col justify-between">
           <div>
-            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-3">📞 Kontak Resmi DKM</span>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-3"><i data-lucide='phone' class='inline-block w-1em h-1em'></i> Kontak Resmi DKM</span>
             <div class="space-y-4">
               {% if mosque.contact_phone %}
                 <div>

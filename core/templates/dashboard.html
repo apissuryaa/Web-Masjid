@@ -12,7 +12,7 @@
         {% if m.tags == 'success' %} bg-emerald-50 border-emerald-300 text-emerald-800
         {% elif m.tags == 'error' %} bg-red-50 border-red-300 text-red-800
         {% else %} bg-gray-50 border-gray-200 text-gray-700 {% endif %}">
-        {% if m.tags == 'success' %}✅{% elif m.tags == 'error' %}❌{% else %}ℹ️{% endif %}
+        {% if m.tags == 'success' %}<i data-lucide='check-circle' class='inline-block w-1em h-1em'></i>{% elif m.tags == 'error' %}<i data-lucide='x-circle' class='inline-block w-1em h-1em'></i>{% else %}<i data-lucide='info' class='inline-block w-1em h-1em'></i>{% endif %}
         {{ m }}
       </div>
     {% endfor %}
@@ -29,25 +29,25 @@
 <div class="border-b border-gray-200 mb-6 bg-white rounded-xl shadow-sm p-2 overflow-x-auto no-scrollbar">
   <nav class="flex flex-nowrap gap-1 whitespace-nowrap" aria-label="Tabs">
     <button id="tab-btn-overview" class="shrink-0 px-4 py-2.5 text-xs font-semibold rounded-lg border border-transparent transition duration-150 flex items-center gap-2">
-      📊 Ringkasan
+      <i data-lucide='bar-chart' class='inline-block w-1em h-1em'></i> Ringkasan
     </button>
     <button id="tab-btn-profil" class="shrink-0 px-4 py-2.5 text-xs font-semibold rounded-lg border border-transparent transition duration-150 flex items-center gap-2">
-      🕌 Profil & Rekening
+      <i data-lucide='moon-star' class='inline-block w-1em h-1em'></i> Profil & Rekening
     </button>
     <button id="tab-btn-pengurus" class="shrink-0 px-4 py-2.5 text-xs font-semibold rounded-lg border border-transparent transition duration-150 flex items-center gap-2">
-      👥 Pengurus
+      <i data-lucide='users' class='inline-block w-1em h-1em'></i> Pengurus
     </button>
     <button id="tab-btn-program" class="shrink-0 px-4 py-2.5 text-xs font-semibold rounded-lg border border-transparent transition duration-150 flex items-center gap-2">
-      📅 Program Kerja
+      <i data-lucide='calendar' class='inline-block w-1em h-1em'></i> Program Kerja
     </button>
     <button id="tab-btn-dokumen" class="shrink-0 px-4 py-2.5 text-xs font-semibold rounded-lg border border-transparent transition duration-150 flex items-center gap-2">
-      📁 Legalitas & SOP
+      <i data-lucide='folder' class='inline-block w-1em h-1em'></i> Legalitas & SOP
     </button>
     <button id="tab-btn-donasi" class="shrink-0 px-4 py-2.5 text-xs font-semibold rounded-lg border border-transparent transition duration-150 flex items-center gap-2">
-      🧾 Bukti Donasi
+      <i data-lucide='receipt' class='inline-block w-1em h-1em'></i> Bukti Donasi
     </button>
     <button id="tab-btn-kas" class="shrink-0 px-4 py-2.5 text-xs font-semibold rounded-lg border border-transparent transition duration-150 flex items-center gap-2">
-      💰 Kelola Kas
+      <i data-lucide='coins' class='inline-block w-1em h-1em'></i> Kelola Kas
     </button>
   </nav>
 </div>
@@ -59,22 +59,22 @@
   <!-- Stat Cards -->
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-      <div class="text-2xl mb-1">📄</div>
+      <div class="text-2xl mb-1"><i data-lucide='file-text' class='inline-block w-1em h-1em'></i></div>
       <div class="text-2xl font-bold text-emerald-700">{{ reports|length }}</div>
       <div class="text-xs text-gray-500 mt-0.5">Laporan Keuangan</div>
     </div>
     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-      <div class="text-2xl mb-1">📑</div>
+      <div class="text-2xl mb-1"><i data-lucide='layers' class='inline-block w-1em h-1em'></i></div>
       <div class="text-2xl font-bold text-emerald-700">{{ legal_docs|length }}</div>
       <div class="text-xs text-gray-500 mt-0.5">Dokumen Legalitas</div>
     </div>
     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-      <div class="text-2xl mb-1">💰</div>
+      <div class="text-2xl mb-1"><i data-lucide='coins' class='inline-block w-1em h-1em'></i></div>
       <div class="text-2xl font-bold text-emerald-700">{{ cashflows|length }}</div>
       <div class="text-xs text-gray-500 mt-0.5">Transaksi Kas</div>
     </div>
     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-      <div class="text-2xl mb-1">📋</div>
+      <div class="text-2xl mb-1"><i data-lucide='clipboard' class='inline-block w-1em h-1em'></i></div>
       <div class="text-2xl font-bold text-emerald-700">{{ sop_docs|length }}</div>
       <div class="text-xs text-gray-500 mt-0.5">Dokumen SOP</div>
     </div>
@@ -87,7 +87,7 @@
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col justify-between">
       <div>
         <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
-          <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm">🕌 Profil Masjid</h2>
+          <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm"><i data-lucide='moon-star' class='inline-block w-1em h-1em'></i> Profil Masjid</h2>
           <button onclick="switchTab('profil')" class="text-xs text-emerald-700 hover:underline font-medium">Kelola →</button>
         </div>
         <div class="px-5 py-4">
@@ -98,7 +98,7 @@
             
             {% if mosque.bank_account %}
               <div class="mt-4 p-3 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center gap-3">
-                <span class="text-xl">💳</span>
+                <span class="text-xl"><i data-lucide='credit-card' class='inline-block w-1em h-1em'></i></span>
                 <div class="text-xs">
                   <p class="text-gray-500 font-medium">Nomor Rekening Resmi</p>
                   <p class="font-bold text-emerald-800 text-sm mt-0.5">{{ mosque.bank_name }}: {{ mosque.bank_account }}</p>
@@ -116,7 +116,7 @@
     <!-- Laporan Keuangan Card -->
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
       <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
-        <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm">📊 Laporan Keuangan Terbaru</h2>
+        <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm"><i data-lucide='bar-chart' class='inline-block w-1em h-1em'></i> Laporan Keuangan Terbaru</h2>
         <a href="{% url 'report_upload' %}" class="text-xs bg-emerald-600 text-white px-2.5 py-1 rounded-lg hover:bg-emerald-700 transition font-medium">+ Upload</a>
       </div>
       <div class="px-5 py-3">
@@ -138,7 +138,7 @@
     <!-- Dokumen Legalitas Card -->
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
       <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
-        <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm">📁 Dokumen Legalitas</h2>
+        <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm"><i data-lucide='folder' class='inline-block w-1em h-1em'></i> Dokumen Legalitas</h2>
         <a href="{% url 'document_upload' %}" class="text-xs bg-emerald-600 text-white px-2.5 py-1 rounded-lg hover:bg-emerald-700 transition font-medium">+ Upload</a>
       </div>
       <div class="px-5 py-3">
@@ -163,9 +163,9 @@
     <!-- Manajemen Kas Card -->
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
       <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
-        <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm">💰 Transaksi Kas Terbaru</h2>
+        <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm"><i data-lucide='coins' class='inline-block w-1em h-1em'></i> Transaksi Kas Terbaru</h2>
         <div class="flex gap-2">
-          <a href="{% url 'cashflow_print' %}" target="_blank" class="text-xs bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg transition shadow-sm flex items-center gap-1 font-medium">🖨️ Cetak</a>
+          <a href="{% url 'cashflow_print' %}" target="_blank" class="text-xs bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg transition shadow-sm flex items-center gap-1 font-medium"><i data-lucide='printer' class='inline-block w-1em h-1em'></i> Cetak</a>
           <button onclick="switchTab('kas')" class="text-xs bg-emerald-600 text-white px-2.5 py-1 rounded-lg hover:bg-emerald-700 transition font-medium">Kelola Kas →</button>
         </div>
       </div>
@@ -178,11 +178,11 @@
                   <span class="text-xs text-gray-400 font-medium shrink-0">{{ cf.date|date:"d M" }}</span>
                   {% if cf.flow_type == 'IN' %}
                     <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/60 truncate max-w-[150px]" title="{{ cf.category.name }}">
-                      🌱 {{ cf.category.name|default:"Masuk" }}
+                      <i data-lucide='arrow-down-left' class='inline-block w-1em h-1em text-green-500'></i> {{ cf.category.name|default:"Masuk" }}
                     </span>
                   {% else %}
                     <span class="text-xs font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded-full border border-red-100/60 truncate max-w-[150px]" title="{{ cf.category.name }}">
-                      🍂 {{ cf.category.name|default:"Keluar" }}
+                      <i data-lucide='arrow-up-right' class='inline-block w-1em h-1em text-red-500'></i> {{ cf.category.name|default:"Keluar" }}
                     </span>
                   {% endif %}
                 </div>
@@ -201,7 +201,7 @@
     <!-- SOP Card -->
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
       <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
-        <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm">📋 SOP Masjid</h2>
+        <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm"><i data-lucide='clipboard' class='inline-block w-1em h-1em'></i> SOP Masjid</h2>
         <a href="{% url 'sop_upload' %}" class="text-xs bg-emerald-600 text-white px-2.5 py-1 rounded-lg hover:bg-emerald-700 transition font-medium">+ Upload</a>
       </div>
       <div class="px-5 py-3">
@@ -223,26 +223,26 @@
     <!-- Akses Cepat Admin Card -->
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
       <div class="px-5 py-4 border-b bg-gray-50">
-        <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm">⚡ Akses Cepat</h2>
+        <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm"><i data-lucide='zap' class='inline-block w-1em h-1em'></i> Akses Cepat</h2>
       </div>
       <div class="px-5 py-4 grid grid-cols-2 gap-2">
         <button onclick="switchTab('profil')" class="text-left flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 text-sm transition font-medium">
-          🕌 Kelola Profil
+          <i data-lucide='moon-star' class='inline-block w-1em h-1em'></i> Kelola Profil
         </button>
         <a href="{% url 'management_add' %}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 text-sm transition font-medium">
-          👥 Tambah Pengurus
+          <i data-lucide='users' class='inline-block w-1em h-1em'></i> Tambah Pengurus
         </a>
         <a href="{% url 'program_add' %}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 text-sm transition font-medium">
-          📅 Tambah Program
+          <i data-lucide='calendar' class='inline-block w-1em h-1em'></i> Tambah Program
         </a>
         <button onclick="switchTab('donasi')" class="text-left flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 text-sm transition font-medium">
-          🧾 Bukti Donasi
+          <i data-lucide='receipt' class='inline-block w-1em h-1em'></i> Bukti Donasi
         </button>
         <button onclick="switchTab('kas')" class="text-left flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 text-sm transition font-medium">
-          💰 Kelola Kas
+          <i data-lucide='coins' class='inline-block w-1em h-1em'></i> Kelola Kas
         </button>
         <a href="{% url 'cashflow_print' %}" target="_blank" class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 text-sm transition text-amber-700 font-medium">
-          🖨️ Cetak Kas Bulanan
+          <i data-lucide='printer' class='inline-block w-1em h-1em'></i> Cetak Kas Bulanan
         </a>
       </div>
     </div>
@@ -255,7 +255,7 @@
   {% if form %}
   <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
     <div class="bg-emerald-700 px-6 py-4 flex items-center gap-3">
-      <span class="text-2xl">🕌</span>
+      <span class="text-2xl"><i data-lucide='moon-star' class='inline-block w-1em h-1em'></i></span>
       <div>
         <h1 class="text-lg font-bold text-white">Edit Profil Masjid</h1>
         <p class="text-emerald-200 text-xs mt-0.5">Kelola identitas resmi dan rekening bank masjid</p>
@@ -375,7 +375,7 @@
       <div class="flex justify-end pt-2">
         <button type="submit"
           class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg transition shadow-sm">
-          💾 Simpan Perubahan
+          <i data-lucide='save' class='inline-block w-1em h-1em'></i> Simpan Perubahan
         </button>
       </div>
     </form>
@@ -386,7 +386,7 @@
   <div class="grid md:grid-cols-2 gap-6">
     <div class="bg-white rounded-2xl border shadow-sm p-5">
       <h2 class="text-sm font-semibold text-emerald-700 uppercase tracking-wide mb-3 flex items-center gap-2">
-        📋 Informasi Umum
+        <i data-lucide='clipboard' class='inline-block w-1em h-1em'></i> Informasi Umum
       </h2>
       <dl class="space-y-2 text-sm">
         <div class="flex gap-2"><dt class="text-gray-500 w-32 shrink-0">Nama</dt><dd class="font-semibold text-gray-800">{{ mosque.name }}</dd></div>
@@ -400,7 +400,7 @@
 
     <div class="bg-white rounded-2xl border shadow-sm p-5">
       <h2 class="text-sm font-semibold text-emerald-700 uppercase tracking-wide mb-3 flex items-center gap-2">
-        🏦 Legalitas & Bank
+        <i data-lucide='landmark' class='inline-block w-1em h-1em'></i> Legalitas & Bank
       </h2>
       <dl class="space-y-2 text-sm">
         <div class="flex gap-2"><dt class="text-gray-500 w-32 shrink-0">No. Akta/Wakaf</dt><dd class="text-gray-700">{{ mosque.deed_number|default:"—" }}</dd></div>
@@ -424,9 +424,9 @@
 <div id="tab-content-pengurus" class="hidden space-y-6 animate-fade-in">
   <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
     <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
-      <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2">👥 Struktur Pengurus</h2>
+      <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2"><i data-lucide='users' class='inline-block w-1em h-1em'></i> Struktur Pengurus</h2>
       <button onclick="document.getElementById('modalTambahPengurus').classList.remove('hidden')" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg border bg-white hover:bg-gray-50 transition shadow-sm font-medium">
-        ➕ Tambah Pengurus
+        <i data-lucide='plus' class='inline-block w-1em h-1em'></i> Tambah Pengurus
       </button>
     </div>
     {% if mgmt %}
@@ -437,13 +437,13 @@
               <span class="font-semibold text-gray-800 text-sm block">{{ m.name }}</span>
               <div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
                 <span class="bg-emerald-50 border border-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">{{ m.get_role_display }}</span>
-                {% if m.phone %}<span>· 📞 {{ m.phone }}</span>{% endif %}
+                {% if m.phone %}<span>· <i data-lucide='phone' class='inline-block w-1em h-1em'></i> {{ m.phone }}</span>{% endif %}
               </div>
             </div>
             <form method="post" action="{% url 'management_delete' m.pk %}" onsubmit="return confirm('Yakin hapus pengurus ini?');">
               {% csrf_token %}
               <button type="submit" class="px-3 py-1 bg-red-50 border border-red-200 text-red-600 hover:bg-red-600 hover:text-white rounded-lg text-xs font-semibold transition">
-                🗑 Hapus
+                <i data-lucide='trash-2' class='inline-block w-1em h-1em'></i> Hapus
               </button>
             </form>
           </li>
@@ -459,9 +459,9 @@
 <div id="tab-content-program" class="hidden space-y-6 animate-fade-in">
   <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
     <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
-      <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2">📅 Program & Kegiatan</h2>
+      <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2"><i data-lucide='calendar' class='inline-block w-1em h-1em'></i> Program & Kegiatan</h2>
       <button onclick="document.getElementById('modalTambahProgram').classList.remove('hidden')" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg border bg-white hover:bg-gray-50 transition shadow-sm font-medium">
-        ➕ Tambah Program
+        <i data-lucide='plus' class='inline-block w-1em h-1em'></i> Tambah Program
       </button>
     </div>
     {% if programs %}
@@ -482,7 +482,7 @@
             <form method="post" action="{% url 'program_delete' p.pk %}" onsubmit="return confirm('Yakin hapus program ini?');">
               {% csrf_token %}
               <button type="submit" class="px-3 py-1 bg-red-50 border border-red-200 text-red-600 hover:bg-red-600 hover:text-white rounded-lg text-xs font-semibold transition">
-                🗑 Hapus
+                <i data-lucide='trash-2' class='inline-block w-1em h-1em'></i> Hapus
               </button>
             </form>
           </li>
@@ -498,9 +498,9 @@
 <div id="tab-content-kas" class="hidden space-y-6 animate-fade-in">
   <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
     <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
-      <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2">💰 Kelola Kas & Transaksi</h2>
+      <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2"><i data-lucide='coins' class='inline-block w-1em h-1em'></i> Kelola Kas & Transaksi</h2>
       <a href="{% url 'cashflow_add' %}?next=/dashboard/?tab=kas" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg border bg-white hover:bg-gray-50 transition shadow-sm">
-        ➕ Tambah Transaksi Kas
+        <i data-lucide='plus' class='inline-block w-1em h-1em'></i> Tambah Transaksi Kas
       </a>
     </div>
     {% if cashflows %}
@@ -509,7 +509,7 @@
         <div class="flex flex-wrap gap-2 w-full sm:w-auto">
           <!-- Month Filter -->
           <select id="cf-filter-month" class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold transition cursor-pointer">
-            <option value="all">📅 Semua Bulan</option>
+            <option value="all"><i data-lucide='calendar' class='inline-block w-1em h-1em'></i> Semua Bulan</option>
             <option value="01">Januari</option>
             <option value="02">Februari</option>
             <option value="03">Maret</option>
@@ -526,13 +526,13 @@
           
           <!-- Year Filter -->
           <select id="cf-filter-year" class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold transition cursor-pointer">
-            <option value="all">🗓️ Semua Tahun</option>
+            <option value="all"><i data-lucide='calendar-days' class='inline-block w-1em h-1em'></i> Semua Tahun</option>
           </select>
         </div>
         
         <!-- Live Search Box -->
         <div class="relative w-full sm:w-64">
-          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-xs">🔍</span>
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-xs"><i data-lucide='search' class='inline-block w-1em h-1em'></i></span>
           <input type="text" id="cf-search" placeholder="Cari keterangan, kategori, nominal..." class="w-full pl-8 pr-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white transition">
         </div>
       </div>
@@ -555,11 +555,11 @@
                 <td class="px-4 py-2.5 font-semibold text-gray-700">
                   {% if cf.flow_type == 'IN' %}
                     <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
-                      🌱 {{ cf.category.name|default:"Pemasukan Umum" }}
+                      <i data-lucide='arrow-down-left' class='inline-block w-1em h-1em text-green-500'></i> {{ cf.category.name|default:"Pemasukan Umum" }}
                     </span>
                   {% else %}
                     <span class="inline-flex items-center gap-1 text-xs font-semibold text-red-700 bg-red-50 px-2.5 py-0.5 rounded-full border border-red-100">
-                      🍂 {{ cf.category.name|default:"Pengeluaran Umum" }}
+                      <i data-lucide='arrow-up-right' class='inline-block w-1em h-1em text-red-500'></i> {{ cf.category.name|default:"Pengeluaran Umum" }}
                     </span>
                   {% endif %}
                 </td>
@@ -588,13 +588,13 @@
 <div id="tab-content-dokumen" class="hidden space-y-6 animate-fade-in">
   <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
     <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
-      <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2">📄 Dokumen Legalitas & SOP</h2>
+      <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2"><i data-lucide='file-text' class='inline-block w-1em h-1em'></i> Dokumen Legalitas & SOP</h2>
       <div class="flex gap-2">
         <button onclick="document.getElementById('modalTambahLegalitas').classList.remove('hidden')" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg border bg-white hover:bg-gray-50 transition shadow-sm font-medium">
-          ⬆️ Upload Legalitas
+          <i data-lucide='upload' class='inline-block w-1em h-1em'></i> Upload Legalitas
         </button>
         <button onclick="document.getElementById('modalTambahSOP').classList.remove('hidden')" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 transition shadow-sm font-medium">
-          ⬆️ Upload SOP
+          <i data-lucide='upload' class='inline-block w-1em h-1em'></i> Upload SOP
         </button>
       </div>
     </div>
@@ -602,7 +602,7 @@
     <!-- PDF & Excel Files Lists -->
     {% if reports or legal_docs or sop_docs %}
     <div class="p-4 bg-emerald-50/20 border-b">
-      <p class="text-xs text-gray-500 font-medium">ℹ️ Dokumen di bawah ini merupakan arsip yang diakses oleh pengurus maupun dipublikasikan sesuai dengan pengaturannya.</p>
+      <p class="text-xs text-gray-500 font-medium"><i data-lucide='info' class='inline-block w-1em h-1em'></i> Dokumen di bawah ini merupakan arsip yang diakses oleh pengurus maupun dipublikasikan sesuai dengan pengaturannya.</p>
     </div>
     {% endif %}
 
@@ -618,7 +618,7 @@
             <form method="post" action="{% url 'document_delete' d.pk %}" onsubmit="return confirm('Yakin hapus dokumen ini?');">
               {% csrf_token %}
               <button type="submit" class="px-3 py-1 bg-red-50 border border-red-200 text-red-600 hover:bg-red-600 hover:text-white rounded-lg text-xs font-semibold transition">
-                🗑 Hapus
+                <i data-lucide='trash-2' class='inline-block w-1em h-1em'></i> Hapus
               </button>
             </form>
           </li>
@@ -633,7 +633,7 @@
             <form method="post" action="{% url 'document_delete' d.pk %}" onsubmit="return confirm('Yakin hapus dokumen ini?');">
               {% csrf_token %}
               <button type="submit" class="px-3 py-1 bg-red-50 border border-red-200 text-red-600 hover:bg-red-600 hover:text-white rounded-lg text-xs font-semibold transition">
-                🗑 Hapus
+                <i data-lucide='trash-2' class='inline-block w-1em h-1em'></i> Hapus
               </button>
             </form>
           </li>
@@ -649,7 +649,7 @@
 <div id="tab-content-donasi" class="hidden space-y-6 animate-fade-in">
   <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
     <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
-      <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2">🧾 Bukti Donasi Jamaah</h2>
+      <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2"><i data-lucide='receipt' class='inline-block w-1em h-1em'></i> Bukti Donasi Jamaah</h2>
       <span class="text-xs text-gray-400 font-medium"><span id="proof-count-badge">{{ proofs|length }}</span> bukti terunggah</span>
     </div>
 
@@ -658,7 +658,7 @@
       <div class="flex flex-wrap gap-2 w-full sm:w-auto">
         <!-- Jenis Filter -->
         <select id="proof-filter-type" class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold transition cursor-pointer">
-          <option value="all">📅 Semua Jenis</option>
+          <option value="all"><i data-lucide='calendar' class='inline-block w-1em h-1em'></i> Semua Jenis</option>
           <option value="ZKT">Zakat</option>
           <option value="INF">Infak</option>
           <option value="SDK">Sedekah</option>
@@ -667,7 +667,7 @@
       
       <!-- Live Search Box -->
       <div class="relative w-full sm:w-64">
-        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-xs">🔍</span>
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-xs"><i data-lucide='search' class='inline-block w-1em h-1em'></i></span>
         <input type="text" id="proof-search" placeholder="Cari nama donatur..." class="w-full pl-8 pr-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white transition">
       </div>
     </div>
@@ -704,12 +704,12 @@
                 <td class="px-5 py-3 text-gray-500 whitespace-nowrap">{{ p.paid_at|date:"d M Y" }}</td>
                 <td class="px-5 py-3">
                   {% if p.proof %}
-                    <a href="{{ p.proof.url }}" target="_blank" class="inline-flex items-center gap-1 text-xs text-emerald-700 hover:underline font-semibold font-medium">📎 Lihat</a>
+                    <a href="{{ p.proof.url }}" target="_blank" class="inline-flex items-center gap-1 text-xs text-emerald-700 hover:underline font-semibold font-medium"><i data-lucide='paperclip' class='inline-block w-1em h-1em'></i> Lihat</a>
                   {% else %}<span class="text-gray-300 text-xs">—</span>{% endif %}
                 </td>
                 <td class="px-5 py-3">
                   {% if p.is_public %}
-                    <span class="text-xs text-emerald-600 font-semibold font-medium">✅ Ya</span>
+                    <span class="text-xs text-emerald-600 font-semibold font-medium"><i data-lucide='check-circle' class='inline-block w-1em h-1em'></i> Ya</span>
                   {% else %}
                     <span class="text-xs text-gray-400">— Tidak</span>
                   {% endif %}
@@ -719,7 +719,7 @@
                     {% csrf_token %}
                     <input type="hidden" name="next" value="/dashboard/?tab=donasi">
                     <button type="submit" class="px-3 py-1 rounded-lg bg-red-50 border border-red-200 text-red-600 hover:bg-red-600 hover:text-white text-xs font-semibold transition">
-                      🗑 Hapus
+                      <i data-lucide='trash-2' class='inline-block w-1em h-1em'></i> Hapus
                     </button>
                   </form>
                 </td>
@@ -973,7 +973,7 @@ document.addEventListener("DOMContentLoaded", function() {
   <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-[fadeInUp_0.2s_ease-out]">
     <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <span class="text-xl">👥</span>
+        <span class="text-xl"><i data-lucide='users' class='inline-block w-1em h-1em'></i></span>
         <div>
           <h2 class="text-base font-bold text-white">Tambah Pengurus</h2>
           <p class="text-emerald-200 text-xs">Tambahkan anggota pengurus DKM</p>
@@ -986,7 +986,7 @@ document.addEventListener("DOMContentLoaded", function() {
       {{ management_form.as_p }}
       <div class="flex items-center gap-3 pt-2 border-t">
         <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition shadow-sm">
-          💾 Simpan
+          <i data-lucide='save' class='inline-block w-1em h-1em'></i> Simpan
         </button>
         <button type="button" onclick="document.getElementById('modalTambahPengurus').classList.add('hidden')" class="px-4 py-2.5 text-sm rounded-xl border border-gray-200 hover:bg-gray-50 transition text-gray-600 font-medium">Batal</button>
       </div>
@@ -999,7 +999,7 @@ document.addEventListener("DOMContentLoaded", function() {
   <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-[fadeInUp_0.2s_ease-out]">
     <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <span class="text-xl">📅</span>
+        <span class="text-xl"><i data-lucide='calendar' class='inline-block w-1em h-1em'></i></span>
         <div>
           <h2 class="text-base font-bold text-white">Tambah Program</h2>
           <p class="text-emerald-200 text-xs">Tambahkan agenda atau program kegiatan masjid</p>
@@ -1012,7 +1012,7 @@ document.addEventListener("DOMContentLoaded", function() {
       {{ program_form.as_p }}
       <div class="flex items-center gap-3 pt-2 border-t">
         <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition shadow-sm">
-          💾 Simpan
+          <i data-lucide='save' class='inline-block w-1em h-1em'></i> Simpan
         </button>
         <button type="button" onclick="document.getElementById('modalTambahProgram').classList.add('hidden')" class="px-4 py-2.5 text-sm rounded-xl border border-gray-200 hover:bg-gray-50 transition text-gray-600 font-medium">Batal</button>
       </div>
@@ -1025,7 +1025,7 @@ document.addEventListener("DOMContentLoaded", function() {
   <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-[fadeInUp_0.2s_ease-out]">
     <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <span class="text-xl">📄</span>
+        <span class="text-xl"><i data-lucide='file-text' class='inline-block w-1em h-1em'></i></span>
         <div>
           <h2 class="text-base font-bold text-white">Upload Dokumen Legalitas</h2>
           <p class="text-emerald-200 text-xs">Unggah berkas akta wakaf, sertifikat tanah, dsb.</p>
@@ -1038,7 +1038,7 @@ document.addEventListener("DOMContentLoaded", function() {
       {{ document_form.as_p }}
       <div class="flex items-center gap-3 pt-2 border-t">
         <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition shadow-sm">
-          💾 Simpan
+          <i data-lucide='save' class='inline-block w-1em h-1em'></i> Simpan
         </button>
         <button type="button" onclick="document.getElementById('modalTambahLegalitas').classList.add('hidden')" class="px-4 py-2.5 text-sm rounded-xl border border-gray-200 hover:bg-gray-50 transition text-gray-600 font-medium">Batal</button>
       </div>
@@ -1051,7 +1051,7 @@ document.addEventListener("DOMContentLoaded", function() {
   <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-[fadeInUp_0.2s_ease-out]">
     <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <span class="text-xl">📋</span>
+        <span class="text-xl"><i data-lucide='clipboard' class='inline-block w-1em h-1em'></i></span>
         <div>
           <h2 class="text-base font-bold text-white">Upload Dokumen SOP</h2>
           <p class="text-emerald-200 text-xs">Unggah berkas Standard Operating Procedure masjid</p>
@@ -1064,7 +1064,7 @@ document.addEventListener("DOMContentLoaded", function() {
       {{ sop_form.as_p }}
       <div class="flex items-center gap-3 pt-2 border-t">
         <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition shadow-sm">
-          💾 Simpan
+          <i data-lucide='save' class='inline-block w-1em h-1em'></i> Simpan
         </button>
         <button type="button" onclick="document.getElementById('modalTambahSOP').classList.add('hidden')" class="px-4 py-2.5 text-sm rounded-xl border border-gray-200 hover:bg-gray-50 transition text-gray-600 font-medium">Batal</button>
       </div>

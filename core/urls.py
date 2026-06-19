@@ -56,4 +56,7 @@ path('donasi/admin/<int:pk>/hapus/', views.donation_proof_delete, name='donation
     path('laporan/<int:pk>/sheet/<slug:sheet>/', views.report_sheet, name='report_sheet'),
     path('laporan/<int:pk>/sheet/<slug:sheet>/csv/', views.report_export_csv, name='report_export_csv'),
     path('laporan/<int:pk>/hapus/', views.report_delete, name='report_delete'),
+
+    # Generator PDF Bulanan Otomatis (Cetak Laporan)
+    path('laporan/kas/cetak/', views.cashflow_print, name='cashflow_print'),
 ]

@@ -1,7 +1,7 @@
 from django import forms
 from .models import (
     Mosque, Document, Management, Program, Donor,
-    ReportFile, DonationChannel, DonationProof, CashFlow
+    ReportFile, DonationChannel, DonationProof, CashFlow, CashCategory
 )
 import decimal, re
 
@@ -208,17 +208,18 @@ class DonationProofForm(forms.ModelForm):
 class CashFlowForm(forms.ModelForm):
     class Meta:
         model = CashFlow
-        fields = ['date', 'flow_type', 'amount', 'description']
+        fields = ['date', 'category', 'amount', 'description']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'w-full rounded border px-3 py-2'}),
-            'flow_type': forms.Select(attrs={'class': 'w-full rounded border px-3 py-2'}),
+            'category': forms.Select(attrs={'class': 'w-full rounded border px-3 py-2'}),
             'amount': forms.NumberInput(attrs={'class': 'w-full rounded border px-3 py-2', 'placeholder': 'Contoh: 150000'}),
             'description': forms.TextInput(attrs={'class': 'w-full rounded border px-3 py-2', 'placeholder': 'Keterangan transaksi'}),
         }
         labels = {
             'date': 'Tanggal',
-            'flow_type': 'Tipe',
+            'category': 'Kategori Kas',
             'amount': 'Nominal (Rp)',
             'description': 'Keterangan',
         }
+
 

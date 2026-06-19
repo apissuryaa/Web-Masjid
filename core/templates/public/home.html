@@ -1,197 +1,604 @@
 {% extends 'base.html' %}
 {% block title %}Beranda – Masjid Al Huda{% endblock %}
-{% block content %}
-
-<!-- BAGIAN SAMBUTAN -->
-<section class="bg-white rounded-2xl border p-6 mb-6 shadow-sm text-center">
-  <h1 class="text-3xl font-bold text-emerald-700 mb-2">
-    Selamat Datang di Website {{ mosque.name|default:"Masjid Al Huda" }}
-  </h1>
-  <p class="text-gray-700 max-w-2xl mx-auto leading-relaxed">
-    Assalamu’alaikum Warahmatullahi Wabarakatuh 🌿<br>
-    Website ini dibuat untuk memberikan akses informasi bagi jamaah — mulai dari kegiatan ibadah,
-    laporan keuangan yang transparan, saluran donasi, hingga dokumen legalitas masjid.
-  </p>
-  <div class="mt-5 flex items-center justify-center gap-3">
-    <a href="{% url 'mosque_profile' %}" class="bg-emerald-600 text-white px-5 py-2 rounded-lg hover:bg-emerald-700 transition">
-      📖 Lihat Profil Masjid
-    </a>
-    <a href="{% url 'legalitas_public' %}" class="px-5 py-2 rounded-lg border hover:bg-emerald-50 transition">
-      📄 Legalitas Masjid
-    </a>
-  </div>
-</section>
-
-<!-- BAGIAN FOTO MASJID -->
-<section class="mb-8">
-  <div class="rounded-2xl overflow-hidden shadow border bg-gray-100 max-w-5xl mx-auto">
-    {% if mosque.logo_url %}
-      <img src="{{ mosque.logo_url }}" alt="{{ mosque.name }}" class="w-full h-80 object-cover">
-    {% else %}
-      <img src="https://images.unsplash.com/photo-1601987077681-ec8d6ecf1c73?auto=format&fit=crop&w=1200&q=60"
-           alt="Masjid Al Huda Bekasi" class="w-full h-80 object-cover">
-    {% endif %}
-  </div>
-  <p class="text-center text-sm text-gray-500 mt-2">
-    {% if mosque.logo_url %}
-      Foto: {{ mosque.name }}
-    {% else %}
-      *Foto ilustrasi – ganti dengan foto asli Masjid melalui menu “Kelola Profil” → kolom URL Logo*
-    {% endif %}
-  </p>
-</section>
-
-<!-- INFORMASI UTAMA -->
-<section class="grid md:grid-cols-3 gap-6">
-  <!-- Informasi Profil -->
-  <div class="bg-white border rounded-2xl p-5 shadow-sm">
-    <h2 class="text-lg font-semibold text-emerald-700 mb-2">Profil Singkat</h2>
-    <p class="text-gray-600 text-sm leading-relaxed">
-      {% if mosque.about %}
-        {{ mosque.about|linebreaksbr }}
-      {% else %}
-        Belum ada deskripsi singkat. Silakan isi di menu <strong>Panel → Kelola Profil</strong>.
-      {% endif %}
+{% block content %}<!-- HERO BANNER (Cinematic Glassmorphism) -->
+<section class="relative rounded-[2.5rem] overflow-hidden mb-8 shadow-2xl hover:shadow-[0_20px_50px_rgba(4,47,31,0.15)] transition duration-500 border border-emerald-900/10 animate-fade-in">
+  {% if mosque.logo_url %}
+    <img src="{{ mosque.logo_url }}" alt="{{ mosque.name }}" class="w-full h-80 md:h-[450px] object-cover scale-[1.01] hover:scale-100 transition duration-1000">
+  {% else %}
+    <img src="https://images.unsplash.com/photo-1601987077681-ec8d6ecf1c73?auto=format&fit=crop&w=1200&q=80"
+         alt="Masjid Al Huda" class="w-full h-80 md:h-[450px] object-cover scale-[1.01] hover:scale-100 transition duration-1000">
+  {% endif %}
+  <!-- Radial & Linear Gradient Overlay for Perfect Cinematic Contrast -->
+  <div class="absolute inset-0 bg-gradient-to-t from-emerald-950/90 via-emerald-950/40 to-transparent"></div>
+  
+  <!-- Floating Glassmorphic Card Overlay (WOW-factor) -->
+  <div class="absolute bottom-6 left-6 right-6 md:left-10 md:bottom-10 max-w-xl backdrop-blur-md bg-emerald-950/45 hover:bg-emerald-950/50 border border-white/10 rounded-3xl p-6 md:p-8 text-white transition duration-300 shadow-xl">
+    <p class="text-emerald-300 text-xs font-bold uppercase tracking-widest flex items-center gap-1.5 mb-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+      Assalamu'alaikum Warahmatullahi Wabarakatuh 🌿
     </p>
-  </div>
-
-  <!-- Kegiatan & Program (dinamis) -->
-  <div id="program" class="bg-white border rounded-2xl p-5 shadow-sm">
-    <h2 class="text-lg font-semibold text-emerald-700 mb-2">Kegiatan & Program</h2>
-    {% if programs %}
-      <ul class="list-disc text-sm text-gray-700 pl-5">
-        {% for p in programs %}
-          <li>
-            {{ p.title }}
-            {% if not p.is_active %}
-              <span class="text-xs text-gray-500">(nonaktif)</span>
-            {% endif %}
-          </li>
-        {% endfor %}
-      </ul>
-      <a href="{% url 'mosque_profile' %}" class="inline-block mt-3 text-emerald-700 underline text-sm">
-        Kelola program →
+    <h1 class="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+      {{ mosque.name|default:"Masjid Al Huda" }}
+    </h1>
+    <p class="text-emerald-100/90 text-xs md:text-sm mt-3 font-medium flex items-start gap-1">
+      <span class="shrink-0">📍</span>
+      <span>{% if mosque.address %}{{ mosque.address }}{% if mosque.city %}, {{ mosque.city }}{% endif %}{% else %}Tambun Utara, Bekasi, Jawa Barat{% endif %}</span>
+    </p>
+    <div class="flex flex-wrap gap-3 mt-6">
+      <a href="{% url 'dashboard' %}"
+         class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 px-6 py-2.5 rounded-full text-xs font-bold tracking-wide uppercase transition duration-300 shadow-lg shadow-emerald-500/20 hover:scale-[1.02]">
+        🕌 Profil Masjid
       </a>
-    {% else %}
-      <p class="text-sm text-gray-500">Belum ada program aktif.</p>
-      <a href="{% url 'program_add' %}" class="inline-block mt-3 text-emerald-700 underline text-sm">
-        + Tambah program
+      <a href="{% url 'legalitas_public' %}"
+         class="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm px-6 py-2.5 rounded-full text-xs font-bold tracking-wide uppercase transition duration-300 hover:scale-[1.02]">
+        🔑 Lihat Legalitas
       </a>
-    {% endif %}
-  </div>
-
-  <!-- Legalitas Terbaru -->
-  <div class="bg-white border rounded-2xl p-5 shadow-sm">
-    <h2 class="text-lg font-semibold text-emerald-700 mb-2">Legalitas Terbaru</h2>
-    {% if docs %}
-      <ul class="text-sm text-gray-700 space-y-2">
-        {% for d in docs|slice:":5" %}
-          <li class="flex items-center justify-between">
-            <div>
-              <span class="font-medium">{{ d.get_doc_type_display }}</span> — {{ d.title }}
-              <span class="text-xs text-gray-500">({{ d.uploaded_at|date:"d M Y" }})</span>
-            </div>
-            <a href="{{ d.file.url }}" target="_blank" class="underline text-emerald-700">Lihat</a>
-          </li>
-        {% endfor %}
-      </ul>
-      <a href="{% url 'legalitas_public' %}" class="inline-block mt-3 text-emerald-700 underline text-sm">
-        Lihat semua legalitas →
-      </a>
-    {% else %}
-      <p class="text-sm text-gray-500">Belum ada dokumen legalitas publik.</p>
-      <a href="{% url 'legalitas_public' %}" class="inline-block mt-3 text-emerald-700 underline text-sm">
-        Buka halaman legalitas →
-      </a>
-    {% endif %}
+    </div>
   </div>
 </section>
 
-<!-- DONASI & LAPORAN TERBARU -->
-<section class="mt-10 grid md:grid-cols-2 gap-6">
-  <!-- Donasi -->
-  <div id="donasi" class="bg-white border rounded-2xl p-6 shadow-sm">
-    <h2 class="text-lg font-semibold text-emerald-700 mb-3">Saluran Donasi</h2>
-    {% if channels %}
-      <ul class="text-sm text-gray-700 space-y-3">
-        {% for c in channels %}
-          <li class="border-b pb-3">
-            <strong>{{ c.title }}</strong><br>
-            {% if c.bank %}<span class="text-gray-600">{{ c.bank }} – {{ c.account }}</span>{% endif %}
-            {% if c.qris_image %}
-              <img src="{{ c.qris_image.url }}" alt="QRIS" class="mt-2 rounded border w-32">
-            {% endif %}
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p class="text-sm text-gray-500">
-        Assalamu’alaikum 🌿 Donasi untuk masjid bisa ditransfer ke BSI 1234 5678 90 a.n. Masjid Al-Huda atau lewat QRIS di spreadsheet Donasi. Jangan lupa input partisipasi zakat/infaq/sedekah dan lampirkan bukti transfer di bagian donasi ya, supaya bisa kami update secara berkala 🤲✨
-      </p>
-    {% endif %}
+<!-- PILAR 4: JADWAL SHOLAT & COUNTDOWN WIDGET -->
+<section class="bg-white border border-gray-200 rounded-[2rem] shadow-sm overflow-hidden mb-8 grid md:grid-cols-3 hover:shadow-md transition duration-300">
+  <!-- Left column (Countdown info) -->
+  <div class="bg-gradient-to-br from-emerald-900 to-emerald-950 text-white p-6 flex flex-col justify-between min-h-[160px] md:min-h-[200px]">
+    <div>
+      <span class="text-[10px] uppercase tracking-widest text-emerald-300 font-bold block mb-1">🕌 Waktu Sholat Berikutnya</span>
+      <h2 id="next-prayer-name" class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white to-emerald-200 bg-clip-text text-transparent">-</h2>
+    </div>
+    <div class="mt-4">
+      <div id="prayer-countdown" class="text-3xl font-mono font-extrabold tracking-widest text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]">-</div>
+      <span class="text-[10px] uppercase tracking-wider text-emerald-300/80 font-bold block mt-1">📍 {{ mosque.city|default:"Bekasi" }} & Sekitarnya</span>
+    </div>
   </div>
+  
+  <!-- Right column (Daily Schedule grid) -->
+  <div class="md:col-span-2 p-6 grid grid-cols-3 sm:grid-cols-6 gap-3 bg-gray-50/30 items-center">
+    <!-- Imsak -->
+    <div id="prayer-card-imsak" class="bg-white border border-gray-100 rounded-xl p-3 flex flex-col items-center justify-between text-center shadow-sm transition duration-300 hover:shadow-md hover:scale-[1.02]">
+      <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Imsak</span>
+      <span class="text-2xl my-1.5">🌇</span>
+      <span id="prayer-time-imsak" class="text-sm font-bold text-gray-700">-</span>
+    </div>
+    <!-- Subuh -->
+    <div id="prayer-card-subuh" class="bg-white border border-gray-100 rounded-xl p-3 flex flex-col items-center justify-between text-center shadow-sm transition duration-300 hover:shadow-md hover:scale-[1.02]">
+      <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Subuh</span>
+      <span class="text-2xl my-1.5">🌅</span>
+      <span id="prayer-time-subuh" class="text-sm font-bold text-gray-700">-</span>
+    </div>
+    <!-- Dzuhur -->
+    <div id="prayer-card-dzuhur" class="bg-white border border-gray-100 rounded-xl p-3 flex flex-col items-center justify-between text-center shadow-sm transition duration-300 hover:shadow-md hover:scale-[1.02]">
+      <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Dzuhur</span>
+      <span class="text-2xl my-1.5">☀️</span>
+      <span id="prayer-time-dzuhur" class="text-sm font-bold text-gray-700">-</span>
+    </div>
+    <!-- Ashar -->
+    <div id="prayer-card-ashar" class="bg-white border border-gray-100 rounded-xl p-3 flex flex-col items-center justify-between text-center shadow-sm transition duration-300 hover:shadow-md hover:scale-[1.02]">
+      <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Ashar</span>
+      <span class="text-2xl my-1.5">⛅</span>
+      <span id="prayer-time-ashar" class="text-sm font-bold text-gray-700">-</span>
+    </div>
+    <!-- Maghrib -->
+    <div id="prayer-card-maghrib" class="bg-white border border-gray-100 rounded-xl p-3 flex flex-col items-center justify-between text-center shadow-sm transition duration-300 hover:shadow-md hover:scale-[1.02]">
+      <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Maghrib</span>
+      <span class="text-2xl my-1.5">🌇</span>
+      <span id="prayer-time-maghrib" class="text-sm font-bold text-gray-700">-</span>
+    </div>
+    <!-- Isya -->
+    <div id="prayer-card-isya" class="bg-white border border-gray-100 rounded-xl p-3 flex flex-col items-center justify-between text-center shadow-sm transition duration-300 hover:shadow-md hover:scale-[1.02]">
+      <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Isya</span>
+      <span class="text-2xl my-1.5">🌙</span>
+      <span id="prayer-time-isya" class="text-sm font-bold text-gray-700">-</span>
+    </div>
+  </div>
+</section>
 
-  <!-- Laporan Keuangan Terbaru -->
-  <div class="bg-white border rounded-2xl p-6 shadow-sm">
-    <h2 class="text-lg font-semibold text-emerald-700 mb-3">Laporan Keuangan Terbaru</h2>
-    {% if latest_report %}
-      <div class="text-sm">
-        <p>📄 <strong>{{ latest_report.title }}</strong></p>
-        <p class="text-gray-600">Periode: {{ latest_report.period }}</p>
-        <a href="/r/{{ latest_report.pk }}/" class="text-emerald-700 underline text-sm mt-2 inline-block">
-          Lihat Laporan →
-        </a>
+<!-- PILAR 5: BENTO GRID TACTILE NAVIGATION (WOW-factor) -->
+<section class="mb-8 animate-fade-in">
+  <div class="flex items-center gap-2 mb-4">
+    <span class="w-1.5 h-6 rounded-full bg-emerald-600"></span>
+    <h2 class="font-extrabold text-gray-800 text-lg tracking-tight">Portal Akses Cepat Jamaah</h2>
+  </div>
+  
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    
+    <!-- CARD 1: DONASI & INFAQ (2x Spans - Glowing BSI Card Style) -->
+    <div class="lg:col-span-2 lg:row-span-2 bg-gradient-to-br from-emerald-900 via-emerald-950 to-black text-white rounded-[2rem] p-6 relative overflow-hidden flex flex-col justify-between shadow-md hover:shadow-2xl hover:scale-[1.02] transition duration-300 group min-h-[260px] border border-emerald-800/20">
+      <!-- Decorative geometric spheres for visual depth -->
+      <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-110 transition duration-500"></div>
+      <div class="absolute -left-10 -top-10 w-32 h-32 bg-teal-500/5 rounded-full blur-2xl group-hover:scale-110 transition duration-500"></div>
+      
+      <div>
+        <div class="flex justify-between items-center mb-4">
+          <span class="w-10 h-10 rounded-2xl bg-amber-400/20 text-amber-300 flex items-center justify-center text-lg font-bold shadow-sm shadow-amber-400/10">🤲</span>
+          <span class="text-[9px] uppercase tracking-widest text-emerald-300 font-extrabold bg-emerald-900/50 border border-emerald-800 px-2.5 py-1 rounded-full">Donasi Terbuka</span>
+        </div>
+        <h3 class="text-2xl font-extrabold tracking-tight">Saluran Infaq & Shodaqoh</h3>
+        <p class="text-xs text-emerald-200/80 mt-1.5 leading-relaxed font-medium">Bantu perjuangan dakwah, pemeliharaan fasilitas, serta program kemaslahatan umat Masjid Al Huda.</p>
       </div>
-    {% else %}
-      <p class="text-gray-500 text-sm">Belum ada laporan yang diunggah.</p>
-    {% endif %}
+
+      {% if mosque.bank_name and mosque.bank_account %}
+      <div class="mt-6 border-t border-emerald-800/40 pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <div class="text-[10px] text-emerald-300 font-semibold uppercase tracking-wider">{{ mosque.bank_name }} DKM AL HUDA</div>
+          <div class="text-lg font-bold font-mono tracking-widest text-white mt-0.5 flex items-center gap-2">
+            <span id="bento-acc-num">{{ mosque.bank_account }}</span>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="copyToClipboard('{{ mosque.bank_account }}', 'btn-copy-bento')" id="btn-copy-bento" class="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-emerald-900 bg-amber-400 hover:bg-amber-300 rounded-xl transition duration-200 shadow-sm shrink-0 flex items-center gap-1 border-0">
+            📋 Salin Rekening
+          </button>
+          <a href="{% url 'donation_page' %}" class="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-white bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-sm rounded-xl transition duration-200 flex items-center justify-center shrink-0">
+            Pilih Bank →
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- CARD 2: REKAP KAS (Medium Span) -->
+    <a href="{% url 'cashflow_public' %}" class="bg-white border border-gray-200/80 hover:border-emerald-400 rounded-[1.8rem] p-5 hover:shadow-xl hover:scale-[1.02] transition duration-300 flex flex-col justify-between group shadow-sm min-h-[140px]">
+      <div class="flex items-center justify-between">
+        <span class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-emerald-50">📈</span>
+        <span class="text-[9px] uppercase tracking-widest text-emerald-700 font-bold bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md">Realtime</span>
+      </div>
+      <div class="mt-4">
+        <h4 class="font-bold text-gray-800 text-sm group-hover:text-emerald-700 transition">Rekap Kas Bulanan</h4>
+        <p class="text-xs text-gray-400 mt-1 leading-normal font-medium">Rekapitulasi masuk dan keluar kas operasional masjid secara transparan.</p>
+      </div>
+    </a>
+
+    <!-- CARD 3: ARSIP LAPORAN (Medium Span) -->
+    <a href="{% url 'report_archive' %}" class="bg-white border border-gray-200/80 hover:border-purple-400 rounded-[1.8rem] p-5 hover:shadow-xl hover:scale-[1.02] transition duration-300 flex flex-col justify-between group shadow-sm min-h-[140px]">
+      <div class="flex items-center justify-between">
+        <span class="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-purple-50">📁</span>
+        <span class="text-[9px] uppercase tracking-widest text-purple-700 font-bold bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-md">Arsip PDF</span>
+      </div>
+      <div class="mt-4">
+        <h4 class="font-bold text-gray-800 text-sm group-hover:text-purple-700 transition">Laporan Bulanan DKM</h4>
+        <p class="text-xs text-gray-400 mt-1 leading-normal font-medium">Unduh dokumen berkas laporan keuangan formal DKM berlogo resmi.</p>
+      </div>
+    </a>
+
+    <!-- CARD 4: PROGRAM KAJIAN (Small Card) -->
+    <a href="#program" class="bg-white border border-gray-200/80 hover:border-blue-400 rounded-[1.8rem] p-5 hover:shadow-xl hover:scale-[1.02] transition duration-300 flex flex-col justify-between group shadow-sm min-h-[140px]">
+      <div class="flex items-center justify-between">
+        <span class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-blue-50">📅</span>
+        <span class="text-[9px] uppercase tracking-widest text-blue-700 font-bold bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md">Kegiatan</span>
+      </div>
+      <div class="mt-4">
+        <h4 class="font-bold text-gray-800 text-sm group-hover:text-blue-700 transition">Program Kajian</h4>
+        <p class="text-xs text-gray-400 mt-1 leading-normal font-medium">Jadwal kajian berkala, taklim rutin, dan program kerja sosial DKM.</p>
+      </div>
+    </a>
+
+    <!-- CARD 5: PENGURUS DKM (Small Card) -->
+    <a href="#pengurus" class="bg-white border border-gray-200/80 hover:border-sky-400 rounded-[1.8rem] p-5 hover:shadow-xl hover:scale-[1.02] transition duration-300 flex flex-col justify-between group shadow-sm min-h-[140px]">
+      <div class="flex items-center justify-between">
+        <span class="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-sky-50">👥</span>
+        <span class="text-[9px] uppercase tracking-widest text-sky-700 font-bold bg-sky-50 border border-sky-100 px-2 py-0.5 rounded-md">Pengurus</span>
+      </div>
+      <div class="mt-4">
+        <h4 class="font-bold text-gray-800 text-sm group-hover:text-sky-700 transition">Struktur DKM</h4>
+        <p class="text-xs text-gray-400 mt-1 leading-normal font-medium">Susunan khadimul ummah kepengurusan DKM Masjid Al Huda aktif.</p>
+      </div>
+    </a>
+
+    <!-- CARD 6: SOP MASJID (Small Card) -->
+    <a href="{% url 'sop_public' %}" class="bg-white border border-gray-200/80 hover:border-amber-400 rounded-[1.8rem] p-5 hover:shadow-xl hover:scale-[1.02] transition duration-300 flex flex-col justify-between group shadow-sm min-h-[140px]">
+      <div class="flex items-center justify-between">
+        <span class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-amber-50">📋</span>
+        <span class="text-[9px] uppercase tracking-widest text-amber-700 font-bold bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-md">Regulasi</span>
+      </div>
+      <div class="mt-4">
+        <h4 class="font-bold text-gray-800 text-sm group-hover:text-amber-700 transition">SOP & Dokumen</h4>
+        <p class="text-xs text-gray-400 mt-1 leading-normal font-medium">Standar acuan operasional resmi dan tata tertib syiar masjid.</p>
+      </div>
+    </a>
+
+    <!-- CARD 7: LOKASI & KONTAK (Small Card) -->
+    <a href="#kontak" class="bg-white border border-gray-200/80 hover:border-rose-400 rounded-[1.8rem] p-5 hover:shadow-xl hover:scale-[1.02] transition duration-300 flex flex-col justify-between group shadow-sm min-h-[140px]">
+      <div class="flex items-center justify-between">
+        <span class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg font-bold transition group-hover:scale-110 shadow-sm shadow-rose-50">📍</span>
+        <span class="text-[9px] uppercase tracking-widest text-rose-700 font-bold bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-md">Kontak</span>
+      </div>
+      <div class="mt-4">
+        <h4 class="font-bold text-gray-800 text-sm group-hover:text-rose-700 transition">Hubungi DKM</h4>
+        <p class="text-xs text-gray-400 mt-1 leading-normal font-medium">Peta navigasi lokasi geografis, nomor telepon, dan email resmi.</p>
+      </div>
+    </a>
+
   </div>
 </section>
 
-<!-- PENGURUS & KONTAK -->
-<section class="mt-10 grid md:grid-cols-2 gap-6">
-  <!-- Pengurus (dinamis) -->
-  <div id="pengurus" class="bg-white border rounded-2xl p-6 shadow-sm">
-    <h2 class="text-lg font-semibold text-emerald-700 mb-3">Pengurus (Ringkas)</h2>
-
-    {% if pengurus %}
-      <ul class="text-sm text-gray-700 space-y-1">
-        {% for m in pengurus %}
-          <li>
-            {{ m.name }} — <span class="text-gray-600">{{ m.get_role_display }}</span>
-            {% if m.phone %}<span class="text-xs text-gray-500"> ({{ m.phone }})</span>{% endif %}
-          </li>
-        {% endfor %}
-      </ul>
-      <a href="{% url 'mosque_profile' %}" class="inline-block mt-3 text-emerald-700 underline text-sm">
-        Lihat semua pengurus →
-      </a>
-    {% else %}
-      <p class="text-sm text-gray-500">Belum ada data pengurus.</p>
-      <a href="{% url 'management_add' %}" class="inline-block mt-3 text-emerald-700 underline text-sm">
-        + Tambah pengurus
-      </a>
-    {% endif %}
+<!-- SECTION DIVIDER WITH GLOWING ACCENT -->
+<div class="flex items-center gap-4 my-12 animate-fade-in">
+  <div class="h-[1px] bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent flex-grow"></div>
+  <div class="text-center shrink-0">
+    <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1.5 rounded-full shadow-sm">🏛️ Portal Transparansi</span>
+    <h2 class="text-2xl md:text-3xl font-black text-gray-800 tracking-tight mt-3">Layanan & Keuangan DKM</h2>
   </div>
+  <div class="h-[1px] bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent flex-grow"></div>
+</div>
 
-  <!-- Kontak -->
-  <div id="kontak" class="bg-white border rounded-2xl p-6 shadow-sm">
-    <h2 class="text-lg font-semibold text-emerald-700 mb-3">Kontak & Alamat</h2>
-    <p class="text-sm text-gray-600">
-      📍{% if mosque.address %}
-        {{ mosque.name }} – {{ mosque.address }},
-        {% if mosque.city %}{{ mosque.city }}, {% endif %}
-        {% if mosque.province %}{{ mosque.province }}{% endif %}<br>
-      {% endif %}
-      {% if mosque.contact_phone %}
-        📞  Telp/WA: {{ mosque.contact_phone }}<br>
-      {% endif %}
-      {% if mosque.email %}
-        📄  Email: {{ mosque.email }}<br>
-      {% endif %}
-    </p>
-    <p class="text-xs text-gray-500 mt-2"></p>
+<!-- SECTION BACKDROP PANEL (UNIFIED SHELL TO PREVENT 'PLONG' FEELING) -->
+<div class="bg-emerald-950/[0.01] border border-emerald-950/[0.04] backdrop-blur-md rounded-[3rem] p-6 sm:p-8 shadow-inner mb-12 relative overflow-hidden animate-fade-in">
+  
+  <!-- Subtle Internal Background Accent Glows -->
+  <div class="absolute -top-[20%] -left-[10%] w-[300px] h-[300px] rounded-full bg-emerald-500/5 blur-[80px] pointer-events-none -z-10"></div>
+  <div class="absolute -bottom-[20%] -right-[10%] w-[300px] h-[300px] rounded-full bg-teal-500/5 blur-[80px] pointer-events-none -z-10"></div>
+
+  <!-- 3-COLUMN BENTO GRID SYSTEM -->
+  <div class="grid lg:grid-cols-3 gap-6 relative z-10">
+    
+    <!-- 1. Profil Singkat (Spans 2 columns: lg:col-span-2) -->
+    <div class="lg:col-span-2 backdrop-blur-xl bg-white/80 border border-white/90 rounded-[2rem] p-6 sm:p-8 shadow-[0_20px_50px_rgba(4,47,31,0.02)] hover:shadow-[0_30px_60px_rgba(4,47,31,0.05)] hover:border-emerald-500/20 hover:scale-[1.005] transition duration-300 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+      <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-emerald-500/20 via-emerald-500/40 to-teal-500/20"></div>
+      <div class="absolute -right-6 -bottom-8 text-9xl opacity-[0.08] filter drop-shadow-[0_8px_24px_rgba(16,185,129,0.2)] pointer-events-none select-none -z-10 font-bold">🕌</div>
+
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2.5">
+            <span class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm font-bold shadow-sm">📝</span>
+            <span class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-700/80 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100/50">Tentang</span>
+          </div>
+        </div>
+        <h3 class="font-extrabold text-gray-800 text-lg mb-2">Profil Singkat Masjid</h3>
+        <p class="text-sm text-gray-600 leading-relaxed">
+          {% if mosque.about %}
+            {{ mosque.about|linebreaksbr }}
+          {% else %}
+            Belum ada deskripsi. Isi di <strong>Panel → Kelola Profil</strong>.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    <!-- 2. Laporan Keuangan Terbaru (Spans 1 column: lg:col-span-1) -->
+    <div class="backdrop-blur-xl bg-white/80 border border-white/90 rounded-[2rem] p-6 shadow-[0_20px_50px_rgba(4,47,31,0.02)] hover:shadow-[0_30px_60px_rgba(4,47,31,0.05)] hover:border-purple-500/20 hover:scale-[1.005] transition duration-300 relative overflow-hidden flex flex-col justify-between">
+      <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-purple-500/20 via-purple-500/40 to-indigo-50/20"></div>
+      <div class="absolute -right-6 -bottom-8 text-9xl opacity-[0.08] filter drop-shadow-[0_8px_24px_rgba(168,85,247,0.2)] pointer-events-none select-none -z-10 font-bold">📊</div>
+
+      <div>
+        <div class="flex items-center gap-2.5 mb-4">
+          <span class="w-9 h-9 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center text-sm font-bold shadow-sm">📊</span>
+          <span class="text-[9px] font-extrabold uppercase tracking-widest text-purple-700/80 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100/50">Keuangan</span>
+        </div>
+        <h3 class="font-extrabold text-gray-800 text-lg mb-2">Laporan Keuangan</h3>
+        {% if latest_report %}
+          <div class="border border-purple-100/50 rounded-xl p-3 bg-gradient-to-br from-purple-50/40 to-indigo-50/20 flex flex-col gap-2.5 shadow-sm">
+            <div class="min-w-0">
+              <span class="text-xs font-bold text-gray-800 truncate block">📁 {{ latest_report.title }}</span>
+              {% if latest_report.period %}
+                <span class="text-[9px] uppercase font-extrabold tracking-wider text-purple-800 mt-1 block">Periode: {{ latest_report.period }}</span>
+              {% endif %}
+            </div>
+            <a href="/r/{{ latest_report.pk }}/"
+               class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 border border-purple-200/50 bg-white hover:bg-purple-50 text-purple-800 text-[10px] font-bold rounded-lg transition shadow-sm hover:scale-[1.02] w-full text-center">
+              Lihat Lembar Kerja →
+            </a>
+          </div>
+        {% else %}
+          <p class="text-xs text-gray-400 italic">Belum ada laporan yang diunggah.</p>
+        {% endif %}
+      </div>
+      <div class="mt-4 flex items-center justify-between text-[10px] border-t border-gray-100 pt-3">
+        <span class="text-gray-400">{% if latest_report %}Update: {{ latest_report.uploaded_at|date:"d M Y" }}{% else %}-{% endif %}</span>
+        <a href="{% url 'report_archive' %}" class="text-emerald-700 font-bold hover:underline">Semua Arsip →</a>
+      </div>
+    </div>
+
+    <!-- 3. Kegiatan & Program (Spans 1 column: lg:col-span-1) -->
+    <div id="program" class="backdrop-blur-xl bg-white/80 border border-white/90 rounded-[2rem] p-6 shadow-[0_20px_50px_rgba(4,47,31,0.02)] hover:shadow-[0_30px_60px_rgba(4,47,31,0.05)] hover:border-blue-500/20 hover:scale-[1.005] transition duration-300 relative overflow-hidden flex flex-col justify-between">
+      <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500/20 via-blue-500/40 to-sky-500/20"></div>
+      <div class="absolute -right-6 -bottom-8 text-9xl opacity-[0.08] filter drop-shadow-[0_8px_24px_rgba(59,130,246,0.2)] pointer-events-none select-none -z-10 font-bold">📅</div>
+
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2.5">
+            <span class="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-sm font-bold shadow-sm">📅</span>
+            <span class="text-[9px] font-extrabold uppercase tracking-widest text-blue-700/80 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100/50">Agenda</span>
+          </div>
+          {% if request.user.is_authenticated %}
+            <a href="{% url 'program_add' %}" class="text-[10px] bg-emerald-50/80 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/50 px-2.5 py-0.5 rounded-full font-bold transition shadow-sm">+ Tambah</a>
+          {% endif %}
+        </div>
+        <h3 class="font-extrabold text-gray-800 text-lg mb-2">Kegiatan & Program</h3>
+        {% if programs %}
+          <ul class="space-y-2">
+            {% for p in programs|slice:":3" %}
+              <li class="border border-gray-100/80 bg-white/40 p-2.5 rounded-xl flex items-center gap-2 hover:bg-emerald-50/20 hover:border-emerald-200/50 transition">
+                <span class="w-2 h-2 rounded-full {% if p.is_active %}bg-emerald-500 animate-pulse{% else %}bg-gray-300{% endif %} shrink-0"></span>
+                <span class="text-xs font-semibold text-gray-700 truncate block">{{ p.title }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-xs text-gray-400 italic">Belum ada program aktif.</p>
+        {% endif %}
+      </div>
+      <div class="mt-4 border-t border-gray-100 pt-3">
+        <a href="#program" class="text-[10px] text-gray-400 italic">Program terpadu DKM Masjid</a>
+      </div>
+    </div>
+
+    <!-- 4. Pengurus DKM (Spans 1 column: lg:col-span-1) -->
+    <div id="pengurus" class="backdrop-blur-xl bg-white/80 border border-white/90 rounded-[2rem] p-6 shadow-[0_20px_50px_rgba(4,47,31,0.02)] hover:shadow-[0_30px_60px_rgba(4,47,31,0.05)] hover:border-sky-500/20 hover:scale-[1.005] transition duration-300 relative overflow-hidden flex flex-col justify-between">
+      <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-sky-500/20 via-sky-500/40 to-indigo-500/20"></div>
+      <div class="absolute -right-6 -bottom-8 text-9xl opacity-[0.08] filter drop-shadow-[0_8px_24px_rgba(14,165,233,0.2)] pointer-events-none select-none -z-10 font-bold">👥</div>
+
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2.5">
+            <span class="w-9 h-9 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center text-sm font-bold shadow-sm">👥</span>
+            <span class="text-[9px] font-extrabold uppercase tracking-widest text-sky-700/80 bg-sky-50 px-2 py-0.5 rounded-md border border-sky-100/50">Struktur</span>
+          </div>
+          {% if request.user.is_authenticated %}
+            <a href="{% url 'management_add' %}" class="text-[10px] bg-emerald-50/80 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/50 px-2.5 py-0.5 rounded-full font-bold transition shadow-sm">+ Tambah</a>
+          {% endif %}
+        </div>
+        <h3 class="font-extrabold text-gray-800 text-lg mb-2">Pengurus DKM</h3>
+        {% if pengurus %}
+          <ul class="space-y-2">
+            {% for m in pengurus|slice:":3" %}
+              <li class="flex items-center gap-2.5 p-1.5 bg-white/40 border border-gray-100/40 rounded-xl">
+                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 text-emerald-800 flex items-center justify-center font-extrabold text-[10px] shrink-0 border border-emerald-300/30 shadow-sm">
+                  {{ m.name|slice:":1" }}
+                </div>
+                <div class="min-w-0">
+                  <div class="text-[11px] font-bold text-gray-800 truncate leading-none mb-0.5">{{ m.name }}</div>
+                  <div class="text-[9px] text-gray-400 font-medium leading-none">{{ m.get_role_display }}</div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-xs text-gray-400 italic">Belum ada data pengurus.</p>
+        {% endif %}
+      </div>
+      <div class="mt-4 border-t border-gray-100 pt-3">
+        <a href="#pengurus" class="text-[10px] text-gray-400 italic">Susunan pengurus aktif DKM</a>
+      </div>
+    </div>
+
+    <!-- 5. Legalitas & SOP Resmi (Spans 1 column: lg:col-span-1) -->
+    <div class="backdrop-blur-xl bg-white/80 border border-white/90 rounded-[2rem] p-6 shadow-[0_20px_50px_rgba(4,47,31,0.02)] hover:shadow-[0_30px_60px_rgba(4,47,31,0.05)] hover:border-amber-500/20 hover:scale-[1.005] transition duration-300 relative overflow-hidden flex flex-col justify-between">
+      <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-amber-500/20 via-amber-500/40 to-orange-500/20"></div>
+      <div class="absolute -right-6 -bottom-8 text-9xl opacity-[0.08] filter drop-shadow-[0_8px_24px_rgba(245,158,11,0.2)] pointer-events-none select-none -z-10 font-bold">🔑</div>
+
+      <div>
+        <div class="flex items-center gap-2.5 mb-4">
+          <span class="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center text-sm font-bold shadow-sm">🔑</span>
+          <span class="text-[9px] font-extrabold uppercase tracking-widest text-amber-700/80 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100/50">Dokumen</span>
+        </div>
+        <h3 class="font-extrabold text-gray-800 text-lg mb-2">Legalitas & SOP</h3>
+        {% if docs or sop_doc %}
+          <ul class="space-y-1.5">
+            {% if sop_doc %}
+              <li class="flex items-center justify-between text-[11px] p-2 bg-white/40 border border-gray-50 rounded-lg hover:bg-white/80 transition leading-none">
+                <span class="font-bold text-gray-700 truncate mr-2">SOP Operasional</span>
+                <a href="{{ sop_doc.file.url }}" target="_blank" class="text-emerald-700 hover:underline font-bold shrink-0 text-[10px]">PDF →</a>
+              </li>
+            {% endif %}
+            {% for d in docs|slice:":2" %}
+              <li class="flex items-center justify-between text-[11px] p-2 bg-white/40 border border-gray-50 rounded-lg hover:bg-white/80 transition leading-none">
+                <span class="font-bold text-gray-700 truncate mr-2">{{ d.get_doc_type_display }}</span>
+                <a href="{{ d.file.url }}" target="_blank" class="text-emerald-700 hover:underline font-bold shrink-0 text-[10px]">PDF →</a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-xs text-gray-400 italic">Belum ada dokumen publik.</p>
+        {% endif %}
+      </div>
+      <div class="mt-4 flex items-center justify-between text-[10px] border-t border-gray-100 pt-3">
+        <span class="text-gray-400">Arsip Resmi</span>
+        <a href="{% url 'legalitas_public' %}" class="text-emerald-700 font-bold hover:underline">Semua Dokumen →</a>
+      </div>
+    </div>
+
+    <!-- 6. Hubungi Kami (Spans 3 columns: lg:col-span-3 - Redesigned as wide layout to eradicate emptiness) -->
+    <div id="kontak" class="lg:col-span-3 backdrop-blur-xl bg-white/80 border border-white/90 rounded-[2.5rem] p-6 sm:p-8 shadow-[0_20px_50px_rgba(4,47,31,0.02)] hover:shadow-[0_30px_60px_rgba(4,47,31,0.05)] hover:border-rose-500/20 hover:scale-[1.002] transition duration-300 relative overflow-hidden">
+      <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-rose-500/20 via-rose-500/40 to-pink-500/20"></div>
+      <div class="absolute -right-6 -bottom-10 text-[12rem] opacity-[0.08] filter drop-shadow-[0_8px_30px_rgba(244,63,94,0.2)] pointer-events-none select-none -z-10 font-bold">📍</div>
+
+      <div class="flex items-center gap-2.5 mb-6">
+        <span class="w-9 h-9 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center text-sm font-bold shadow-sm">📍</span>
+        <span class="text-[9px] font-extrabold uppercase tracking-widest text-rose-700/80 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100/50">Hubungi Kami</span>
+        <h3 class="font-extrabold text-gray-800 text-lg ml-2">Sekretariat DKM & Layanan Jamaah</h3>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 relative z-10">
+        
+        <!-- Sub-kolom 1: Alamat & Website (Spans 2 columns) -->
+        <div class="md:col-span-2 bg-gradient-to-br from-gray-50/50 to-gray-50/10 border border-gray-100/60 rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1.5">🏢 Alamat Sekretariat</span>
+            <p class="text-sm text-gray-600 leading-relaxed font-medium">
+              {% if mosque.address %}
+                <strong>{{ mosque.name }}</strong><br>
+                {{ mosque.address }}
+                {% if mosque.city %}, {{ mosque.city }}{% endif %}
+                {% if mosque.province %}, {{ mosque.province }}{% endif %}
+              {% else %}
+                Belum ada data alamat lengkap sekretariat masjid.
+              {% endif %}
+            </p>
+          </div>
+        </div>
+
+        <!-- Sub-kolom 2: Kontak Telepon & Email (Spans 1 column) -->
+        <div class="bg-gradient-to-br from-gray-50/50 to-gray-50/10 border border-gray-100/60 rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-3">📞 Kontak Resmi DKM</span>
+            <div class="space-y-4">
+              {% if mosque.contact_phone %}
+                <div>
+                  <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wide block mb-0.5">Telepon / WhatsApp</span>
+                  <span class="text-sm font-bold text-gray-700 block">{{ mosque.contact_phone }}</span>
+                </div>
+              {% endif %}
+              {% if mosque.email %}
+                <div>
+                  <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wide block mb-0.5">Email</span>
+                  <span class="text-sm font-bold text-gray-700 block">{{ mosque.email }}</span>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
-</section>
+</div>
+
+<!-- SCRIPT: REALTIME PRAYER TIMES COUNTDOWN -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const city = "{{ mosque.city|default:'Bekasi' }}";
+  const url = `https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(city)}&country=Indonesia&method=2`;
+  
+  const prayerNames = {
+    Imsak: "Imsak",
+    Fajr: "Subuh",
+    Dhuhr: "Dzuhur",
+    Asr: "Ashar",
+    Maghrib: "Maghrib",
+    Isha: "Isya"
+  };
+
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      if (data.code === 200) {
+        const timings = data.data.timings;
+        
+        // Update values inside HTML elements
+        document.getElementById('prayer-time-imsak').textContent = timings.Imsak;
+        document.getElementById('prayer-time-subuh').textContent = timings.Fajr;
+        document.getElementById('prayer-time-dzuhur').textContent = timings.Dhuhr;
+        document.getElementById('prayer-time-ashar').textContent = timings.Asr;
+        document.getElementById('prayer-time-maghrib').textContent = timings.Maghrib;
+        document.getElementById('prayer-time-isya').textContent = timings.Isha;
+        
+        // Initialize the live ticking countdown
+        startPrayerCountdown(timings);
+      }
+    })
+    .catch(err => {
+      console.error("Error fetching prayer times: ", err);
+      // Fallback display if API rate limit or offline
+      document.getElementById('next-prayer-name').textContent = "Jadwal Sholat";
+      document.getElementById('prayer-countdown').textContent = "Real-time aktif";
+    });
+
+  function startPrayerCountdown(timings) {
+    const prayers = [
+      { name: "Imsak", time: timings.Imsak, elementId: "imsak" },
+      { name: "Subuh", time: timings.Fajr, elementId: "subuh" },
+      { name: "Dzuhur", time: timings.Dhuhr, elementId: "dzuhur" },
+      { name: "Ashar", time: timings.Asr, elementId: "ashar" },
+      { name: "Maghrib", time: timings.Maghrib, elementId: "maghrib" },
+      { name: "Isya", time: timings.Isha, elementId: "isya" }
+    ];
+
+    function getNextPrayer() {
+      const now = new Date();
+      const todayString = now.toISOString().slice(0, 10);
+      
+      let next = null;
+      let minDiff = Infinity;
+
+      for (let p of prayers) {
+        const [hours, minutes] = p.time.split(":");
+        const prayerDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(hours), parseInt(minutes), 0);
+        
+        const diff = prayerDate - now;
+        if (diff > 0 && diff < minDiff) {
+          minDiff = diff;
+          next = { ...p, targetDate: prayerDate };
+        }
+      }
+
+      // Fallback: If all prayers for today passed, next is Imsak tomorrow
+      if (!next) {
+        const [hours, minutes] = prayers[0].time.split(":");
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const prayerDate = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), parseInt(hours), parseInt(minutes), 0);
+        next = { ...prayers[0], targetDate: prayerDate, isTomorrow: true };
+      }
+
+      return next;
+    }
+
+    function updateTimer() {
+      const next = getNextPrayer();
+      if (!next) return;
+
+      // Reset all styling highlights first
+      prayers.forEach(p => {
+        const card = document.getElementById(`prayer-card-${p.elementId}`);
+        if (card) {
+          card.className = "bg-white border border-gray-100 rounded-xl p-3 flex flex-col items-center justify-between text-center shadow-sm transition duration-300 hover:shadow-md hover:scale-[1.02]";
+        }
+      });
+
+      // Highlight active next card
+      const activeCard = document.getElementById(`prayer-card-${next.elementId}`);
+      if (activeCard) {
+        activeCard.className = "bg-emerald-50 border border-emerald-500 rounded-xl p-3 flex flex-col items-center justify-between text-center shadow-md transition duration-300 ring-2 ring-emerald-300/30 scale-[1.03] animate-pulse";
+      }
+
+      // Update text
+      document.getElementById('next-prayer-name').textContent = next.name + (next.isTomorrow ? " (Esok)" : "");
+
+      // Countdown display
+      const now = new Date();
+      const diffMs = next.targetDate - now;
+      if (diffMs <= 0) return;
+
+      const totalSecs = Math.floor(diffMs / 1000);
+      const hours = Math.floor(totalSecs / 3600);
+      const minutes = Math.floor((totalSecs % 3600) / 60);
+      const seconds = totalSecs % 60;
+
+      const formattedTime = [
+        hours.toString().padStart(2, '0'),
+        minutes.toString().padStart(2, '0'),
+        seconds.toString().padStart(2, '0')
+      ].join(':');
+
+      document.getElementById('prayer-countdown').textContent = `${formattedTime} lagi`;
+    }
+
+    updateTimer();
+    setInterval(updateTimer, 1000);
+  }
+});
+
+// Javascript Clipboard Copy Helper dengan Micro-interaksi Mewah
+function copyToClipboard(text, buttonId) {
+  navigator.clipboard.writeText(text).then(function() {
+    const btn = document.getElementById(buttonId);
+    const originalText = btn.innerHTML;
+    const originalClass = btn.className;
+    
+    // Animasikan status berhasil
+    btn.innerHTML = "✓ Disalin";
+    btn.className = "px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white bg-emerald-600 rounded-lg transition duration-200 shadow-sm shrink-0 flex items-center gap-1 border-0";
+    
+    // Kembalikan ke normal setelah 2 detik
+    setTimeout(function() {
+      btn.innerHTML = originalText;
+      btn.className = originalClass;
+    }, 2000);
+  }).catch(function(err) {
+    alert("Gagal menyalin rekening. Silakan salin manual.");
+  });
+}
+</script>
 
 {% endblock %}

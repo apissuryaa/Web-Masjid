@@ -189,6 +189,24 @@ class AuditLog(models.Model):
         return f"{self.action} @ {self.created_at:%Y-%m-%d %H:%M}"
 
 
+class CashCategory(models.Model):
+    ACTIVITY_CHOICES = [
+        ('OPERASI', 'Aktivitas Operasi'),
+        ('INVESTASI', 'Aktivitas Investasi'),
+        ('PENDANAAN', 'Aktivitas Pendanaan'),
+    ]
+    FLOW_CHOICES = [
+        ('IN', 'Pemasukan'),
+        ('OUT', 'Pengeluaran'),
+    ]
+    name = models.CharField('Nama Kategori', max_length=100)
+    activity_type = models.CharField('Jenis Aktivitas', max_length=15, choices=ACTIVITY_CHOICES, default='OPERASI')
+    flow_type = models.CharField('Tipe Arus', max_length=5, choices=FLOW_CHOICES, default='IN')
+
+    def __str__(self):
+        return f"{self.name} ({self.get_flow_type_display()})"
+
+
 class CashFlow(models.Model):
     FLOW_CHOICES = [
         ('IN', 'Pemasukan'),
@@ -196,6 +214,7 @@ class CashFlow(models.Model):
     ]
     mosque = models.ForeignKey(Mosque, on_delete=models.CASCADE, related_name='cashflows')
     date = models.DateField('Tanggal')
+    category = models.ForeignKey(CashCategory, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Kategori Kas")
     flow_type = models.CharField('Tipe', max_length=10, choices=FLOW_CHOICES, default='IN')
     amount = models.DecimalField('Nominal (Rp)', max_digits=14, decimal_places=2)
     description = models.CharField('Keterangan', max_length=255)
@@ -203,5 +222,11 @@ class CashFlow(models.Model):
     class Meta:
         ordering = ['-date']
 
+    def save(self, *args, **kwargs):
+        if self.category:
+            self.flow_type = self.category.flow_type
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.get_flow_type_display()} - Rp {self.amount} ({self.date})"
+

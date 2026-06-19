@@ -1,128 +1,395 @@
 {% extends 'base.html' %}
 {% load humanize %}
-{% block title %}Rekap Kas – Masjid Al Huda{% endblock %}
+{% block title %}Rekap Kas – {{ mosque.name|default:"Masjid" }}{% endblock %}
 
 {% block content %}
-<section class="bg-white rounded-2xl border p-6 shadow-sm mb-6">
-  <h1 class="text-2xl font-bold text-emerald-700 mb-3">Rekapitulasi Arus Kas</h1>
 
-  {% if mosque %}
-    <p class="text-sm text-gray-600 mb-4">
-      Grafik rekapitulasi pemasukan dan pengeluaran kas Masjid <strong>{{ mosque.name }}</strong>.
-    </p>
-  {% endif %}
-
-  <!-- NAVIGASI TAHUN (Pagination) -->
-  <div class="flex flex-wrap gap-2 mb-6">
-    {% for y in years_list %}
-      <a href="?year={{ y }}" 
-         class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors border
-                {% if y == selected_year %}
-                  bg-emerald-600 text-white border-emerald-600
-                {% else %}
-                  bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50
-                {% endif %}">
-        {{ y }}
-      </a>
+{# ──────────────── FLASH MESSAGES ──────────────── #}
+{% if messages %}
+  <div class="mb-4 space-y-2">
+    {% for msg in messages %}
+      <div class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium border
+        {% if msg.tags == 'success' %}bg-emerald-50 text-emerald-800 border-emerald-200
+        {% elif msg.tags == 'error' %}bg-red-50 text-red-800 border-red-200
+        {% else %}bg-blue-50 text-blue-800 border-blue-200{% endif %}">
+        {% if msg.tags == 'success' %}✅{% elif msg.tags == 'error' %}❌{% else %}ℹ️{% endif %}
+        {{ msg }}
+      </div>
     {% endfor %}
   </div>
+{% endif %}
 
-  <!-- AREA GRAFIK -->
-  <div class="w-full h-80 mb-8 relative">
-    <canvas id="cashflowChart"></canvas>
-  </div>
-  
-  <hr class="mb-6">
-  
-  <h2 class="text-xl font-bold text-emerald-700 mb-4">Transaksi Kas Terbaru</h2>
-  {% if recent_cashflows %}
-    <div class="overflow-x-auto">
-      <table class="min-w-full text-sm border border-gray-200 rounded-lg">
-        <thead class="bg-emerald-100 text-emerald-800 font-semibold">
-          <tr>
-            <th class="text-left p-3 border-b">Tanggal</th>
-            <th class="text-left p-3 border-b">Tipe</th>
-            <th class="text-left p-3 border-b">Keterangan</th>
-            <th class="text-right p-3 border-b">Nominal</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for cf in recent_cashflows %}
-            <tr class="hover:bg-emerald-50 transition border-b">
-              <td class="p-3">{{ cf.date|date:"d M Y" }}</td>
-              <td class="p-3">
-                {% if cf.flow_type == 'IN' %}
-                  <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Pemasukan</span>
-                {% else %}
-                  <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">Pengeluaran</span>
-                {% endif %}
-              </td>
-              <td class="p-3">{{ cf.description }}</td>
-              <td class="p-3 text-right font-medium {% if cf.flow_type == 'IN' %}text-green-700{% else %}text-red-700{% endif %}">
-                Rp {{ cf.amount|floatformat:0|intcomma }}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+<div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
+
+  <!-- Header -->
+  <div class="bg-emerald-700 px-6 py-5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">📊</span>
+      <div>
+        <h1 class="text-lg font-bold text-white">Rekapitulasi Arus Kas</h1>
+        <p class="text-emerald-200 text-xs mt-0.5">
+          {% if mosque %}Grafik pemasukan &amp; pengeluaran kas {{ mosque.name }}
+          {% else %}Grafik rekapitulasi pemasukan dan pengeluaran kas{% endif %}
+        </p>
+      </div>
     </div>
-  {% else %}
-    <p class="text-gray-500 bg-gray-50 p-4 rounded-lg border text-center">Belum ada catatan transaksi kas.</p>
-  {% endif %}
 
-</section>
+    {# ── Tombol Tambah Transaksi (admin saja) ── #}
+    {% if is_admin %}
+    <button id="btnOpenModal"
+            onclick="document.getElementById('modalTambahKas').classList.remove('hidden')"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-white/15 hover:bg-white/25 text-white text-sm font-semibold rounded-xl border border-white/30 transition backdrop-blur-sm shadow-sm">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+      </svg>
+      Tambah Transaksi
+    </button>
+    {% endif %}
+  </div>
+
+  <!-- Content & Controls -->
+  <div class="p-6">
+    <!-- NAVIGASI TAHUN (Pagination) -->
+    <div class="flex flex-wrap items-center gap-2 mb-6">
+      <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider mr-2">Pilih Tahun:</span>
+      {% for y in years_list %}
+        <a href="?year={{ y }}"
+           class="px-4 py-1.5 rounded-full text-xs font-semibold transition border
+                  {% if y == selected_year %}
+                    bg-emerald-600 text-white border-emerald-600 shadow-sm
+                  {% else %}
+                    bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50
+                  {% endif %}">
+          {{ y }}
+        </a>
+      {% endfor %}
+    </div>
+
+    <!-- WIDGET SUMMARY TOTAL (PREMIUM) -->
+    <div class="grid sm:grid-cols-3 gap-4 mb-6">
+
+      <!-- Total Pemasukan -->
+      <div class="bg-gradient-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200/60 rounded-2xl p-5 hover:scale-[1.02] transition duration-300 shadow-sm flex items-center gap-4">
+        <span class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-700 flex items-center justify-center text-2xl shrink-0">📈</span>
+        <div>
+          <div class="text-[10px] uppercase tracking-widest text-emerald-800 font-bold">Total Pemasukan</div>
+          <div class="text-lg font-extrabold text-emerald-950 mt-0.5">Rp {{ total_year_in|floatformat:0|intcomma }}</div>
+          <div class="text-[10px] text-emerald-700 font-medium mt-0.5">Tahun {{ selected_year }}</div>
+        </div>
+      </div>
+
+      <!-- Total Pengeluaran -->
+      <div class="bg-gradient-to-br from-red-50 to-red-100/50 border border-red-200/60 rounded-2xl p-5 hover:scale-[1.02] transition duration-300 shadow-sm flex items-center gap-4">
+        <span class="w-12 h-12 rounded-xl bg-red-500/10 text-red-700 flex items-center justify-center text-2xl shrink-0">📉</span>
+        <div>
+          <div class="text-[10px] uppercase tracking-widest text-red-800 font-bold">Total Pengeluaran</div>
+          <div class="text-lg font-extrabold text-red-950 mt-0.5">Rp {{ total_year_out|floatformat:0|intcomma }}</div>
+          <div class="text-[10px] text-red-700 font-medium mt-0.5">Tahun {{ selected_year }}</div>
+        </div>
+      </div>
+
+      <!-- Saldo Kas Bersih -->
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/60 rounded-2xl p-5 hover:scale-[1.02] transition duration-300 shadow-sm flex items-center gap-4">
+        <span class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-700 flex items-center justify-center text-2xl shrink-0">💰</span>
+        <div>
+          <div class="text-[10px] uppercase tracking-widest text-blue-800 font-bold">Selisih Kas Bersih</div>
+          <div class="text-lg font-extrabold text-blue-950 mt-0.5">Rp {{ total_year_net|floatformat:0|intcomma }}</div>
+          <div class="text-[10px] text-blue-700 font-medium mt-0.5">Tahun {{ selected_year }}</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- AREA GRAFIK -->
+    <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm mb-8 hover:shadow-md transition duration-300">
+      <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Grafik Bulanan Pemasukan vs Pengeluaran</h3>
+      <div class="w-full h-80 relative">
+        <canvas id="cashflowChart"></canvas>
+      </div>
+    </div>
+
+    <hr class="border-gray-100 mb-6">
+
+    <!-- TRANSAKSI -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+      <h2 class="text-sm font-semibold text-gray-800 uppercase tracking-wider">
+        Rincian Transaksi Kas
+      </h2>
+      <span class="text-xs text-gray-400 font-medium"><span id="cf-count-badge">{{ recent_cashflows|length }}</span> transaksi</span>
+    </div>
+
+    <!-- FILTER & PENCARIAN INSTAN -->
+    <div class="p-3.5 bg-gray-50/70 border border-gray-200 rounded-xl mb-4 flex flex-col sm:flex-row gap-3 items-center justify-between shadow-sm">
+      <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+        <!-- Month Filter -->
+        <select id="cf-filter-month" class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold transition cursor-pointer">
+          <option value="all">📅 Semua Bulan</option>
+          <option value="01">Januari</option>
+          <option value="02">Februari</option>
+          <option value="03">Maret</option>
+          <option value="04">April</option>
+          <option value="05">Mei</option>
+          <option value="06">Juni</option>
+          <option value="07">Juli</option>
+          <option value="08">Agustus</option>
+          <option value="09">September</option>
+          <option value="10">Oktober</option>
+          <option value="11">November</option>
+          <option value="12">Desember</option>
+        </select>
+        
+        <!-- Year Filter -->
+        <select id="cf-filter-year" class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold transition cursor-pointer">
+          <option value="all">🗓️ Semua Tahun</option>
+        </select>
+      </div>
+      
+      <!-- Live Search Box -->
+      <div class="relative w-full sm:w-64">
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-xs">🔍</span>
+        <input type="text" id="cf-search" placeholder="Cari keterangan, kategori, nominal..." class="w-full pl-8 pr-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white transition">
+      </div>
+    </div>
+
+    {% if recent_cashflows %}
+      <div class="overflow-x-auto max-h-[385px] overflow-y-auto rounded-xl border border-gray-200 shadow-sm relative">
+        <table class="std-table min-w-full">
+          <thead class="bg-emerald-50/80 sticky top-0 z-10">
+            <tr>
+              <th class="bg-[#f0fdf4] font-semibold">Tanggal</th>
+              <th class="bg-[#f0fdf4] font-semibold">Kategori Kas</th>
+              <th class="bg-[#f0fdf4] font-semibold">Keterangan</th>
+              <th class="bg-[#f0fdf4] font-semibold text-right">Nominal</th>
+              {% if is_admin %}<th class="bg-[#f0fdf4] font-semibold text-center">Aksi</th>{% endif %}
+            </tr>
+          </thead>
+          <tbody id="cf-table-body" class="divide-y divide-gray-100 bg-white">
+            {% for cf in recent_cashflows %}
+              <tr class="cf-row hover:bg-gray-50 transition group" data-date="{{ cf.date|date:'Y-m-d' }}" data-search="{{ cf.category.name|default:'Umum' }} {{ cf.description }} Rp {{ cf.amount|floatformat:0 }}">
+                <td class="whitespace-nowrap text-gray-500">{{ cf.date|date:"d M Y" }}</td>
+                <td>
+                  {% if cf.flow_type == 'IN' %}
+                    <span class="inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                      🌱 {{ cf.category.name|default:"Pemasukan Umum" }}
+                    </span>
+                  {% else %}
+                    <span class="inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-100">
+                      🍂 {{ cf.category.name|default:"Pengeluaran Umum" }}
+                    </span>
+                  {% endif %}
+                </td>
+                <td class="font-medium text-gray-700">{{ cf.description }}</td>
+                <td class="text-right font-bold text-sm {% if cf.flow_type == 'IN' %}text-emerald-700{% else %}text-red-600{% endif %}">
+                  {% if cf.flow_type == 'IN' %}+{% else %}-{% endif %} Rp {{ cf.amount|floatformat:0|intcomma }}
+                </td>
+                {% if is_admin %}
+                <td class="text-center whitespace-nowrap">
+                  <a href="{% url 'cashflow_edit' cf.pk %}?next=/rekap-kas/?year={{ selected_year }}"
+                     class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition mr-1">
+                    ✏️ Edit
+                  </a>
+                  <form method="post" action="{% url 'cashflow_delete' cf.pk %}"
+                        class="inline"
+                        onsubmit="return confirm('Hapus transaksi ini?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="/rekap-kas/?year={{ selected_year }}">
+                    <button type="submit"
+                            class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition">
+                      🗑️ Hapus
+                    </button>
+                  </form>
+                </td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="py-8 text-center bg-gray-50 rounded-xl border border-gray-200">
+        <p class="text-gray-400 italic text-sm">Belum ada catatan transaksi kas tahun ini.</p>
+        {% if is_admin %}
+        <button onclick="document.getElementById('modalTambahKas').classList.remove('hidden')"
+                class="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition">
+          + Tambah Transaksi Pertama
+        </button>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+{# ──────────────── MODAL TAMBAH TRANSAKSI (ADMIN ONLY) ──────────────── #}
+{% if is_admin %}
+<div id="modalTambahKas"
+     class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+     role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+       onclick="document.getElementById('modalTambahKas').classList.add('hidden')"></div>
+
+  <!-- Panel -->
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden
+              animate-[fadeInUp_0.2s_ease-out]">
+
+    <!-- Modal Header -->
+    <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="w-9 h-9 bg-white/15 rounded-lg flex items-center justify-center text-lg">💸</span>
+        <div>
+          <h2 id="modalTitle" class="text-base font-bold text-white">Catat Transaksi Kas</h2>
+          <p class="text-emerald-200 text-xs">Pemasukan atau pengeluaran langsung tercatat</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('modalTambahKas').classList.add('hidden')"
+              class="text-white/70 hover:text-white hover:bg-white/15 w-8 h-8 rounded-lg flex items-center justify-center transition text-lg leading-none">
+        ×
+      </button>
+    </div>
+
+    <!-- Form -->
+    <form method="post" action="{% url 'cashflow_public' %}?year={{ selected_year }}" class="p-6 space-y-4">
+      {% csrf_token %}
+
+      {% if cashflow_form.errors %}
+      <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-xs text-red-700">
+        ❌ Ada kesalahan, silakan periksa isian kembali.
+      </div>
+      {% endif %}
+
+      <!-- Tanggal -->
+      <div>
+        <label for="id_date" class="block text-xs font-semibold text-gray-600 mb-1">📅 Tanggal</label>
+        <input type="date" name="date" id="id_date"
+               value="{{ cashflow_form.date.value|default:'' }}"
+               required
+               class="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition">
+        {% if cashflow_form.date.errors %}
+          <p class="text-xs text-red-600 mt-1">{{ cashflow_form.date.errors|join:", " }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Kategori -->
+      <div>
+        <label for="id_category" class="block text-xs font-semibold text-gray-600 mb-1">🏷️ Kategori Kas</label>
+        <select name="category" id="id_category"
+                class="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition bg-white">
+          {% for val, label in cashflow_form.fields.category.choices %}
+            <option value="{{ val }}"
+              {% if cashflow_form.category.value == val|stringformat:"s" %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+        {% if cashflow_form.category.errors %}
+          <p class="text-xs text-red-600 mt-1">{{ cashflow_form.category.errors|join:", " }}</p>
+        {% endif %}
+        <p class="text-[10px] text-gray-400 mt-1">Kategori otomatis menentukan jenis (masuk/keluar)</p>
+      </div>
+
+      <!-- Nominal -->
+      <div>
+        <label for="id_amount" class="block text-xs font-semibold text-gray-600 mb-1">💵 Nominal (Rp)</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">Rp</span>
+          <input type="number" name="amount" id="id_amount"
+                 value="{{ cashflow_form.amount.value|default:'' }}"
+                 min="1" step="1" placeholder="Contoh: 150000"
+                 required
+                 class="w-full rounded-xl border border-gray-200 pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition">
+        </div>
+        {% if cashflow_form.amount.errors %}
+          <p class="text-xs text-red-600 mt-1">{{ cashflow_form.amount.errors|join:", " }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Keterangan -->
+      <div>
+        <label for="id_description" class="block text-xs font-semibold text-gray-600 mb-1">📝 Keterangan</label>
+        <input type="text" name="description" id="id_description"
+               value="{{ cashflow_form.description.value|default:'' }}"
+               placeholder="Keterangan singkat transaksi"
+               required maxlength="255"
+               class="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition">
+        {% if cashflow_form.description.errors %}
+          <p class="text-xs text-red-600 mt-1">{{ cashflow_form.description.errors|join:", " }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Tombol Aksi -->
+      <div class="flex items-center gap-3 pt-2 border-t border-gray-100">
+        <button type="submit"
+                class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-sm font-semibold rounded-xl transition shadow-sm">
+          💾 Simpan Transaksi
+        </button>
+        <button type="button"
+                onclick="document.getElementById('modalTambahKas').classList.add('hidden')"
+                class="px-4 py-2.5 text-sm rounded-xl border border-gray-200 hover:bg-gray-50 transition text-gray-600 font-medium">
+          Batal
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# Buka modal otomatis jika ada error form #}
+{% if cashflow_form.errors %}
+<script>document.getElementById('modalTambahKas').classList.remove('hidden');</script>
+{% endif %}
+{% endif %}
 
 <!-- Include Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function() {
     const ctx = document.getElementById('cashflowChart').getContext('2d');
-    
-    // Parse data dari backend (dikirim dalam bentuk string JSON via context)
+
     const labels = JSON.parse('{{ chart_labels|safe }}');
     const dataIn = JSON.parse('{{ chart_in|safe }}');
     const dataOut = JSON.parse('{{ chart_out|safe }}');
-    
+
     new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: labels.map(l => l.replace('-', '/')), // ubah YYYY-MM jadi YYYY/MM untuk tampilan
+        labels: labels.map(l => l.replace('-', '/')),
         datasets: [
           {
             label: 'Pemasukan (Rp)',
             data: dataIn,
-            backgroundColor: 'rgba(16, 185, 129, 0.7)', // emerald-500
+            backgroundColor: 'rgba(16, 185, 129, 0.85)',
             borderColor: 'rgba(16, 185, 129, 1)',
             borderWidth: 1,
-            borderRadius: 4
+            borderRadius: 6
           },
           {
             label: 'Pengeluaran (Rp)',
             data: dataOut,
-            backgroundColor: 'rgba(239, 68, 68, 0.7)', // red-500
+            backgroundColor: 'rgba(239, 68, 68, 0.85)',
             borderColor: 'rgba(239, 68, 68, 1)',
             borderWidth: 1,
-            borderRadius: 4
+            borderRadius: 6
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        interaction: {
-          mode: 'index',
-          intersect: false,
-        },
+        interaction: { mode: 'index', intersect: false },
         plugins: {
+          legend: {
+            labels: { font: { family: "'Inter', sans-serif", weight: '500' } }
+          },
           tooltip: {
             callbacks: {
               label: function(context) {
                 let label = context.dataset.label || '';
-                if (label) {
-                  label += ': ';
-                }
+                if (label) label += ': ';
                 if (context.parsed.y !== null) {
-                  label += new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(context.parsed.y);
+                  label += new Intl.NumberFormat('id-ID', {
+                    style: 'currency', currency: 'IDR', maximumFractionDigits: 0
+                  }).format(context.parsed.y);
                 }
                 return label;
               }
@@ -130,15 +397,17 @@
           }
         },
         scales: {
+          x: {
+            grid: { display: false },
+            ticks: { font: { family: "'Inter', sans-serif", size: 11 } }
+          },
           y: {
             beginAtZero: true,
             ticks: {
-              callback: function(value, index, values) {
-                if (value >= 1000000) {
-                  return 'Rp ' + (value / 1000000) + ' Jt';
-                } else if (value >= 1000) {
-                  return 'Rp ' + (value / 1000) + ' Rb';
-                }
+              font: { family: "'Inter', sans-serif", size: 11 },
+              callback: function(value) {
+                if (value >= 1000000) return 'Rp ' + (value / 1000000) + ' Jt';
+                if (value >= 1000) return 'Rp ' + (value / 1000) + ' Rb';
                 return 'Rp ' + value;
               }
             }
@@ -146,6 +415,104 @@
         }
       }
     });
+
+    // 2. Live Instant Filtering & Search Arus Kas
+    const monthFilter = document.getElementById("cf-filter-month");
+    const yearFilter = document.getElementById("cf-filter-year");
+    const searchInput = document.getElementById("cf-search");
+    const rows = document.querySelectorAll(".cf-row");
+    const tbody = document.getElementById("cf-table-body");
+    const countBadge = document.getElementById("cf-count-badge");
+    
+    if (monthFilter && rows.length) {
+      // Populate Year Filter dropdown dynamically from available rows
+      const yearsSet = new Set();
+      rows.forEach(row => {
+        const dateStr = row.getAttribute("data-date");
+        if (dateStr) {
+          const year = dateStr.substring(0, 4);
+          yearsSet.add(year);
+        }
+      });
+      
+      // Sort years in descending order
+      const sortedYears = Array.from(yearsSet).sort((a, b) => b - a);
+      sortedYears.forEach(year => {
+        const option = document.createElement("option");
+        option.value = year;
+        option.textContent = year;
+        yearFilter.appendChild(option);
+      });
+
+      // Filter Function
+      function filterCashflows() {
+        const selectedMonth = monthFilter.value; // 'all' or '01'-'12'
+        const selectedYear = yearFilter.value;   // 'all' or 'YYYY'
+        const searchVal = searchInput.value.toLowerCase().trim();
+        
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+          const dateStr = row.getAttribute("data-date"); // YYYY-MM-DD
+          const searchData = row.getAttribute("data-search").toLowerCase();
+          
+          const rowYear = dateStr.substring(0, 4);
+          const rowMonth = dateStr.substring(5, 7);
+          
+          // Filter Conditions
+          const matchMonth = (selectedMonth === "all" || rowMonth === selectedMonth);
+          const matchYear = (selectedYear === "all" || rowYear === selectedYear);
+          const matchSearch = (!searchVal || searchData.includes(searchVal));
+          
+          if (matchMonth && matchYear && matchSearch) {
+            row.style.display = "";
+            visibleCount++;
+          } else {
+            row.style.display = "none";
+          }
+        });
+
+        // Update count badge
+        if (countBadge) {
+          countBadge.textContent = visibleCount;
+        }
+
+        // Handle "no records found" message
+        const emptyMessage = document.getElementById("cf-empty-search-msg");
+        if (visibleCount === 0) {
+          if (!emptyMessage) {
+            const tr = document.createElement("tr");
+            tr.id = "cf-empty-search-msg";
+            tr.className = "bg-gray-50/30";
+            tr.innerHTML = `<td colspan="${document.querySelectorAll('.std-table th').length}" class="px-4 py-8 text-center text-xs text-gray-400 italic">Tidak ada transaksi kas yang cocok dengan filter pencarian.</td>`;
+            tbody.appendChild(tr);
+          }
+        } else {
+          if (emptyMessage) {
+            emptyMessage.remove();
+          }
+        }
+      }
+
+      // Attach Event Listeners
+      monthFilter.addEventListener("change", filterCashflows);
+      yearFilter.addEventListener("change", filterCashflows);
+      searchInput.addEventListener("input", filterCashflows);
+    }
+  });
+
+  // Tutup modal dengan tombol Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.getElementById('modalTambahKas')?.classList.add('hidden');
+    }
   });
 </script>
+
+<style>
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+</style>
 {% endblock %}

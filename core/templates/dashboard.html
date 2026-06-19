@@ -1,53 +1,1075 @@
 {% extends 'base.html' %}
-{% block title %}Dashboard (Pengurus) – Web Masjid{% endblock %}
+{% load humanize %}
+{% block title %}Panel Pengurus – {{ mosque.name|default:"Masjid Al Huda" }}{% endblock %}
+
 {% block content %}
-<h1 class="text-2xl font-bold mb-3">Dashboard Pengurus</h1>
-<div class="grid md:grid-cols-2 gap-4">
-  <div class="bg-white p-4 rounded-xl border">
-    <div class="text-lg font-semibold mb-2">Profil</div>
-    {% if mosque %}
-      <div class="text-sm">{{ mosque.name }}</div>
-      <div class="text-sm text-gray-600">{{ mosque.address }}</div>
-      <a class="inline-block mt-3 px-3 py-1 rounded bg-emerald-600 text-white" href="/profil/">Kelola Profil</a>
-    {% else %}<p>Belum ada profil.</p>{% endif %}
+
+{# ── Flash Messages ── #}
+{% if messages %}
+  <div class="space-y-2 mb-4">
+    {% for m in messages %}
+      <div class="px-4 py-3 rounded-lg border text-sm flex items-center gap-2
+        {% if m.tags == 'success' %} bg-emerald-50 border-emerald-300 text-emerald-800
+        {% elif m.tags == 'error' %} bg-red-50 border-red-300 text-red-800
+        {% else %} bg-gray-50 border-gray-200 text-gray-700 {% endif %}">
+        {% if m.tags == 'success' %}✅{% elif m.tags == 'error' %}❌{% else %}ℹ️{% endif %}
+        {{ m }}
+      </div>
+    {% endfor %}
   </div>
-  <div class="bg-white p-4 rounded-xl border">
-    <div class="text-lg font-semibold mb-2">Transparansi Keuangan</div>
-    <a class="inline-block mt-1 px-3 py-1 rounded bg-emerald-600 text-white" href="/laporan/upload/">Upload Laporan Excel</a>
-    <ul class="mt-3 text-sm space-y-1">
-      {% for r in reports %}
-        <li><a class="underline" href="/laporan/{{ r.pk }}/">{{ r.title }}</a> — {{ r.uploaded_at|date:"d M Y H:i" }}</li>
-      {% empty %}<li class="text-gray-500">Belum ada laporan.</li>{% endfor %}
-    </ul>
-  </div>
-  <div class="bg-white p-4 rounded-xl border">
-    <div class="text-lg font-semibold mb-2">Dokumen Legalitas</div>
-    <a class="inline-block px-3 py-1 rounded bg-emerald-600 text-white text-sm" href="/dokumen/upload/">Upload Legalitas</a>
-    <ul class="mt-3 text-sm space-y-1">
-      {% for d in legal_docs %}
-        <li><a class="underline" href="{{ d.file.url }}" target="_blank">{{ d.get_doc_type_display }} — {{ d.title }}</a></li>
-      {% empty %}<li class="text-gray-500">Belum ada dokumen.</li>{% endfor %}
-    </ul>
+{% endif %}
+
+<!-- Header -->
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-gray-800">Panel Pengurus</h1>
+  <p class="text-sm text-gray-500 mt-1">Selamat datang, <span class="font-semibold text-emerald-700">{{ request.user.username }}</span>. Kelola seluruh operasional masjid dari satu panel terpadu.</p>
+</div>
+
+<!-- Tabs Navigation -->
+<div class="border-b border-gray-200 mb-6 bg-white rounded-xl shadow-sm p-2 overflow-x-auto no-scrollbar">
+  <nav class="flex flex-nowrap gap-1 whitespace-nowrap" aria-label="Tabs">
+    <button id="tab-btn-overview" class="shrink-0 px-4 py-2.5 text-xs font-semibold rounded-lg border border-transparent transition duration-150 flex items-center gap-2">
+      📊 Ringkasan
+    </button>
+    <button id="tab-btn-profil" class="shrink-0 px-4 py-2.5 text-xs font-semibold rounded-lg border border-transparent transition duration-150 flex items-center gap-2">
+      🕌 Profil & Rekening
+    </button>
+    <button id="tab-btn-pengurus" class="shrink-0 px-4 py-2.5 text-xs font-semibold rounded-lg border border-transparent transition duration-150 flex items-center gap-2">
+      👥 Pengurus
+    </button>
+    <button id="tab-btn-program" class="shrink-0 px-4 py-2.5 text-xs font-semibold rounded-lg border border-transparent transition duration-150 flex items-center gap-2">
+      📅 Program Kerja
+    </button>
+    <button id="tab-btn-dokumen" class="shrink-0 px-4 py-2.5 text-xs font-semibold rounded-lg border border-transparent transition duration-150 flex items-center gap-2">
+      📁 Legalitas & SOP
+    </button>
+    <button id="tab-btn-donasi" class="shrink-0 px-4 py-2.5 text-xs font-semibold rounded-lg border border-transparent transition duration-150 flex items-center gap-2">
+      🧾 Bukti Donasi
+    </button>
+    <button id="tab-btn-kas" class="shrink-0 px-4 py-2.5 text-xs font-semibold rounded-lg border border-transparent transition duration-150 flex items-center gap-2">
+      💰 Kelola Kas
+    </button>
+  </nav>
+</div>
+
+<!-- TAB CONTENTS -->
+
+<!-- 1. TAB RINGKASAN (OVERVIEW) -->
+<div id="tab-content-overview" class="space-y-6">
+  <!-- Stat Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+      <div class="text-2xl mb-1">📄</div>
+      <div class="text-2xl font-bold text-emerald-700">{{ reports|length }}</div>
+      <div class="text-xs text-gray-500 mt-0.5">Laporan Keuangan</div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+      <div class="text-2xl mb-1">📑</div>
+      <div class="text-2xl font-bold text-emerald-700">{{ legal_docs|length }}</div>
+      <div class="text-xs text-gray-500 mt-0.5">Dokumen Legalitas</div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+      <div class="text-2xl mb-1">💰</div>
+      <div class="text-2xl font-bold text-emerald-700">{{ cashflows|length }}</div>
+      <div class="text-xs text-gray-500 mt-0.5">Transaksi Kas</div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+      <div class="text-2xl mb-1">📋</div>
+      <div class="text-2xl font-bold text-emerald-700">{{ sop_docs|length }}</div>
+      <div class="text-xs text-gray-500 mt-0.5">Dokumen SOP</div>
+    </div>
   </div>
 
-  <div class="bg-white p-4 rounded-xl border">
-    <div class="text-lg font-semibold mb-2">Standar Operasional Prosedur (SOP)</div>
-    <a class="inline-block px-3 py-1 rounded bg-emerald-600 text-white text-sm" href="/sop/upload/">Upload SOP Baru</a>
-    <ul class="mt-3 text-sm space-y-1">
-      {% for d in sop_docs %}
-        <li><a class="underline" href="{{ d.file.url }}" target="_blank">{{ d.title }}</a></li>
-      {% empty %}<li class="text-gray-500">Belum ada SOP.</li>{% endfor %}
-    </ul>
-  </div>
-  <div class="bg-white p-4 rounded-xl border">
-    <div class="text-lg font-semibold mb-2">Manajemen Kas</div>
-    <a class="inline-block mt-1 px-3 py-1 rounded bg-emerald-600 text-white" href="/kas/add/">+ Tambah Kas</a>
-    <ul class="mt-3 text-sm space-y-1">
-      {% for cf in cashflows %}
-        <li>{{ cf.date|date:"d/m" }} — {% if cf.flow_type == 'IN' %}<span class="text-green-600">+ Rp{{ cf.amount|floatformat:0 }}</span>{% else %}<span class="text-red-600">- Rp{{ cf.amount|floatformat:0 }}</span>{% endif %}</li>
-      {% empty %}<li class="text-gray-500">Belum ada kas.</li>{% endfor %}
-    </ul>
-    <a class="block mt-3 text-sm text-emerald-700 underline" href="/profil/">Lihat Semua / Hapus Data</a>
+  <!-- Main Grid -->
+  <div class="grid md:grid-cols-2 gap-6">
+
+    <!-- Profil Masjid Card -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col justify-between">
+      <div>
+        <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
+          <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm">🕌 Profil Masjid</h2>
+          <button onclick="switchTab('profil')" class="text-xs text-emerald-700 hover:underline font-medium">Kelola →</button>
+        </div>
+        <div class="px-5 py-4">
+          {% if mosque %}
+            <p class="font-semibold text-gray-800 text-base">{{ mosque.name }}</p>
+            <p class="text-sm text-gray-500 mt-1">{{ mosque.address }}</p>
+            <p class="text-xs text-gray-400 mt-1">{{ mosque.city }}, {{ mosque.province }}</p>
+            
+            {% if mosque.bank_account %}
+              <div class="mt-4 p-3 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center gap-3">
+                <span class="text-xl">💳</span>
+                <div class="text-xs">
+                  <p class="text-gray-500 font-medium">Nomor Rekening Resmi</p>
+                  <p class="font-bold text-emerald-800 text-sm mt-0.5">{{ mosque.bank_name }}: {{ mosque.bank_account }}</p>
+                </div>
+              </div>
+            {% endif %}
+          {% else %}
+            <p class="text-sm text-gray-400 italic">Belum ada profil masjid.</p>
+            <button onclick="switchTab('profil')" class="mt-2 text-sm text-emerald-700 hover:underline font-medium">+ Isi profil</button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Laporan Keuangan Card -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
+        <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm">📊 Laporan Keuangan Terbaru</h2>
+        <a href="{% url 'report_upload' %}" class="text-xs bg-emerald-600 text-white px-2.5 py-1 rounded-lg hover:bg-emerald-700 transition font-medium">+ Upload</a>
+      </div>
+      <div class="px-5 py-3">
+        {% if reports %}
+          <ul class="space-y-2">
+            {% for r in reports|slice:":5" %}
+              <li class="flex items-center justify-between text-sm py-1 border-b border-gray-50 last:border-0">
+                <a href="/laporan/{{ r.pk }}/" class="text-emerald-700 hover:underline font-medium truncate max-w-[200px]">{{ r.title }}</a>
+                <span class="text-xs text-gray-400 shrink-0 ml-2">{{ r.uploaded_at|date:"d M Y" }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-sm text-gray-400 italic py-2">Belum ada laporan.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Dokumen Legalitas Card -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
+        <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm">📁 Dokumen Legalitas</h2>
+        <a href="{% url 'document_upload' %}" class="text-xs bg-emerald-600 text-white px-2.5 py-1 rounded-lg hover:bg-emerald-700 transition font-medium">+ Upload</a>
+      </div>
+      <div class="px-5 py-3">
+        {% if legal_docs %}
+          <ul class="space-y-2">
+            {% for d in legal_docs|slice:":5" %}
+              <li class="text-sm py-1 border-b border-gray-50 last:border-0 flex justify-between">
+                <span class="truncate max-w-[200px]">
+                  <a href="{{ d.file.url }}" target="_blank" class="text-emerald-700 hover:underline font-medium">{{ d.get_doc_type_display }}</a>
+                  <span class="text-gray-500"> — {{ d.title }}</span>
+                </span>
+                <span class="text-xs text-gray-400 shrink-0 ml-2">{{ d.uploaded_at|date:"d M Y" }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-sm text-gray-400 italic py-2">Belum ada dokumen.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Manajemen Kas Card -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
+        <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm">💰 Transaksi Kas Terbaru</h2>
+        <div class="flex gap-2">
+          <a href="{% url 'cashflow_print' %}" target="_blank" class="text-xs bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg transition shadow-sm flex items-center gap-1 font-medium">🖨️ Cetak</a>
+          <button onclick="switchTab('kas')" class="text-xs bg-emerald-600 text-white px-2.5 py-1 rounded-lg hover:bg-emerald-700 transition font-medium">Kelola Kas →</button>
+        </div>
+      </div>
+      <div class="px-5 py-3">
+        {% if cashflows %}
+          <ul class="space-y-2">
+            {% for cf in cashflows|slice:":5" %}
+              <li class="flex items-center justify-between text-sm py-2 border-b border-gray-50 last:border-0">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="text-xs text-gray-400 font-medium shrink-0">{{ cf.date|date:"d M" }}</span>
+                  {% if cf.flow_type == 'IN' %}
+                    <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/60 truncate max-w-[150px]" title="{{ cf.category.name }}">
+                      🌱 {{ cf.category.name|default:"Masuk" }}
+                    </span>
+                  {% else %}
+                    <span class="text-xs font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded-full border border-red-100/60 truncate max-w-[150px]" title="{{ cf.category.name }}">
+                      🍂 {{ cf.category.name|default:"Keluar" }}
+                    </span>
+                  {% endif %}
+                </div>
+                <span class="font-bold text-sm {% if cf.flow_type == 'IN' %}text-emerald-700{% else %}text-red-600{% endif %} shrink-0 ml-2">
+                  {% if cf.flow_type == 'IN' %}+{% else %}-{% endif %} Rp {{ cf.amount|floatformat:0|intcomma }}
+                </span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-sm text-gray-400 italic py-2">Belum ada data kas.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- SOP Card -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
+        <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm">📋 SOP Masjid</h2>
+        <a href="{% url 'sop_upload' %}" class="text-xs bg-emerald-600 text-white px-2.5 py-1 rounded-lg hover:bg-emerald-700 transition font-medium">+ Upload</a>
+      </div>
+      <div class="px-5 py-3">
+        {% if sop_docs %}
+          <ul class="space-y-2">
+            {% for d in sop_docs|slice:":5" %}
+              <li class="text-sm py-1 border-b border-gray-50 last:border-0 flex justify-between">
+                <a href="{{ d.file.url }}" target="_blank" class="text-emerald-700 hover:underline font-medium">{{ d.title }}</a>
+                <span class="text-xs text-gray-400 shrink-0 ml-2">{{ d.uploaded_at|date:"d M Y" }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-sm text-gray-400 italic py-2">Belum ada SOP.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Akses Cepat Admin Card -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b bg-gray-50">
+        <h2 class="font-semibold text-gray-800 flex items-center gap-2 text-sm">⚡ Akses Cepat</h2>
+      </div>
+      <div class="px-5 py-4 grid grid-cols-2 gap-2">
+        <button onclick="switchTab('profil')" class="text-left flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 text-sm transition font-medium">
+          🕌 Kelola Profil
+        </button>
+        <a href="{% url 'management_add' %}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 text-sm transition font-medium">
+          👥 Tambah Pengurus
+        </a>
+        <a href="{% url 'program_add' %}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 text-sm transition font-medium">
+          📅 Tambah Program
+        </a>
+        <button onclick="switchTab('donasi')" class="text-left flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 text-sm transition font-medium">
+          🧾 Bukti Donasi
+        </button>
+        <button onclick="switchTab('kas')" class="text-left flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 text-sm transition font-medium">
+          💰 Kelola Kas
+        </button>
+        <a href="{% url 'cashflow_print' %}" target="_blank" class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 text-sm transition text-amber-700 font-medium">
+          🖨️ Cetak Kas Bulanan
+        </a>
+      </div>
+    </div>
+
   </div>
 </div>
+
+<!-- 2. TAB PROFIL & BANK -->
+<div id="tab-content-profil" class="hidden space-y-6 animate-fade-in">
+  {% if form %}
+  <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+    <div class="bg-emerald-700 px-6 py-4 flex items-center gap-3">
+      <span class="text-2xl">🕌</span>
+      <div>
+        <h1 class="text-lg font-bold text-white">Edit Profil Masjid</h1>
+        <p class="text-emerald-200 text-xs mt-0.5">Kelola identitas resmi dan rekening bank masjid</p>
+      </div>
+    </div>
+
+    {% if form.non_field_errors %}
+      <div class="mx-6 mt-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'dashboard' %}" class="p-6">
+      {% csrf_token %}
+      <input type="hidden" name="update_profile" value="1">
+
+      {# —— Informasi Dasar —— #}
+      <h2 class="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-3">Informasi Dasar</h2>
+      <div class="grid sm:grid-cols-2 gap-4 mb-6">
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.name.label }}</label>
+          {{ form.name }}
+          {% if form.name.errors %}<p class="text-red-500 text-xs mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.address.label }}</label>
+          {{ form.address }}
+          {% if form.address.errors %}<p class="text-red-500 text-xs mt-1">{{ form.address.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.city.label }}</label>
+          {{ form.city }}
+          {% if form.city.errors %}<p class="text-red-500 text-xs mt-1">{{ form.city.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.province.label }}</label>
+          {{ form.province }}
+          {% if form.province.errors %}<p class="text-red-500 text-xs mt-1">{{ form.province.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.established_date.label }}</label>
+          {{ form.established_date }}
+          {% if form.established_date.errors %}<p class="text-red-500 text-xs mt-1">{{ form.established_date.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.land_status.label }}</label>
+          {{ form.land_status }}
+          {% if form.land_status.errors %}<p class="text-red-500 text-xs mt-1">{{ form.land_status.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+
+      <hr class="border-gray-100 mb-6">
+
+      {# —— Legalitas & Keuangan —— #}
+      <h2 class="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-3">Legalitas & Keuangan</h2>
+      <div class="grid sm:grid-cols-2 gap-4 mb-6">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.deed_number.label }}</label>
+          {{ form.deed_number }}
+          {% if form.deed_number.errors %}<p class="text-red-500 text-xs mt-1">{{ form.deed_number.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.npwp.label }}</label>
+          {{ form.npwp }}
+          {% if form.npwp.errors %}<p class="text-red-500 text-xs mt-1">{{ form.npwp.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.bank_name.label }}</label>
+          {{ form.bank_name }}
+          {% if form.bank_name.errors %}<p class="text-red-500 text-xs mt-1">{{ form.bank_name.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.bank_account.label }}</label>
+          {{ form.bank_account }}
+          {% if form.bank_account.errors %}<p class="text-red-500 text-xs mt-1">{{ form.bank_account.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+
+      <hr class="border-gray-100 mb-6">
+
+      {# —— Kontak & Media —— #}
+      <h2 class="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-3">Kontak & Media</h2>
+      <div class="grid sm:grid-cols-2 gap-4 mb-6">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.contact_phone.label }}</label>
+          {{ form.contact_phone }}
+          {% if form.contact_phone.errors %}<p class="text-red-500 text-xs mt-1">{{ form.contact_phone.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.email.label }}</label>
+          {{ form.email }}
+          {% if form.email.errors %}<p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.website.label }}</label>
+          {{ form.website }}
+          {% if form.website.errors %}<p class="text-red-500 text-xs mt-1">{{ form.website.errors.0 }}</p>{% endif %}
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.logo_url.label }}</label>
+          {{ form.logo_url }}
+          {% if form.logo_url.errors %}<p class="text-red-500 text-xs mt-1">{{ form.logo_url.errors.0 }}</p>{% endif %}
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ form.about.label }}</label>
+          {{ form.about }}
+          {% if form.about.errors %}<p class="text-red-500 text-xs mt-1">{{ form.about.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+
+      {% if form.errors and not form.non_field_errors %}
+        <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          ⚠️ Beberapa isian belum valid. Periksa kolom yang ditandai.
+        </div>
+      {% endif %}
+
+      <div class="flex justify-end pt-2">
+        <button type="submit"
+          class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg transition shadow-sm">
+          💾 Simpan Perubahan
+        </button>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- Preview Profil Info Card -->
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="bg-white rounded-2xl border shadow-sm p-5">
+      <h2 class="text-sm font-semibold text-emerald-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+        📋 Informasi Umum
+      </h2>
+      <dl class="space-y-2 text-sm">
+        <div class="flex gap-2"><dt class="text-gray-500 w-32 shrink-0">Nama</dt><dd class="font-semibold text-gray-800">{{ mosque.name }}</dd></div>
+        <div class="flex gap-2"><dt class="text-gray-500 w-32 shrink-0">Alamat</dt><dd class="text-gray-700">{{ mosque.address }}</dd></div>
+        <div class="flex gap-2"><dt class="text-gray-500 w-32 shrink-0">Kota/Kab</dt><dd class="text-gray-700">{{ mosque.city }}</dd></div>
+        <div class="flex gap-2"><dt class="text-gray-500 w-32 shrink-0">Provinsi</dt><dd class="text-gray-700">{{ mosque.province }}</dd></div>
+        <div class="flex gap-2"><dt class="text-gray-500 w-32 shrink-0">Berdiri</dt><dd class="text-gray-700">{{ mosque.established_date|default:"—" }}</dd></div>
+        <div class="flex gap-2"><dt class="text-gray-500 w-32 shrink-0">Status Tanah</dt><dd class="text-gray-700">{{ mosque.land_status|default:"—" }}</dd></div>
+      </dl>
+    </div>
+
+    <div class="bg-white rounded-2xl border shadow-sm p-5">
+      <h2 class="text-sm font-semibold text-emerald-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+        🏦 Legalitas & Bank
+      </h2>
+      <dl class="space-y-2 text-sm">
+        <div class="flex gap-2"><dt class="text-gray-500 w-32 shrink-0">No. Akta/Wakaf</dt><dd class="text-gray-700">{{ mosque.deed_number|default:"—" }}</dd></div>
+        <div class="flex gap-2"><dt class="text-gray-500 w-32 shrink-0">NPWP</dt><dd class="text-gray-700">{{ mosque.npwp|default:"—" }}</dd></div>
+        <div class="flex gap-2"><dt class="text-gray-500 w-32 shrink-0">Bank</dt><dd class="text-gray-700">{{ mosque.bank_name|default:"—" }}</dd></div>
+        <div class="flex gap-2"><dt class="text-gray-500 w-32 shrink-0">No. Rekening</dt><dd class="font-semibold text-gray-800">{{ mosque.bank_account|default:"—" }}</dd></div>
+      </dl>
+      {% if mosque.about %}
+      <hr class="my-3 border-gray-100">
+      <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Tentang</h3>
+      <p class="text-sm text-gray-600 leading-relaxed">{{ mosque.about }}</p>
+      {% endif %}
+      {% if mosque.logo_url %}
+        <img src="{{ mosque.logo_url }}" alt="Logo Masjid" class="mt-3 w-24 rounded border object-contain">
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- 3. TAB STRUKTUR PENGURUS -->
+<div id="tab-content-pengurus" class="hidden space-y-6 animate-fade-in">
+  <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+    <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2">👥 Struktur Pengurus</h2>
+      <button onclick="document.getElementById('modalTambahPengurus').classList.remove('hidden')" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg border bg-white hover:bg-gray-50 transition shadow-sm font-medium">
+        ➕ Tambah Pengurus
+      </button>
+    </div>
+    {% if mgmt %}
+      <ul class="divide-y">
+        {% for m in mgmt %}
+          <li class="px-5 py-3.5 flex items-center justify-between gap-3">
+            <div>
+              <span class="font-semibold text-gray-800 text-sm block">{{ m.name }}</span>
+              <div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                <span class="bg-emerald-50 border border-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">{{ m.get_role_display }}</span>
+                {% if m.phone %}<span>· 📞 {{ m.phone }}</span>{% endif %}
+              </div>
+            </div>
+            <form method="post" action="{% url 'management_delete' m.pk %}" onsubmit="return confirm('Yakin hapus pengurus ini?');">
+              {% csrf_token %}
+              <button type="submit" class="px-3 py-1 bg-red-50 border border-red-200 text-red-600 hover:bg-red-600 hover:text-white rounded-lg text-xs font-semibold transition">
+                🗑 Hapus
+              </button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="px-5 py-6 text-sm text-gray-400 italic text-center">Belum ada data pengurus.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- 4. TAB PROGRAM & KEGIATAN -->
+<div id="tab-content-program" class="hidden space-y-6 animate-fade-in">
+  <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+    <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2">📅 Program & Kegiatan</h2>
+      <button onclick="document.getElementById('modalTambahProgram').classList.remove('hidden')" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg border bg-white hover:bg-gray-50 transition shadow-sm font-medium">
+        ➕ Tambah Program
+      </button>
+    </div>
+    {% if programs %}
+      <ul class="divide-y">
+        {% for p in programs %}
+          <li class="px-5 py-3.5 flex items-center justify-between gap-3">
+            <div>
+              <span class="font-semibold text-gray-800 text-sm block">{{ p.title }}</span>
+              <div class="text-xs text-gray-500 mt-1">
+                {% if p.is_active %}
+                  <span class="text-emerald-600 font-semibold">● Aktif</span>
+                {% else %}
+                  <span class="text-gray-400">○ Nonaktif</span>
+                {% endif %}
+                {% if p.last_update %} · Update {{ p.last_update|date:"d M Y" }}{% endif %}
+              </div>
+            </div>
+            <form method="post" action="{% url 'program_delete' p.pk %}" onsubmit="return confirm('Yakin hapus program ini?');">
+              {% csrf_token %}
+              <button type="submit" class="px-3 py-1 bg-red-50 border border-red-200 text-red-600 hover:bg-red-600 hover:text-white rounded-lg text-xs font-semibold transition">
+                🗑 Hapus
+              </button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="px-5 py-6 text-sm text-gray-400 italic text-center">Belum ada data program.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- TAB KELOLA KAS -->
+<div id="tab-content-kas" class="hidden space-y-6 animate-fade-in">
+  <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+    <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2">💰 Kelola Kas & Transaksi</h2>
+      <a href="{% url 'cashflow_add' %}?next=/dashboard/?tab=kas" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg border bg-white hover:bg-gray-50 transition shadow-sm">
+        ➕ Tambah Transaksi Kas
+      </a>
+    </div>
+    {% if cashflows %}
+      <!-- FILTER & PENCARIAN INSTAN -->
+      <div class="px-5 py-3.5 bg-gray-50/50 border-b flex flex-col sm:flex-row gap-3 items-center justify-between">
+        <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+          <!-- Month Filter -->
+          <select id="cf-filter-month" class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold transition cursor-pointer">
+            <option value="all">📅 Semua Bulan</option>
+            <option value="01">Januari</option>
+            <option value="02">Februari</option>
+            <option value="03">Maret</option>
+            <option value="04">April</option>
+            <option value="05">Mei</option>
+            <option value="06">Juni</option>
+            <option value="07">Juli</option>
+            <option value="08">Agustus</option>
+            <option value="09">September</option>
+            <option value="10">Oktober</option>
+            <option value="11">November</option>
+            <option value="12">Desember</option>
+          </select>
+          
+          <!-- Year Filter -->
+          <select id="cf-filter-year" class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold transition cursor-pointer">
+            <option value="all">🗓️ Semua Tahun</option>
+          </select>
+        </div>
+        
+        <!-- Live Search Box -->
+        <div class="relative w-full sm:w-64">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-xs">🔍</span>
+          <input type="text" id="cf-search" placeholder="Cari keterangan, kategori, nominal..." class="w-full pl-8 pr-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white transition">
+        </div>
+      </div>
+
+      <div class="overflow-x-auto max-h-[450px] overflow-y-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-gray-50 sticky top-0 z-10">
+            <tr class="text-left text-xs text-gray-500 uppercase tracking-wide border-b font-semibold">
+              <th class="px-4 py-2.5">Tanggal</th>
+              <th class="px-4 py-2.5">Kategori Kas</th>
+              <th class="px-4 py-2.5">Nominal</th>
+              <th class="px-4 py-2.5">Keterangan</th>
+              <th class="px-4 py-2.5 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="cf-table-body" class="divide-y divide-gray-100">
+            {% for cf in cashflows %}
+              <tr class="cf-row hover:bg-gray-50 transition" data-date="{{ cf.date|date:'Y-m-d' }}" data-search="{{ cf.category.name|default:'Umum' }} {{ cf.description }} Rp {{ cf.amount|floatformat:0 }}">
+                <td class="px-4 py-2.5 whitespace-nowrap text-gray-600">{{ cf.date|date:"d M Y" }}</td>
+                <td class="px-4 py-2.5 font-semibold text-gray-700">
+                  {% if cf.flow_type == 'IN' %}
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+                      🌱 {{ cf.category.name|default:"Pemasukan Umum" }}
+                    </span>
+                  {% else %}
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-red-700 bg-red-50 px-2.5 py-0.5 rounded-full border border-red-100">
+                      🍂 {{ cf.category.name|default:"Pengeluaran Umum" }}
+                    </span>
+                  {% endif %}
+                </td>
+                <td class="px-4 py-2.5 font-bold text-gray-800">Rp {{ cf.amount|floatformat:0|intcomma }}</td>
+                <td class="px-4 py-2.5 text-gray-600">{{ cf.description }}</td>
+                <td class="px-4 py-2.5 text-right whitespace-nowrap">
+                  <a href="{% url 'cashflow_edit' cf.pk %}?next=/dashboard/?tab=kas" class="text-blue-600 hover:underline text-xs mr-3 font-semibold">Edit</a>
+                  <form method="post" action="{% url 'cashflow_delete' cf.pk %}" onsubmit="return confirm('Yakin hapus data kas ini?');" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="/dashboard/?tab=kas">
+                    <button type="submit" class="text-red-500 hover:underline text-xs font-semibold">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="px-5 py-6 text-sm text-gray-400 italic text-center">Belum ada data transaksi kas.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- 5. TAB LEGALITAS & SOP -->
+<div id="tab-content-dokumen" class="hidden space-y-6 animate-fade-in">
+  <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+    <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2">📄 Dokumen Legalitas & SOP</h2>
+      <div class="flex gap-2">
+        <button onclick="document.getElementById('modalTambahLegalitas').classList.remove('hidden')" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg border bg-white hover:bg-gray-50 transition shadow-sm font-medium">
+          ⬆️ Upload Legalitas
+        </button>
+        <button onclick="document.getElementById('modalTambahSOP').classList.remove('hidden')" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 transition shadow-sm font-medium">
+          ⬆️ Upload SOP
+        </button>
+      </div>
+    </div>
+    
+    <!-- PDF & Excel Files Lists -->
+    {% if reports or legal_docs or sop_docs %}
+    <div class="p-4 bg-emerald-50/20 border-b">
+      <p class="text-xs text-gray-500 font-medium">ℹ️ Dokumen di bawah ini merupakan arsip yang diakses oleh pengurus maupun dipublikasikan sesuai dengan pengaturannya.</p>
+    </div>
+    {% endif %}
+
+    <!-- Dokumen List -->
+    {% if legal_docs or sop_docs %}
+      <ul class="divide-y">
+        {% for d in legal_docs %}
+          <li class="px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-gray-50 transition">
+            <div>
+              <a href="{{ d.file.url }}" target="_blank" class="text-emerald-700 font-semibold hover:underline text-sm">{{ d.title }}</a>
+              <span class="ml-2 text-[10px] font-bold bg-amber-100 border border-amber-200 text-amber-800 px-2 py-0.5 rounded-full">{{ d.get_doc_type_display }}</span>
+            </div>
+            <form method="post" action="{% url 'document_delete' d.pk %}" onsubmit="return confirm('Yakin hapus dokumen ini?');">
+              {% csrf_token %}
+              <button type="submit" class="px-3 py-1 bg-red-50 border border-red-200 text-red-600 hover:bg-red-600 hover:text-white rounded-lg text-xs font-semibold transition">
+                🗑 Hapus
+              </button>
+            </form>
+          </li>
+        {% endfor %}
+        
+        {% for d in sop_docs %}
+          <li class="px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-gray-50 transition">
+            <div>
+              <a href="{{ d.file.url }}" target="_blank" class="text-emerald-700 font-semibold hover:underline text-sm">{{ d.title }}</a>
+              <span class="ml-2 text-[10px] font-bold bg-blue-100 border border-blue-200 text-blue-800 px-2 py-0.5 rounded-full">SOP MASJID</span>
+            </div>
+            <form method="post" action="{% url 'document_delete' d.pk %}" onsubmit="return confirm('Yakin hapus dokumen ini?');">
+              {% csrf_token %}
+              <button type="submit" class="px-3 py-1 bg-red-50 border border-red-200 text-red-600 hover:bg-red-600 hover:text-white rounded-lg text-xs font-semibold transition">
+                🗑 Hapus
+              </button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="px-5 py-6 text-sm text-gray-400 italic text-center">Belum ada dokumen legalitas maupun SOP yang diunggah.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- 6. TAB BUKTI DONASI JAMAAH -->
+<div id="tab-content-donasi" class="hidden space-y-6 animate-fade-in">
+  <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+    <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2">🧾 Bukti Donasi Jamaah</h2>
+      <span class="text-xs text-gray-400 font-medium"><span id="proof-count-badge">{{ proofs|length }}</span> bukti terunggah</span>
+    </div>
+
+    <!-- FILTER & PENCARIAN BUKTI DONASI -->
+    <div class="px-5 py-3.5 bg-gray-50/50 border-b flex flex-col sm:flex-row gap-3 items-center justify-between">
+      <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+        <!-- Jenis Filter -->
+        <select id="proof-filter-type" class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold transition cursor-pointer">
+          <option value="all">📅 Semua Jenis</option>
+          <option value="ZKT">Zakat</option>
+          <option value="INF">Infak</option>
+          <option value="SDK">Sedekah</option>
+        </select>
+      </div>
+      
+      <!-- Live Search Box -->
+      <div class="relative w-full sm:w-64">
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-xs">🔍</span>
+        <input type="text" id="proof-search" placeholder="Cari nama donatur..." class="w-full pl-8 pr-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white transition">
+      </div>
+    </div>
+
+    {% if proofs %}
+      <div class="overflow-x-auto max-h-[450px] overflow-y-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-gray-50 sticky top-0 z-10 border-b">
+            <tr class="text-left text-xs text-gray-500 uppercase tracking-wider font-semibold bg-gray-50">
+              <th class="px-5 py-3">Waktu Upload</th>
+              <th class="px-5 py-3">Jenis</th>
+              <th class="px-5 py-3">Nama Donatur</th>
+              <th class="px-5 py-3">Jumlah</th>
+              <th class="px-5 py-3">Tgl Transfer</th>
+              <th class="px-5 py-3">Bukti</th>
+              <th class="px-5 py-3">Publik</th>
+              <th class="px-5 py-3 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="proof-table-body" class="divide-y divide-gray-100 bg-white">
+            {% for p in proofs %}
+              <tr class="proof-row hover:bg-gray-50 transition" data-type="{{ p.donation_type }}" data-search="{{ p.donor_name|lower }}">
+                <td class="px-5 py-3 text-gray-500 whitespace-nowrap">{{ p.uploaded_at|date:"d M Y H:i" }}</td>
+                <td class="px-5 py-3">
+                  <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full
+                    {% if p.donation_type == 'ZKT' %}bg-emerald-100 text-emerald-700 border border-emerald-200
+                    {% elif p.donation_type == 'SDK' %}bg-amber-100 text-amber-700 border border-amber-200
+                    {% else %}bg-blue-100 text-blue-700 border border-blue-200{% endif %}">
+                    {{ p.get_donation_type_display }}
+                  </span>
+                </td>
+                <td class="px-5 py-3 font-semibold text-gray-800">{{ p.donor_name }}</td>
+                <td class="px-5 py-3 font-bold text-emerald-700">Rp {{ p.amount|floatformat:0|intcomma }}</td>
+                <td class="px-5 py-3 text-gray-500 whitespace-nowrap">{{ p.paid_at|date:"d M Y" }}</td>
+                <td class="px-5 py-3">
+                  {% if p.proof %}
+                    <a href="{{ p.proof.url }}" target="_blank" class="inline-flex items-center gap-1 text-xs text-emerald-700 hover:underline font-semibold font-medium">📎 Lihat</a>
+                  {% else %}<span class="text-gray-300 text-xs">—</span>{% endif %}
+                </td>
+                <td class="px-5 py-3">
+                  {% if p.is_public %}
+                    <span class="text-xs text-emerald-600 font-semibold font-medium">✅ Ya</span>
+                  {% else %}
+                    <span class="text-xs text-gray-400">— Tidak</span>
+                  {% endif %}
+                </td>
+                <td class="px-5 py-3 text-right">
+                  <form method="post" action="{% url 'donation_proof_delete' p.pk %}" onsubmit="return confirm('Hapus bukti donasi ini?');" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="/dashboard/?tab=donasi">
+                    <button type="submit" class="px-3 py-1 rounded-lg bg-red-50 border border-red-200 text-red-600 hover:bg-red-600 hover:text-white text-xs font-semibold transition">
+                      🗑 Hapus
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="px-5 py-6 text-sm text-gray-400 italic text-center">Belum ada bukti donasi yang diunggah.</p>
+    {% endif %}
+  </div>
+</div>
+
+{# ── Styling Input Form (Dashboard) ── #}
+<style>
+  form input[type=text],
+  form input[type=email],
+  form input[type=url],
+  form input[type=date],
+  form textarea,
+  form select {
+    display: block;
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: #111827;
+    background: #fff;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  form input:focus,
+  form textarea:focus,
+  form select:focus {
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5,150,105,.1);
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.25s ease-out forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<!-- TAB CONTROLLER & LIVE SEARCH SCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // 1. Tab Controller
+  const tabs = ['overview', 'profil', 'pengurus', 'program', 'dokumen', 'donasi', 'kas'];
+  const urlParams = new URLSearchParams(window.location.search);
+  let activeTab = urlParams.get('tab') || 'overview';
+  
+  if (!tabs.includes(activeTab)) {
+    activeTab = 'overview';
+  }
+
+  function showTab(tabName) {
+    tabs.forEach(t => {
+      const btn = document.getElementById(`tab-btn-${t}`);
+      const content = document.getElementById(`tab-content-${t}`);
+      if (t === tabName) {
+        if (btn) {
+          btn.classList.add('border-emerald-600', 'text-emerald-700', 'bg-emerald-50/50', 'font-semibold', 'border-b-2');
+          btn.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700');
+        }
+        if (content) {
+          content.classList.remove('hidden');
+        }
+      } else {
+        if (btn) {
+          btn.classList.remove('border-emerald-600', 'text-emerald-700', 'bg-emerald-50/50', 'font-semibold', 'border-b-2');
+          btn.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700');
+        }
+        if (content) {
+          content.classList.add('hidden');
+        }
+      }
+    });
+    
+    // Update URL query string without reloading page
+    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?tab=' + tabName;
+    window.history.replaceState({ path: newUrl }, '', newUrl);
+  }
+
+  // Bind click events
+  tabs.forEach(t => {
+    const btn = document.getElementById(`tab-btn-${t}`);
+    if (btn) {
+      btn.addEventListener('click', () => showTab(t));
+    }
+  });
+
+  // Global function for layout switching
+  window.switchTab = function(tabName) {
+    showTab(tabName);
+    document.getElementById('tab-btn-overview').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Show initial tab
+  showTab(activeTab);
+
+  // 2. Live Instant Filtering & Search Arus Kas
+  const monthFilter = document.getElementById("cf-filter-month");
+  const yearFilter = document.getElementById("cf-filter-year");
+  const searchInput = document.getElementById("cf-search");
+  const rows = document.querySelectorAll(".cf-row");
+  const tbody = document.getElementById("cf-table-body");
+  
+  if (monthFilter && rows.length) {
+    // Populate Year Filter dropdown dynamically from available rows
+    const yearsSet = new Set();
+    rows.forEach(row => {
+      const dateStr = row.getAttribute("data-date");
+      if (dateStr) {
+        const year = dateStr.substring(0, 4);
+        yearsSet.add(year);
+      }
+    });
+    
+    // Sort years in descending order
+    const sortedYears = Array.from(yearsSet).sort((a, b) => b - a);
+    sortedYears.forEach(year => {
+      const option = document.createElement("option");
+      option.value = year;
+      option.textContent = year;
+      yearFilter.appendChild(option);
+    });
+
+    // Filter Function
+    function filterCashflows() {
+      const selectedMonth = monthFilter.value; // 'all' or '01'-'12'
+      const selectedYear = yearFilter.value;   // 'all' or 'YYYY'
+      const searchVal = searchInput.value.toLowerCase().trim();
+      
+      let visibleCount = 0;
+      
+      rows.forEach(row => {
+        const dateStr = row.getAttribute("data-date"); // YYYY-MM-DD
+        const searchData = row.getAttribute("data-search").toLowerCase();
+        
+        const rowYear = dateStr.substring(0, 4);
+        const rowMonth = dateStr.substring(5, 7);
+        
+        // Filter Conditions
+        const matchMonth = (selectedMonth === "all" || rowMonth === selectedMonth);
+        const matchYear = (selectedYear === "all" || rowYear === selectedYear);
+        const matchSearch = (!searchVal || searchData.includes(searchVal));
+        
+        if (matchMonth && matchYear && matchSearch) {
+          row.style.display = "";
+          visibleCount++;
+        } else {
+          row.style.display = "none";
+        }
+      });
+
+      // Handle "no records found" message
+      const emptyMessage = document.getElementById("cf-empty-search-msg");
+      if (visibleCount === 0) {
+        if (!emptyMessage) {
+          const tr = document.createElement("tr");
+          tr.id = "cf-empty-search-msg";
+          tr.className = "bg-gray-50/30";
+          tr.innerHTML = `<td colspan="5" class="px-4 py-8 text-center text-xs text-gray-400 italic">Tidak ada transaksi kas yang cocok dengan filter pencarian.</td>`;
+          tbody.appendChild(tr);
+        }
+      } else {
+        if (emptyMessage) {
+          emptyMessage.remove();
+        }
+      }
+    }
+
+    // Attach Event Listeners
+    monthFilter.addEventListener("change", filterCashflows);
+    yearFilter.addEventListener("change", filterCashflows);
+    searchInput.addEventListener("input", filterCashflows);
+  }
+
+  // 3. Live Instant Filtering & Search Bukti Donasi
+  const proofSearch = document.getElementById("proof-search");
+  const proofTypeFilter = document.getElementById("proof-filter-type");
+  const proofRows = document.querySelectorAll(".proof-row");
+  const proofTbody = document.getElementById("proof-table-body");
+  const proofCountBadge = document.getElementById("proof-count-badge");
+  
+  if (proofSearch && proofRows.length) {
+    function filterProofs() {
+      const selectedType = proofTypeFilter.value; // 'all' or 'ZKT', 'INF', 'SDK'
+      const searchVal = proofSearch.value.toLowerCase().trim();
+      let visibleCount = 0;
+      
+      proofRows.forEach(row => {
+        const typeStr = row.getAttribute("data-type");
+        const searchData = row.getAttribute("data-search");
+        
+        const matchType = (selectedType === "all" || typeStr === selectedType);
+        const matchSearch = (!searchVal || searchData.includes(searchVal));
+        
+        if (matchType && matchSearch) {
+          row.style.display = "";
+          visibleCount++;
+        } else {
+          row.style.display = "none";
+        }
+      });
+      
+      if (proofCountBadge) {
+        proofCountBadge.textContent = visibleCount;
+      }
+      
+      const emptyMessage = document.getElementById("proof-empty-search-msg");
+      if (visibleCount === 0) {
+        if (!emptyMessage) {
+          const tr = document.createElement("tr");
+          tr.id = "proof-empty-search-msg";
+          tr.className = "bg-gray-50/30";
+          tr.innerHTML = `<td colspan="8" class="px-5 py-8 text-center text-xs text-gray-400 italic">Tidak ada bukti donasi yang cocok dengan filter pencarian.</td>`;
+          proofTbody.appendChild(tr);
+        }
+      } else {
+        if (emptyMessage) {
+          emptyMessage.remove();
+        }
+      }
+    }
+    
+    proofSearch.addEventListener("input", filterProofs);
+    proofTypeFilter.addEventListener("change", filterProofs);
+  }
+
+  // Tutup modal dengan Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.getElementById('modalTambahPengurus')?.classList.add('hidden');
+      document.getElementById('modalTambahProgram')?.classList.add('hidden');
+      document.getElementById('modalTambahLegalitas')?.classList.add('hidden');
+      document.getElementById('modalTambahSOP')?.classList.add('hidden');
+    }
+  });
+});
+</script>
+
+{# ──────────────── MODALS MARKUP ──────────────── #}
+<div id="modalTambahPengurus" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="document.getElementById('modalTambahPengurus').classList.add('hidden')"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-[fadeInUp_0.2s_ease-out]">
+    <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-xl">👥</span>
+        <div>
+          <h2 class="text-base font-bold text-white">Tambah Pengurus</h2>
+          <p class="text-emerald-200 text-xs">Tambahkan anggota pengurus DKM</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('modalTambahPengurus').classList.add('hidden')" class="text-white/70 hover:text-white text-lg font-bold">×</button>
+    </div>
+    <form method="post" action="{% url 'management_add' %}" class="django-form p-6 space-y-4">
+      {% csrf_token %}
+      {{ management_form.as_p }}
+      <div class="flex items-center gap-3 pt-2 border-t">
+        <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition shadow-sm">
+          💾 Simpan
+        </button>
+        <button type="button" onclick="document.getElementById('modalTambahPengurus').classList.add('hidden')" class="px-4 py-2.5 text-sm rounded-xl border border-gray-200 hover:bg-gray-50 transition text-gray-600 font-medium">Batal</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalTambahProgram" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="document.getElementById('modalTambahProgram').classList.add('hidden')"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-[fadeInUp_0.2s_ease-out]">
+    <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-xl">📅</span>
+        <div>
+          <h2 class="text-base font-bold text-white">Tambah Program</h2>
+          <p class="text-emerald-200 text-xs">Tambahkan agenda atau program kegiatan masjid</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('modalTambahProgram').classList.add('hidden')" class="text-white/70 hover:text-white text-lg font-bold">×</button>
+    </div>
+    <form method="post" action="{% url 'program_add' %}" class="django-form p-6 space-y-4">
+      {% csrf_token %}
+      {{ program_form.as_p }}
+      <div class="flex items-center gap-3 pt-2 border-t">
+        <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition shadow-sm">
+          💾 Simpan
+        </button>
+        <button type="button" onclick="document.getElementById('modalTambahProgram').classList.add('hidden')" class="px-4 py-2.5 text-sm rounded-xl border border-gray-200 hover:bg-gray-50 transition text-gray-600 font-medium">Batal</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalTambahLegalitas" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="document.getElementById('modalTambahLegalitas').classList.add('hidden')"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-[fadeInUp_0.2s_ease-out]">
+    <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-xl">📄</span>
+        <div>
+          <h2 class="text-base font-bold text-white">Upload Dokumen Legalitas</h2>
+          <p class="text-emerald-200 text-xs">Unggah berkas akta wakaf, sertifikat tanah, dsb.</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('modalTambahLegalitas').classList.add('hidden')" class="text-white/70 hover:text-white text-lg font-bold">×</button>
+    </div>
+    <form method="post" action="{% url 'document_upload' %}" enctype="multipart/form-data" class="django-form p-6 space-y-4">
+      {% csrf_token %}
+      {{ document_form.as_p }}
+      <div class="flex items-center gap-3 pt-2 border-t">
+        <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition shadow-sm">
+          💾 Simpan
+        </button>
+        <button type="button" onclick="document.getElementById('modalTambahLegalitas').classList.add('hidden')" class="px-4 py-2.5 text-sm rounded-xl border border-gray-200 hover:bg-gray-50 transition text-gray-600 font-medium">Batal</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalTambahSOP" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="document.getElementById('modalTambahSOP').classList.add('hidden')"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-[fadeInUp_0.2s_ease-out]">
+    <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-xl">📋</span>
+        <div>
+          <h2 class="text-base font-bold text-white">Upload Dokumen SOP</h2>
+          <p class="text-emerald-200 text-xs">Unggah berkas Standard Operating Procedure masjid</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('modalTambahSOP').classList.add('hidden')" class="text-white/70 hover:text-white text-lg font-bold">×</button>
+    </div>
+    <form method="post" action="{% url 'sop_upload' %}" enctype="multipart/form-data" class="django-form p-6 space-y-4">
+      {% csrf_token %}
+      {{ sop_form.as_p }}
+      <div class="flex items-center gap-3 pt-2 border-t">
+        <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition shadow-sm">
+          💾 Simpan
+        </button>
+        <button type="button" onclick="document.getElementById('modalTambahSOP').classList.add('hidden')" class="px-4 py-2.5 text-sm rounded-xl border border-gray-200 hover:bg-gray-50 transition text-gray-600 font-medium">Batal</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 {% endblock %}

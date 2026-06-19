@@ -17,7 +17,7 @@ import pandas as pd
 
 from .models import (
     Mosque, Document, Management, Program, Donor,
-    ReportFile, DonationChannel, AuditLog, DonationProof, CashFlow
+    ReportFile, DonationChannel, AuditLog, DonationProof, CashFlow, CashCategory
 )
 from .forms import (
     MosqueForm, DocumentForm, ManagementForm, ProgramForm,
@@ -36,6 +36,53 @@ def log(request, action, detail=""):
     )
 
 
+def ensure_categories():
+    """Otomatis inisialisasi daftar kategori kas ramah pengguna yang siap pakai."""
+    defaults = [
+        # Pemasukan - Operasi
+        ('Kotak Amal / Infak / Sedekah', 'OPERASI', 'IN'),
+        ('Penerimaan Donasi CSR', 'OPERASI', 'IN'),
+        ('Pendapatan Sewa (Aula/Peralatan)', 'OPERASI', 'IN'),
+        ('Penerimaan Zakat', 'OPERASI', 'IN'),
+        ('Penerimaan Dana Pembangunan', 'OPERASI', 'IN'),
+        ('Pemasukan Lain-lain', 'OPERASI', 'IN'),
+        # Pengeluaran - Operasi
+        ('Beban Listrik, Air & Internet', 'OPERASI', 'OUT'),
+        ('Beban Kebersihan & K3', 'OPERASI', 'OUT'),
+        ('Beban Kegiatan Kajian & Program', 'OPERASI', 'OUT'),
+        ('Beban Pemeliharaan & Perbaikan Gedung', 'OPERASI', 'OUT'),
+        ('Beban Gaji, Honor Ustadz & Marbot', 'OPERASI', 'OUT'),
+        ('Beban Konsumsi Kegiatan', 'OPERASI', 'OUT'),
+        ('Beban Transportasi & Akomodasi', 'OPERASI', 'OUT'),
+        ('Beban Administrasi & Umum', 'OPERASI', 'OUT'),
+        ('Pengeluaran Lain-lain', 'OPERASI', 'OUT'),
+        # Investasi
+        ('Pembelian Aset Tetap (Karpet/AC/Inventaris)', 'INVESTASI', 'OUT'),
+        ('Penjualan Aset Tetap Bekas', 'INVESTASI', 'IN'),
+        # Pendanaan
+        ('Penerimaan Wakaf Uang', 'PENDANAAN', 'IN'),
+        ('Dana Talangan / Hutang Diterima', 'PENDANAAN', 'IN'),
+        ('Pengembalian Hutang / Pinjaman', 'PENDANAAN', 'OUT'),
+    ]
+    for name, act, flow in defaults:
+        CashCategory.objects.get_or_create(
+            name=name,
+            defaults={'activity_type': act, 'flow_type': flow}
+        )
+    
+    # Otomatis migrasikan transaksi kas lama yang tidak berkategori
+    default_cat_in, _ = CashCategory.objects.get_or_create(
+        name='Pemasukan Umum',
+        defaults={'activity_type': 'OPERASI', 'flow_type': 'IN'}
+    )
+    default_cat_out, _ = CashCategory.objects.get_or_create(
+        name='Pengeluaran Umum',
+        defaults={'activity_type': 'OPERASI', 'flow_type': 'OUT'}
+    )
+    CashFlow.objects.filter(category__isnull=True, flow_type='IN').update(category=default_cat_in)
+    CashFlow.objects.filter(category__isnull=True, flow_type='OUT').update(category=default_cat_out)
+
+
 def ensure_mosque():
     """Pastikan ada satu record masjid agar relasi ForeignKey tidak kosong."""
     mosque = Mosque.objects.first()
@@ -45,6 +92,8 @@ def ensure_mosque():
             city="Bekasi",
             province="Jawa Barat",
         )
+    # Jalankan inisialisasi kategori kas ramah pengguna
+    ensure_categories()
     return mosque
 
 
@@ -138,34 +187,53 @@ import json
 
 def cashflow_public(request):
     mosque = Mosque.objects.first()
-    
+    is_admin = request.user.is_authenticated
+
+    # ── Tambah transaksi langsung dari halaman rekap (admin saja) ──
+    cashflow_form = None
+    if is_admin:
+        mosque = ensure_mosque()  # pastikan mosque & kategori sudah ada
+        if request.method == 'POST':
+            cashflow_form = CashFlowForm(request.POST)
+            if cashflow_form.is_valid():
+                obj = cashflow_form.save(commit=False)
+                obj.mosque = mosque
+                obj.save()
+                log(request, 'CREATE', f'CashFlow {obj.get_flow_type_display()} Rp{obj.amount}')
+                messages.success(request, 'Transaksi berhasil ditambahkan.')
+                return redirect(f"{request.path}?year={obj.date.year}")
+            else:
+                messages.error(request, 'Gagal menyimpan. Periksa isian.')
+        else:
+            cashflow_form = CashFlowForm()
+
     # Dapatkan daftar tahun yang memiliki data kas
     available_dates = CashFlow.objects.dates('date', 'year', order='DESC')
     years_list = [d.year for d in available_dates]
-    
+
     # Default ke tahun ini jika tidak ada data
     current_year = datetime.datetime.now().year
     if not years_list:
         years_list = [current_year]
-        
+
     # Ambil parameter tahun dari URL (GET)
     try:
         selected_year = int(request.GET.get('year', years_list[0]))
     except ValueError:
         selected_year = years_list[0]
-        
+
     if selected_year not in years_list and CashFlow.objects.exists():
         selected_year = years_list[0]
     elif selected_year not in years_list:
         years_list.append(selected_year)
         years_list.sort(reverse=True)
-        
+
     # Filter data kas berdasarkan tahun terpilih
     cfs = CashFlow.objects.filter(date__year=selected_year).order_by('date')
-    
+
     # Inisialisasi ringkasan untuk 12 bulan (Jan - Des)
     summary = {f"{selected_year}-{str(m).zfill(2)}": {'in': 0, 'out': 0} for m in range(1, 13)}
-    
+
     for cf in cfs:
         month_key = cf.date.strftime('%Y-%m')
         if month_key in summary:
@@ -173,21 +241,27 @@ def cashflow_public(request):
                 summary[month_key]['in'] += float(cf.amount)
             else:
                 summary[month_key]['out'] += float(cf.amount)
-            
+
     # Siapkan label dan data untuk Chart.js
     month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
     labels = []
     data_in = []
     data_out = []
-    
+
     for i in range(1, 13):
         month_key = f"{selected_year}-{str(i).zfill(2)}"
         labels.append(f"{month_names[i-1]} {selected_year}")
         data_in.append(summary[month_key]['in'])
         data_out.append(summary[month_key]['out'])
-    
-    recent_cashflows = cfs.order_by('-date')[:10]
-    
+
+    # Kirim semua transaksi tahun ini agar bisa difilter di sisi client (publik & admin)
+    recent_cashflows = cfs.order_by('-date')
+
+    # Hitung ringkasan total tahun berjalan untuk widget premium
+    total_year_in = sum(cf.amount for cf in cfs if cf.flow_type == 'IN') or 0
+    total_year_out = sum(cf.amount for cf in cfs if cf.flow_type == 'OUT') or 0
+    total_year_net = total_year_in - total_year_out
+
     context = {
         'mosque': mosque,
         'chart_labels': json.dumps(labels),
@@ -196,6 +270,11 @@ def cashflow_public(request):
         'recent_cashflows': recent_cashflows,
         'years_list': years_list,
         'selected_year': selected_year,
+        'total_year_in': total_year_in,
+        'total_year_out': total_year_out,
+        'total_year_net': total_year_net,
+        'is_admin': is_admin,
+        'cashflow_form': cashflow_form,
     }
     return render(request, 'public/rekap_kas.html', context)
 
@@ -303,82 +382,64 @@ def report_public_export_csv(request, pk, sheet):
 # -------------------------------------------------
 @login_required
 def dashboard(request):
-    mosque = Mosque.objects.first()
-    reports = ReportFile.objects.order_by('-uploaded_at')[:10]
-    legal_docs = Document.objects.exclude(doc_type='SOP').order_by('-uploaded_at')[:10]
-    sop_docs = Document.objects.filter(doc_type='SOP').order_by('-uploaded_at')[:10]
-    cashflows = CashFlow.objects.order_by('-date')[:5]
-    return render(request, 'dashboard.html', {
-        'mosque': mosque, 
-        'reports': reports, 
-        'legal_docs': legal_docs,
-        'sop_docs': sop_docs,
-        'cashflows': cashflows
-    })
-
-
-@login_required
-def mosque_profile(request):
     mosque = ensure_mosque()
 
-    if request.method == 'POST':
+    # Handle Mosque Profile update
+    if request.method == 'POST' and 'update_profile' in request.POST:
         form = MosqueForm(request.POST, instance=mosque)
         if form.is_valid():
             form.save()
             log(request, 'UPDATE', 'Update Mosque profile')
-            messages.success(request, 'Profil diperbarui.')
-            return redirect('mosque_profile')
+            messages.success(request, 'Profil masjid berhasil diperbarui.')
+            return redirect('/dashboard/?tab=profil')
         else:
             messages.error(request, 'Form tidak valid. Mohon periksa isian.')
     else:
         form = MosqueForm(instance=mosque)
 
-    docs = Document.objects.filter(mosque=mosque).order_by('-uploaded_at')
-    mgmt = Management.objects.filter(mosque=mosque).order_by('role', 'name')
-    programs = Program.objects.filter(mosque=mosque).order_by('-is_active', 'title')
-    donors = Donor.objects.filter(mosque=mosque).order_by('name')
-    reports = ReportFile.objects.filter(mosque=mosque).order_by('-uploaded_at')
-    channels = DonationChannel.objects.filter(mosque=mosque).order_by('-is_active', 'title')
+    # Inisialisasi form-form master data untuk render modal di dashboard
+    management_form = ManagementForm()
+    program_form = ProgramForm()
+    document_form = DocumentForm()
+    sop_form = SOPForm()
 
-    # >>> Tambahan: preview 10 bukti donasi terakhir
-    proofs = DonationProof.objects.filter(mosque=mosque).select_related('uploaded_by').order_by('-uploaded_at')[:10]
-    
+    # Ambil semua data pengelolaan untuk tab-tab dashboard
+    reports = ReportFile.objects.filter(mosque=mosque).order_by('-uploaded_at')
+    legal_docs = Document.objects.filter(mosque=mosque).exclude(doc_type='SOP').order_by('-uploaded_at')
+    sop_docs = Document.objects.filter(mosque=mosque, doc_type='SOP').order_by('-uploaded_at')
     cashflows = CashFlow.objects.filter(mosque=mosque).order_by('-date')
-
-    ctx = {
-        'form': form,
-        'mosque': mosque,
-        'docs': docs,
-        'mgmt': mgmt,
-        'programs': programs,
-        'donors': donors,
-        'reports': reports,
-        'channels': channels,
-        'proofs': proofs,   # <<< kirim ke template
-        'cashflows': cashflows,
-    }
-    return render(request, 'mosque/profile.html', ctx)
-
-
-    # Gunakan filter FK supaya pasti muncul meski related_name berbeda
-    docs = Document.objects.filter(mosque=mosque).order_by('-uploaded_at')
     mgmt = Management.objects.filter(mosque=mosque).order_by('role', 'name')
     programs = Program.objects.filter(mosque=mosque).order_by('-is_active', 'title')
     donors = Donor.objects.filter(mosque=mosque).order_by('name')
-    reports = ReportFile.objects.filter(mosque=mosque).order_by('-uploaded_at')
     channels = DonationChannel.objects.filter(mosque=mosque).order_by('-is_active', 'title')
+    
+    # Menampilkan seluruh bukti donasi (tanpa batas 10) agar terkelola penuh dari dashboard
+    proofs = DonationProof.objects.filter(mosque=mosque).select_related('uploaded_by').order_by('-uploaded_at')
 
     ctx = {
         'form': form,
+        'management_form': management_form,
+        'program_form': program_form,
+        'document_form': document_form,
+        'sop_form': sop_form,
         'mosque': mosque,
-        'docs': docs,
+        'reports': reports,
+        'legal_docs': legal_docs,
+        'sop_docs': sop_docs,
+        'cashflows': cashflows,
         'mgmt': mgmt,
         'programs': programs,
         'donors': donors,
-        'reports': reports,
         'channels': channels,
+        'proofs': proofs,
     }
-    return render(request, 'mosque/profile.html', ctx)
+    return render(request, 'dashboard.html', ctx)
+
+
+@login_required
+def mosque_profile(request):
+    """Alihkan ke halaman Dashboard dengan tab profil aktif."""
+    return redirect('/dashboard/?tab=profil')
 
 
 # ----------------------------- Upload Dokumen Legalitas
@@ -393,7 +454,7 @@ def document_upload(request):
             obj.save()
             log(request, 'UPLOAD', f'Document {obj.title}')
             messages.success(request, 'Dokumen legalitas berhasil diunggah.')
-            return redirect('mosque_profile')
+            return redirect('/dashboard/?tab=dokumen')
         else:
             messages.error(request, 'Gagal mengunggah dokumen. Periksa isian.')
     else:
@@ -420,7 +481,7 @@ def sop_upload(request):
             obj.save()
             log(request, 'UPLOAD', f'SOP {obj.title}')
             messages.success(request, 'SOP berhasil diunggah dan menggantikan yang lama.')
-            return redirect('mosque_profile')
+            return redirect('/dashboard/?tab=dokumen')
         else:
             messages.error(request, 'Gagal mengunggah SOP. Periksa isian.')
     else:
@@ -442,7 +503,7 @@ def document_delete(request, pk):
     d.delete()
     log(request, "DELETE", f"Document {title}")
     messages.success(request, f"Dokumen '{title}' berhasil dihapus.")
-    return redirect(request.META.get('HTTP_REFERER', 'mosque_profile'))
+    return redirect(request.META.get('HTTP_REFERER', '/dashboard/?tab=dokumen'))
 
 
 # ----------------------------- Master data internal
@@ -457,7 +518,7 @@ def management_add(request):
             obj.save()
             log(request, 'CREATE', f'Management {obj.name}')
             messages.success(request, 'Pengurus ditambahkan.')
-            return redirect('mosque_profile')
+            return redirect('/dashboard/?tab=pengurus')
     else:
         form = ManagementForm()
     return render(request, 'management/form.html', {'form': form})
@@ -474,7 +535,7 @@ def program_add(request):
             obj.save()
             log(request, 'CREATE', f'Program {obj.title}')
             messages.success(request, 'Program ditambahkan.')
-            return redirect('mosque_profile')
+            return redirect('/dashboard/?tab=program')
     else:
         form = ProgramForm()
     return render(request, 'program/form.html', {'form': form})
@@ -491,7 +552,7 @@ def donor_add(request):
             obj.save()
             log(request, 'CREATE', f'Donor {obj.name}')
             messages.success(request, 'Donatur ditambahkan.')
-            return redirect('mosque_profile')
+            return redirect('/dashboard/?tab=donasi')
     else:
         form = DonorForm()
     return render(request, 'donor/form.html', {'form': form})
@@ -508,7 +569,7 @@ def channel_add(request):
             obj.save()
             log(request, 'CREATE', f'Channel {obj.title}')
             messages.success(request, 'Channel donasi ditambahkan.')
-            return redirect('mosque_profile')
+            return redirect('/dashboard/?tab=donasi')
     else:
         form = DonationChannelForm()
     return render(request, 'channel/form.html', {'form': form})
@@ -525,24 +586,33 @@ def cashflow_add(request):
             obj.save()
             log(request, 'CREATE', f'CashFlow {obj.get_flow_type_display()} Rp{obj.amount}')
             messages.success(request, 'Data kas berhasil ditambahkan.')
-            return redirect('mosque_profile')
+            next_url = request.POST.get('next', '')
+            if next_url:
+                return redirect(next_url)
+            return redirect(f"/rekap-kas/?year={obj.date.year}")
     else:
         form = CashFlowForm()
-    return render(request, 'cashflow/form.html', {'form': form, 'title': 'Catat Arus Kas'})
+    next_url = request.GET.get('next', '/rekap-kas/')
+    return render(request, 'cashflow/form.html', {'form': form, 'title': 'Catat Arus Kas', 'next': next_url})
 
 @login_required
 def cashflow_edit(request, pk):
     obj = get_object_or_404(CashFlow, pk=pk)
+    back_year = obj.date.year  # simpan tahun sebelum edit
     if request.method == 'POST':
         form = CashFlowForm(request.POST, instance=obj)
         if form.is_valid():
-            form.save()
-            log(request, 'UPDATE', f'CashFlow {obj.get_flow_type_display()} Rp{obj.amount}')
+            saved = form.save()
+            log(request, 'UPDATE', f'CashFlow {saved.get_flow_type_display()} Rp{saved.amount}')
             messages.success(request, 'Data kas berhasil diperbarui.')
-            return redirect('mosque_profile')
+            next_url = request.POST.get('next', '')
+            if next_url:
+                return redirect(next_url)
+            return redirect(f"/rekap-kas/?year={saved.date.year}")
     else:
         form = CashFlowForm(instance=obj)
-    return render(request, 'cashflow/form.html', {'form': form, 'title': 'Edit Arus Kas'})
+    next_url = request.GET.get('next', f'/rekap-kas/?year={back_year}')
+    return render(request, 'cashflow/form.html', {'form': form, 'title': 'Edit Arus Kas', 'next': next_url})
 
 
 
@@ -557,7 +627,7 @@ def management_delete(request, pk):
     obj.delete()
     log(request, "DELETE", f"Management {name}")
     messages.success(request, f"Pengurus '{name}' dihapus.")
-    return redirect("mosque_profile")
+    return redirect("/dashboard/?tab=pengurus")
 
 
 @login_required
@@ -568,17 +638,21 @@ def program_delete(request, pk):
     obj.delete()
     log(request, "DELETE", f"Program {title}")
     messages.success(request, f"Program '{title}' dihapus.")
-    return redirect("mosque_profile")
+    return redirect("/dashboard/?tab=program")
 
 @login_required
 @require_http_methods(["POST"])
 def cashflow_delete(request, pk):
     obj = get_object_or_404(CashFlow, pk=pk)
     desc = obj.description
+    year = obj.date.year
     obj.delete()
     log(request, "DELETE", f"CashFlow {desc}")
     messages.success(request, f"Data kas '{desc}' dihapus.")
-    return redirect("mosque_profile")
+    next_url = request.POST.get('next', '')
+    if next_url:
+        return redirect(next_url)
+    return redirect(f"/rekap-kas/?year={year}")
 # ---------- /HAPUS PENGURUS & PROGRAM & KAS
 
 
@@ -594,7 +668,7 @@ def report_upload(request):
             obj.save()
             log(request, 'UPLOAD', f'Report {obj.title} (SHA256 {obj.sha256[:10]}...)')
             messages.success(request, 'Laporan keuangan berhasil diunggah.')
-            return redirect('mosque_profile')
+            return redirect('/dashboard/?tab=laporan')
         else:
             messages.error(request, 'Gagal mengunggah laporan. Periksa isian.')
     else:
@@ -675,7 +749,7 @@ def report_delete(request, pk):
     rf.delete()
     log(request, "DELETE", f"Report {title}")
     messages.success(request, f"Laporan '{title}' berhasil dihapus.")
-    return redirect("mosque_profile")
+    return redirect("/dashboard/?tab=laporan")
 
 
 # === HAPUS LAPORAN KEUANGAN dari HALAMAN ARSIP → kembali ke arsip
@@ -762,4 +836,127 @@ def donation_proof_delete(request, pk: int):
     obj.delete()
     log(request, 'DELETE', f'DonationProof {name}')
     messages.success(request, f"Bukti donasi '{name}' dihapus.")
+    next_url = request.POST.get('next', '')
+    if next_url:
+        return redirect(next_url)
     return redirect('donation_proof_admin')
+
+
+@login_required
+def cashflow_print(request):
+    mosque = ensure_mosque()
+    
+    # Ambil parameter bulan & tahun (default ke bulan ini)
+    now = datetime.datetime.now()
+    try:
+        year = int(request.GET.get('year', now.year))
+        month = int(request.GET.get('month', now.month))
+    except ValueError:
+        year = now.year
+        month = now.month
+        
+    first_day_of_month = datetime.date(year, month, 1)
+    
+    # Saldo Awal (kumulatif sebelum bulan berjalan)
+    cf_prev = CashFlow.objects.filter(date__lt=first_day_of_month)
+    prev_in = sum(cf.amount for cf in cf_prev if cf.flow_type == 'IN') or 0
+    prev_out = sum(cf.amount for cf in cf_prev if cf.flow_type == 'OUT') or 0
+    saldo_awal = prev_in - prev_out
+
+    # Transaksi bulan terpilih
+    cfs = CashFlow.objects.filter(date__year=year, date__month=month).order_by('date')
+    
+    total_in = sum(cf.amount for cf in cfs if cf.flow_type == 'IN') or 0
+    total_out = sum(cf.amount for cf in cfs if cf.flow_type == 'OUT') or 0
+    saldo_akhir = saldo_awal + total_in - total_out
+
+    # --- AGREGASI ISAK 35 ---
+    # 1. Aktivitas Operasi
+    ops_in = cfs.filter(category__activity_type='OPERASI', category__flow_type='IN')
+    ops_in_list = []
+    for cat in CashCategory.objects.filter(activity_type='OPERASI', flow_type='IN'):
+        cat_sum = sum(cf.amount for cf in ops_in if cf.category == cat) or 0
+        if cat_sum > 0:
+            ops_in_list.append({'name': cat.name, 'amount': cat_sum})
+            
+    ops_out = cfs.filter(category__activity_type='OPERASI', category__flow_type='OUT')
+    ops_out_list = []
+    for cat in CashCategory.objects.filter(activity_type='OPERASI', flow_type='OUT'):
+        cat_sum = sum(cf.amount for cf in ops_out if cf.category == cat) or 0
+        if cat_sum > 0:
+            ops_out_list.append({'name': cat.name, 'amount': cat_sum})
+            
+    net_ops = sum(x['amount'] for x in ops_in_list) - sum(x['amount'] for x in ops_out_list)
+
+    # 2. Aktivitas Investasi
+    inv_in = cfs.filter(category__activity_type='INVESTASI', category__flow_type='IN')
+    inv_in_list = []
+    for cat in CashCategory.objects.filter(activity_type='INVESTASI', flow_type='IN'):
+        cat_sum = sum(cf.amount for cf in inv_in if cf.category == cat) or 0
+        if cat_sum > 0:
+            inv_in_list.append({'name': cat.name, 'amount': cat_sum})
+            
+    inv_out = cfs.filter(category__activity_type='INVESTASI', category__flow_type='OUT')
+    inv_out_list = []
+    for cat in CashCategory.objects.filter(activity_type='INVESTASI', flow_type='OUT'):
+        cat_sum = sum(cf.amount for cf in inv_out if cf.category == cat) or 0
+        if cat_sum > 0:
+            inv_out_list.append({'name': cat.name, 'amount': cat_sum})
+            
+    net_inv = sum(x['amount'] for x in inv_in_list) - sum(x['amount'] for x in inv_out_list)
+
+    # 3. Aktivitas Pendanaan
+    fin_in = cfs.filter(category__activity_type='PENDANAAN', category__flow_type='IN')
+    fin_in_list = []
+    for cat in CashCategory.objects.filter(activity_type='PENDANAAN', flow_type='IN'):
+        cat_sum = sum(cf.amount for cf in fin_in if cf.category == cat) or 0
+        if cat_sum > 0:
+            fin_in_list.append({'name': cat.name, 'amount': cat_sum})
+            
+    fin_out = cfs.filter(category__activity_type='PENDANAAN', category__flow_type='OUT')
+    fin_out_list = []
+    for cat in CashCategory.objects.filter(activity_type='PENDANAAN', flow_type='OUT'):
+        cat_sum = sum(cf.amount for cf in fin_out if cf.category == cat) or 0
+        if cat_sum > 0:
+            fin_out_list.append({'name': cat.name, 'amount': cat_sum})
+            
+    net_fin = sum(x['amount'] for x in fin_in_list) - sum(x['amount'] for x in fin_out_list)
+
+    # Perubahan Kas Bersih
+    net_change = net_ops + net_inv + net_fin
+
+    # Nama pengurus penandatangan
+    ketua = Management.objects.filter(role='KET').first()
+    bendahara = Management.objects.filter(role='BEN').first()
+    
+    month_names = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+    month_name = month_names[month - 1]
+    
+    context = {
+        'mosque': mosque,
+        'cfs': cfs,
+        'year': year,
+        'month': month,
+        'month_name': month_name,
+        'saldo_awal': saldo_awal,
+        'total_in': total_in,
+        'total_out': total_out,
+        'saldo_akhir': saldo_akhir,
+        'ops_in_list': ops_in_list,
+        'ops_out_list': ops_out_list,
+        'net_ops': net_ops,
+        'inv_in_list': inv_in_list,
+        'inv_out_list': inv_out_list,
+        'net_inv': net_inv,
+        'fin_in_list': fin_in_list,
+        'fin_out_list': fin_out_list,
+        'net_fin': net_fin,
+        'net_change': net_change,
+        'ketua': ketua,
+        'bendahara': bendahara,
+        'print_date': datetime.datetime.now(),
+    }
+    return render(request, "reports/print_report.html", context)
+
+

@@ -2,76 +2,103 @@
 {% block title %}Upload Bukti Donasi – Masjid Al Huda{% endblock %}
 {% block content %}
 
-<div class="max-w-xl mx-auto bg-white border rounded-2xl p-6 shadow-sm">
-  <h1 class="text-2xl font-bold text-emerald-700 text-center mb-2">
-    Upload Bukti
-    {% if dtype == 'ZKT' %}Zakat{% elif dtype == 'SDK' %}Sedekah{% else %}Infak{% endif %}
-  </h1>
-  <p class="text-sm text-gray-600 text-center mb-6">
-    Unggah bukti transfer agar bendahara bisa melakukan pencatatan.
-  </p>
-
-  {% if messages %}
-    {% for m in messages %}
-      <div class="mb-3 p-3 rounded bg-emerald-100 border border-emerald-300 text-emerald-800">{{ m }}</div>
-    {% endfor %}
-  {% endif %}
-
-  <form id="donation-form" method="post" enctype="multipart/form-data" class="space-y-4">
-    {% csrf_token %}
-    {{ form.donation_type.as_hidden }}
-
-    {# Tampilkan error di atas field (kalau ada) #}
-    {% if form.non_field_errors %}
-      <div class="p-3 rounded border bg-red-50 border-red-200 text-red-700 text-sm">{{ form.non_field_errors }}</div>
-    {% endif %}
-
-    <div>
-      <label class="block text-sm font-medium mb-1">Nama Donatur</label>
-      {{ form.donor_name }}
-      {{ form.donor_name.errors }}
+<div class="max-w-xl mx-auto">
+  <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden mb-6">
+    
+    <!-- Header -->
+    <div class="bg-emerald-700 px-6 py-5 flex items-center gap-3">
+      <span class="text-2xl">⬆️</span>
+      <div>
+        <h1 class="text-lg font-bold text-white">
+          Upload Bukti {% if dtype == 'ZKT' %}Zakat{% elif dtype == 'SDK' %}Sedekah{% else %}Infak{% endif %}
+        </h1>
+        <p class="text-emerald-200 text-xs mt-0.5">Unggah bukti transfer Anda untuk proses pencatatan bendahara</p>
+      </div>
     </div>
 
-    <div>
-      <label class="block text-sm font-medium mb-1">No. HP/WA</label>
-      {{ form.phone }}
-      {{ form.phone.errors }}
-    </div>
+    <!-- Form -->
+    <form id="donation-form" method="post" enctype="multipart/form-data" class="django-form p-6 space-y-4">
+      {% csrf_token %}
+      {{ form.donation_type.as_hidden }}
 
-    <div>
-      <label class="block text-sm font-medium mb-1">Jumlah (Rp)</label>
-      {{ form.amount }}
-      <p class="text-xs text-gray-500 mt-1">Contoh penulisan: <b>150.000</b> atau <b>150.000,50</b></p>
-      {{ form.amount.errors }}
-    </div>
+      {% if form.non_field_errors %}
+        <div class="p-3 rounded-lg border bg-red-50 border-red-200 text-red-700 text-sm">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
 
-    <div>
-      <label class="block text-sm font-medium mb-1">Tanggal Transfer</label>
-      {{ form.paid_at }}
-      {{ form.paid_at.errors }}
-    </div>
+      <div>
+        <label for="{{ form.donor_name.id_for_label }}">Nama Donatur</label>
+        {{ form.donor_name }}
+        {% if form.donor_name.errors %}
+          <ul class="errorlist">{% for err in form.donor_name.errors %}<li>{{ err }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
 
-    <div>
-      <label class="block text-sm font-medium mb-1">Catatan</label>
-      {{ form.note }}
-      {{ form.note.errors }}
-    </div>
+      <div>
+        <label for="{{ form.phone.id_for_label }}">No. HP / WhatsApp</label>
+        {{ form.phone }}
+        {% if form.phone.errors %}
+          <ul class="errorlist">{% for err in form.phone.errors %}<li>{{ err }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
 
-    <div>
-      <label class="block text-sm font-medium mb-1">Bukti Transfer (jpg/png/pdf)</label>
-      {{ form.proof }}
-      {{ form.proof.errors }}
-    </div>
+      <div>
+        <label for="{{ form.amount.id_for_label }}">Jumlah Donasi (Rp)</label>
+        {{ form.amount }}
+        <p class="text-xs text-gray-400 mt-1">Contoh penulisan: <b>150.000</b> atau <b>150.000,50</b></p>
+        {% if form.amount.errors %}
+          <ul class="errorlist">{% for err in form.amount.errors %}<li>{{ err }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
 
-    <div class="flex items-center gap-2">
-      {{ form.is_public }} <span class="text-sm text-gray-700">Tampilkan ke publik?</span>
-      {{ form.is_public.errors }}
-    </div>
+      <div>
+        <label for="{{ form.paid_at.id_for_label }}">Tanggal Transfer</label>
+        {{ form.paid_at }}
+        {% if form.paid_at.errors %}
+          <ul class="errorlist">{% for err in form.paid_at.errors %}<li>{{ err }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
 
-    <button class="w-full py-2.5 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700">
-      Unggah
-    </button>
-  </form>
+      <div>
+        <label for="{{ form.note.id_for_label }}">Catatan (Opsional)</label>
+        {{ form.note }}
+        {% if form.note.errors %}
+          <ul class="errorlist">{% for err in form.note.errors %}<li>{{ err }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div>
+        <label for="{{ form.proof.id_for_label }}">Bukti Transfer (PDF / JPG / PNG)</label>
+        {{ form.proof }}
+        {% if form.proof.errors %}
+          <ul class="errorlist">{% for err in form.proof.errors %}<li>{{ err }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div class="flex items-center gap-2 pt-2">
+        {{ form.is_public }}
+        <label for="{{ form.is_public.id_for_label }}" class="!mb-0 select-none cursor-pointer">
+          Tampilkan ke publik? (Nama & Jumlah akan terlihat di list publik)
+        </label>
+        {% if form.is_public.errors %}
+          <ul class="errorlist">{% for err in form.is_public.errors %}<li>{{ err }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div class="flex items-center gap-3 pt-4 border-t border-gray-100">
+        <button type="submit"
+                class="inline-flex items-center justify-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg transition shadow-sm">
+          🚀 Unggah Bukti
+        </button>
+        <a href="{% url 'donation_page' %}"
+           class="px-4 py-2.5 text-sm rounded-lg border border-gray-200 hover:bg-gray-50 transition text-gray-600">
+          Kembali
+        </a>
+      </div>
+    </form>
+
+  </div>
 </div>
 
 <script>
@@ -98,10 +125,8 @@
 
   let last = input.value;
   input.addEventListener('input', () => {
-    const start = input.selectionStart;
     input.value = formatRupiah(input.value);
     last = input.value;
-    // caret sederhana (tidak selalu sempurna di semua situasi)
     input.setSelectionRange(input.value.length, input.value.length);
   });
 

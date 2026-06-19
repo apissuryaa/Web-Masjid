@@ -1,0 +1,279 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan Keuangan - {{ mosque.name }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+    }
+    @media print {
+      body {
+        background-color: #ffffff;
+        color: #000000;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-border {
+        border-color: #000000 !important;
+      }
+      .print-shadow-none {
+        box-shadow: none !important;
+      }
+      .print-p-0 {
+        padding: 0 !important;
+      }
+      @page {
+        size: A4;
+        margin: 1.5cm;
+      }
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-8">
+
+  <!-- CONTROL BAR (no-print) -->
+  <div class="no-print max-w-3xl mx-auto mb-6 bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="{% url 'dashboard' %}" class="text-sm font-medium text-gray-500 hover:text-emerald-700 transition">
+        ← Kembali ke Panel
+      </a>
+      <span class="text-gray-300">|</span>
+      <span class="text-sm font-semibold text-gray-700">Laporan Keuangan</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <!-- Month selection form -->
+      <form method="get" class="flex items-center gap-1.5 mr-2">
+        <select name="month" class="border rounded-lg text-xs px-2 py-1.5 focus:outline-none focus:border-emerald-600">
+          <option value="1" {% if month == 1 %}selected{% endif %}>Januari</option>
+          <option value="2" {% if month == 2 %}selected{% endif %}>Februari</option>
+          <option value="3" {% if month == 3 %}selected{% endif %}>Maret</option>
+          <option value="4" {% if month == 4 %}selected{% endif %}>April</option>
+          <option value="5" {% if month == 5 %}selected{% endif %}>Mei</option>
+          <option value="6" {% if month == 6 %}selected{% endif %}>Juni</option>
+          <option value="7" {% if month == 7 %}selected{% endif %}>Juli</option>
+          <option value="8" {% if month == 8 %}selected{% endif %}>Agustus</option>
+          <option value="9" {% if month == 9 %}selected{% endif %}>September</option>
+          <option value="10" {% if month == 10 %}selected{% endif %}>Oktober</option>
+          <option value="11" {% if month == 11 %}selected{% endif %}>November</option>
+          <option value="12" {% if month == 12 %}selected{% endif %}>Desember</option>
+        </select>
+        <select name="year" class="border rounded-lg text-xs px-2 py-1.5 focus:outline-none focus:border-emerald-600">
+          <option value="2025" {% if year == 2025 %}selected{% endif %}>2025</option>
+          <option value="2026" {% if year == 2026 %}selected{% endif %}>2026</option>
+          <option value="2027" {% if year == 2027 %}selected{% endif %}>2027</option>
+        </select>
+        <button type="submit" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition">
+          Ganti
+        </button>
+      </form>
+      <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow flex items-center gap-1.5">
+        🖨️ Cetak / Unduh PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- PRINT SHEET CONTAINER -->
+  <div class="max-w-3xl mx-auto bg-white p-8 sm:p-16 rounded-2xl border border-gray-200 shadow-sm print-shadow-none print-p-0 print-border-none">
+
+    <!-- REPORT HEADER (ISAK 35 STYLE) -->
+    <div class="text-center mb-8">
+      <h2 class="text-base font-bold text-gray-900 tracking-wider uppercase">{{ mosque.name }}</h2>
+      <h1 class="text-lg font-bold text-gray-900 tracking-widest uppercase mt-0.5">Laporan Arus Kas</h1>
+      <p class="text-sm text-gray-800 mt-1">Untuk Bulan yang Berakhir Pada Tanggal {{ month_name }} {{ year }}</p>
+      <p class="text-xs italic text-gray-500 mt-1.5">(Disajikan dalam Rupiah, kecuali dinyatakan lain)</p>
+    </div>
+
+    <!-- DOUBLE HORIZONTAL LINE -->
+    <div class="border-t border-black mb-1"></div>
+    <div class="border-t-4 border-double border-black mb-6"></div>
+
+    <!-- HEADER COLUMNS -->
+    <div class="flex justify-between font-bold text-xs uppercase tracking-wider mb-4 border-b border-gray-200 pb-2">
+      <span>Keterangan</span>
+      <span class="w-32 text-right">{{ month_name }} {{ year }}</span>
+    </div>
+
+    <!-- MAIN ISAK 35 CASH FLOW CONTENT -->
+    <div class="text-xs space-y-6">
+
+      <!-- 1. ARUS KAS DARI AKTIVITAS OPERASI -->
+      <div>
+        <h3 class="font-bold text-gray-900 uppercase tracking-wide mb-2">ARUS KAS DARI AKTIVITAS OPERASI</h3>
+        
+        <div class="space-y-1.5 pl-4">
+          <!-- Inflows (Pemasukan) -->
+          {% for item in ops_in_list %}
+            <div class="flex justify-between text-gray-700">
+              <span>Kas dari {{ item.name }}</span>
+              <span class="w-32 text-right">Rp {{ item.amount|floatformat:0|intcomma }}</span>
+            </div>
+          {% empty %}
+            <!-- Show placeholder if empty to match format -->
+            <div class="flex justify-between text-gray-400 italic">
+              <span>Kas dari Penerimaan Operasional</span>
+              <span class="w-32 text-right">-</span>
+            </div>
+          {% endfor %}
+
+          <!-- Outflows (Pengeluaran - Formatted as (Amount) representing negative) -->
+          {% for item in ops_out_list %}
+            <div class="flex justify-between text-gray-700">
+              <span>Kas untuk {{ item.name }}</span>
+              <span class="w-32 text-right">(Rp {{ item.amount|floatformat:0|intcomma }})</span>
+            </div>
+          {% empty %}
+            <div class="flex justify-between text-gray-400 italic">
+              <span>Kas untuk Pengeluaran Operasional</span>
+              <span class="w-32 text-right">-</span>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Net Operating Cash Flow -->
+        <div class="flex justify-between font-bold text-gray-900 border-t border-black mt-3 pt-2">
+          <span>Arus Kas Bersih Yang Diperoleh Dari Aktivitas Operasi</span>
+          <span class="w-32 text-right {% if net_ops < 0 %}text-red-700{% endif %}">
+            {% if net_ops < 0 %}(Rp {{ net_ops|stringformat:"d"|slice:"1:"|intcomma }}){% else %}Rp {{ net_ops|floatformat:0|intcomma }}{% endif %}
+          </span>
+        </div>
+      </div>
+
+      <!-- 2. ARUS KAS DARI AKTIVITAS INVESTASI -->
+      <div>
+        <h3 class="font-bold text-gray-900 uppercase tracking-wide mb-2">ARUS KAS DARI AKTIVITAS INVESTASI</h3>
+        
+        <div class="space-y-1.5 pl-4">
+          {% for item in inv_in_list %}
+            <div class="flex justify-between text-gray-700">
+              <span>Kas dari {{ item.name }}</span>
+              <span class="w-32 text-right">Rp {{ item.amount|floatformat:0|intcomma }}</span>
+            </div>
+          {% endfor %}
+
+          {% for item in inv_out_list %}
+            <div class="flex justify-between text-gray-700">
+              <span>Kas untuk {{ item.name }}</span>
+              <span class="w-32 text-right">(Rp {{ item.amount|floatformat:0|intcomma }})</span>
+            </div>
+          {% empty %}
+            <div class="flex justify-between text-gray-400 italic">
+              <span>Kas bersih aktivitas investasi (pembelian aset tetap)</span>
+              <span class="w-32 text-right">-</span>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Net Investing Cash Flow -->
+        <div class="flex justify-between font-bold text-gray-900 border-t border-black mt-3 pt-2">
+          <span>Arus Kas Bersih Digunakan Untuk Aktivitas Investasi</span>
+          <span class="w-32 text-right {% if net_inv < 0 %}text-red-700{% endif %}">
+            {% if net_inv < 0 %}(Rp {{ net_inv|stringformat:"d"|slice:"1:"|intcomma }}){% else %}Rp {{ net_inv|floatformat:0|intcomma }}{% endif %}
+          </span>
+        </div>
+      </div>
+
+      <!-- 3. ARUS KAS DARI AKTIVITAS PENDANAAN -->
+      <div>
+        <h3 class="font-bold text-gray-900 uppercase tracking-wide mb-2">ARUS KAS DARI AKTIVITAS PENDANAAN</h3>
+        
+        <div class="space-y-1.5 pl-4">
+          {% for item in fin_in_list %}
+            <div class="flex justify-between text-gray-700">
+              <span>Kas dari {{ item.name }}</span>
+              <span class="w-32 text-right">Rp {{ item.amount|floatformat:0|intcomma }}</span>
+            </div>
+          {% endfor %}
+
+          {% for item in fin_out_list %}
+            <div class="flex justify-between text-gray-700">
+              <span>Kas untuk {{ item.name }}</span>
+              <span class="w-32 text-right">(Rp {{ item.amount|floatformat:0|intcomma }})</span>
+            </div>
+          {% empty %}
+            <div class="flex justify-between text-gray-400 italic">
+              <span>Kas pendanaan (penerimaan permanen, dll.)</span>
+              <span class="w-32 text-right">-</span>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Net Financing Cash Flow -->
+        <div class="flex justify-between font-bold text-gray-900 border-t border-black mt-3 pt-2">
+          <span>Arus Kas Bersih Digunakan Untuk Aktivitas Pendanaan</span>
+          <span class="w-32 text-right {% if net_fin < 0 %}text-red-700{% endif %}">
+            {% if net_fin < 0 %}(Rp {{ net_fin|stringformat:"d"|slice:"1:"|intcomma }}){% else %}Rp {{ net_fin|floatformat:0|intcomma }}{% endif %}
+          </span>
+        </div>
+      </div>
+
+      <!-- 4. TOTAL REKAP ARUS KAS -->
+      <div class="pt-4 border-t-2 border-black space-y-2">
+        <div class="flex justify-between font-bold text-gray-900">
+          <span>Kenaikan/(Penurunan) Kas dan Setara Kas</span>
+          <span class="w-32 text-right {% if net_change < 0 %}text-red-700{% endif %}">
+            {% if net_change < 0 %}(Rp {{ net_change|stringformat:"d"|slice:"1:"|intcomma }}){% else %}Rp {{ net_change|floatformat:0|intcomma }}{% endif %}
+          </span>
+        </div>
+        
+        <div class="flex justify-between text-gray-700">
+          <span>Kas dan Setara Kas Awal Bulan</span>
+          <span class="w-32 text-right">Rp {{ saldo_awal|floatformat:0|intcomma }}</span>
+        </div>
+        
+        <div class="flex justify-between font-extrabold text-gray-900 border-t border-black border-b-4 border-double pt-2 pb-1.5 mb-2">
+          <span>Kas dan Setara Kas Akhir Bulan</span>
+          <span class="w-32 text-right">Rp {{ saldo_akhir|floatformat:0|intcomma }}</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CALK NOTE -->
+    <div class="text-center text-[10px] text-gray-500 font-medium italic mt-12 mb-12">
+      "Catatan atas laporan keuangan merupakan bagian yang tidak terpisahkan dari laporan keuangan secara keseluruhan"
+    </div>
+
+    <!-- SIGNATURE BLOCKS (PENGESAHAN LAPORAN) -->
+    <div class="grid grid-cols-2 gap-8 text-center text-xs mt-12">
+      <div>
+        <span class="text-gray-500 block mb-1">Mengetahui & Menyetujui,</span>
+        <span class="font-bold text-gray-800 block uppercase tracking-wider mb-20">Ketua DKM {{ mosque.name }}</span>
+        
+        <div class="inline-block border-b border-gray-600 px-8 pb-1 font-bold text-gray-900 uppercase">
+          {{ ketua.name|default:"........................................" }}
+        </div>
+        <div class="text-[10px] text-gray-400 mt-1">
+          {% if ketua.phone %}Narahubung: {{ ketua.phone }}{% else %}Pengurus Utama DKM{% endif %}
+        </div>
+      </div>
+      
+      <div>
+        <span class="text-gray-500 block mb-1">{{ mosque.city|default:"Bekasi" }}, {{ print_date|date:"d F Y" }}</span>
+        <span class="font-bold text-gray-800 block uppercase tracking-wider mb-20">Bendahara DKM</span>
+        
+        <div class="inline-block border-b border-gray-600 px-8 pb-1 font-bold text-gray-900 uppercase">
+          {{ bendahara.name|default:"........................................" }}
+        </div>
+        <div class="text-[10px] text-gray-400 mt-1">
+          {% if bendahara.phone %}Narahubung: {{ bendahara.phone }}{% else %}Bagian Keuangan DKM{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- PRINT FOOTER METADATA -->
+    <div class="mt-16 pt-3 border-t border-gray-200 flex justify-between text-[8px] text-gray-400">
+      <span>Dokumen ini dihasilkan secara otomatis oleh Portal Informasi {{ mosque.name }} sesuai format standar akuntansi nonlaba (ISAK 35).</span>
+      <span>Tgl Cetak: {{ print_date|date:"d/m/Y H:i" }}</span>
+    </div>
+
+  </div>
+
+</body>
+</html>

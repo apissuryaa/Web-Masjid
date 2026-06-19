@@ -5,193 +5,339 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>{% block title %}Masjid Al Huda{% endblock %}</title>
   <meta name="description" content="Portal informasi Masjid Al Huda, Bekasi – Tambun Utara." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .table-wrap{overflow:auto}
-    thead th{position:sticky;top:0;background:#fff}
-    table.min-w-full tbody tr:nth-child(even){background-color:#f9fafb}
-    .link-card:hover { transform: translateY(-2px); }
+    /* ── Typography ── */
+    *, body { font-family: 'Inter', system-ui, sans-serif; }
+
+    /* ── Micro-animations ── */
+    a, button { transition: all .18s ease; }
+    .link-card {
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .link-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,.1);
+    }
+
+    /* ── Global Form Styling (untuk form.as_p) ── */
+    .django-form p { margin-bottom: .75rem; }
+    .django-form p label,
+    .django-form label {
+      display: block;
+      font-size: .8125rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: .3rem;
+    }
+    .django-form input[type=text],
+    .django-form input[type=email],
+    .django-form input[type=url],
+    .django-form input[type=date],
+    .django-form input[type=number],
+    .django-form input[type=password],
+    .django-form input[type=file],
+    .django-form select,
+    .django-form textarea {
+      display: block;
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: .5rem;
+      padding: .5rem .75rem;
+      font-size: .875rem;
+      color: #111827;
+      background: #fff;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .django-form input:focus,
+    .django-form select:focus,
+    .django-form textarea:focus {
+      border-color: #059669;
+      box-shadow: 0 0 0 3px rgba(5,150,105,.12);
+    }
+    .django-form .helptext {
+      display: block;
+      font-size: .75rem;
+      color: #9ca3af;
+      margin-top: .25rem;
+    }
+    .django-form ul.errorlist {
+      list-style: none;
+      padding: 0;
+      margin: .25rem 0 0;
+    }
+    .django-form ul.errorlist li {
+      font-size: .75rem;
+      color: #dc2626;
+    }
+    .django-form input[type=checkbox] {
+      width: 1rem;
+      height: 1rem;
+      display: inline;
+      accent-color: #059669;
+    }
+
+    /* ── Table Standard ── */
+    .std-table { width: 100%; font-size: .875rem; border-collapse: collapse; }
+    .std-table thead tr { background: #f0fdf4; }
+    .std-table thead th {
+      padding: .625rem .875rem;
+      text-align: left;
+      font-size: .75rem;
+      font-weight: 600;
+      color: #065f46;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      border-bottom: 1px solid #d1fae5;
+    }
+    .std-table tbody tr { border-bottom: 1px solid #f3f4f6; }
+    .std-table tbody tr:hover { background: #f9fafb; }
+    .std-table td { padding: .625rem .875rem; color: #374151; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #a7f3d0; border-radius: 99px; }
+
+    /* ── Navbar mobile ── */
+    #mobile-menu { display: none; }
+    #mobile-menu.open { display: flex; }
   </style>
 </head>
-<body class="bg-emerald-50 text-gray-800">
+<body class="bg-slate-50 text-gray-800 min-h-screen relative overflow-x-hidden">
 
-  <!-- TOP BAR -->
-  <header class="bg-emerald-700 text-white">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
-      <a href="{% url 'home' %}" class="flex items-center gap-2 text-xl font-semibold">
-        <span>🕌</span> <span>Masjid Al Huda</span>
+  <!-- GLOBAL FIXED BACKGROUND DECORATIONS (Stripe & Apple Style) -->
+  <div class="fixed inset-0 pointer-events-none -z-50 overflow-hidden select-none">
+    <!-- Ambient Blur Glows -->
+    <div class="absolute -top-[10%] -right-[10%] w-[600px] h-[600px] rounded-full bg-emerald-500/10 blur-[150px] animate-pulse" style="animation-duration: 8s;"></div>
+    <div class="absolute top-[35%] -left-[15%] w-[500px] h-[500px] rounded-full bg-teal-500/5 blur-[120px] animate-pulse" style="animation-duration: 12s;"></div>
+    <div class="absolute -bottom-[10%] right-[10%] w-[600px] h-[600px] rounded-full bg-amber-500/5 blur-[150px] animate-pulse" style="animation-duration: 10s;"></div>
+    
+    <!-- Premium Dot Grid Overlay spanning all margins -->
+    <div class="absolute inset-0 opacity-70" style="background-image: radial-gradient(rgba(16, 185, 129, 0.07) 1.2px, transparent 1.2px); background-size: 24px 24px;"></div>
+  </div>
+
+  <!-- TOP BAR (Sticky Glassmorphism) -->
+  <header class="bg-emerald-950/80 backdrop-blur-md border-b border-emerald-500/20 text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
+      <a href="{% url 'home' %}" class="group flex items-center gap-3 shrink-0 text-white transition duration-200">
+        <!-- High-Tech Glassmorphic Logo Badge -->
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400/10 to-teal-500/10 border border-emerald-400/20 flex items-center justify-center shadow-[0_4px_15px_rgba(16,185,129,0.1)] relative overflow-hidden group-hover:border-emerald-400/40 group-hover:shadow-[0_4px_20px_rgba(16,185,129,0.2)] transition duration-300">
+          <div class="absolute inset-0 bg-emerald-500/10 blur-sm pointer-events-none"></div>
+          <span class="text-lg relative z-10 select-none transform group-hover:scale-110 transition duration-300">🕌</span>
+        </div>
+        
+        <!-- Premium Brand Typography -->
+        <div class="flex flex-col leading-none">
+          <span class="text-sm font-black tracking-wider text-white uppercase bg-gradient-to-r from-white via-emerald-100 to-emerald-300 bg-clip-text text-transparent group-hover:from-white group-hover:to-emerald-200 transition duration-300">{{ mosque.name|default:"Masjid Al Huda" }}</span>
+          <span class="text-[8px] font-extrabold tracking-[0.15em] text-emerald-400 uppercase mt-0.5">Portal Resmi DKM</span>
+        </div>
       </a>
 
-      <nav class="ml-auto text-sm flex items-center gap-4">
-        <a class="hover:underline {% if request.path == '/' %}underline font-medium{% endif %}"
+      <!-- Desktop Nav -->
+      <nav class="ml-auto text-xs hidden md:flex items-center gap-5">
+        <a class="hover:text-emerald-300 py-1 transition duration-200 {% if request.path == '/' %}text-emerald-400 font-bold border-b-2 border-emerald-400{% else %}text-emerald-100{% endif %}"
            href="{% url 'home' %}">Beranda</a>
-        <a class="hover:underline {% if request.path|slice:':7' == '/arsip/' %}underline font-medium{% endif %}"
+        <a class="hover:text-emerald-300 py-1 transition duration-200 {% if '/arsip/' in request.path %}text-emerald-400 font-bold border-b-2 border-emerald-400{% else %}text-emerald-100{% endif %}"
            href="{% url 'report_archive' %}">Arsip Laporan</a>
-        <a class="hover:underline {% if request.path|slice:':10' == '/rekap-kas' %}underline font-medium{% endif %}"
+        <a class="hover:text-emerald-300 py-1 transition duration-200 {% if '/rekap-kas' in request.path %}text-emerald-400 font-bold border-b-2 border-emerald-400{% else %}text-emerald-100{% endif %}"
            href="{% url 'cashflow_public' %}">Rekap Kas</a>
-        <a class="hover:underline {% if request.path|slice:':4' == '/sop' %}underline font-medium{% endif %}"
+        <a class="hover:text-emerald-300 py-1 transition duration-200 {% if '/sop' in request.path %}text-emerald-400 font-bold border-b-2 border-emerald-400{% else %}text-emerald-100{% endif %}"
            href="{% url 'sop_public' %}">SOP</a>
 
         {% if request.user.is_authenticated %}
-          <a class="hover:underline {% if request.path|slice:':10' == '/dashboard' %}underline font-medium{% endif %}"
-             href="{% url 'dashboard' %}">Panel</a>
-          <span class="hidden sm:inline">•</span>
-          <span class="hidden sm:inline">Halo, <span class="font-medium">{{ request.user.username }}</span></span>
-          <a class="underline" href="{% url 'logout' %}">Keluar</a>
+          <span class="text-emerald-500/50">|</span>
+          <a class="hover:text-emerald-300 py-1 transition duration-200 {% if '/dashboard' in request.path %}text-emerald-400 font-bold border-b-2 border-emerald-400{% else %}text-emerald-100{% endif %}"
+              href="{% url 'dashboard' %}">Panel</a>
+          <span class="text-emerald-200/80 text-[10px] bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">Halo, <span class="font-bold text-emerald-400">{{ request.user.username }}</span></span>
+          <a class="bg-red-500/20 hover:bg-red-600 border border-red-500/30 hover:border-red-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition shadow-sm"
+              href="{% url 'logout' %}">Keluar</a>
         {% else %}
-          <a class="underline" href="{% url 'login' %}">Masuk Pengurus</a>
+          <a class="bg-emerald-500 hover:bg-emerald-600 border border-emerald-400 hover:border-emerald-500 px-4 py-1.5 rounded-full text-xs font-bold transition shadow-md shadow-emerald-950/20"
+             href="{% url 'login' %}">Masuk Pengurus</a>
         {% endif %}
       </nav>
+
+      <!-- Hamburger -->
+      <button id="hamburger" class="md:hidden ml-auto p-2 rounded-lg hover:bg-emerald-600 transition" aria-label="Menu">
+        <svg id="icon-open" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+        <svg id="icon-close" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-menu" class="md:hidden flex-col px-4 pb-4 gap-1 border-t border-emerald-600/40">
+      <a href="{% url 'home' %}" class="block py-2 px-3 rounded-lg text-emerald-100 hover:bg-emerald-600/50 text-sm">🏠 Beranda</a>
+      <a href="{% url 'report_archive' %}" class="block py-2 px-3 rounded-lg text-emerald-100 hover:bg-emerald-600/50 text-sm">📁 Arsip Laporan</a>
+      <a href="{% url 'cashflow_public' %}" class="block py-2 px-3 rounded-lg text-emerald-100 hover:bg-emerald-600/50 text-sm">📊 Rekap Kas</a>
+      <a href="{% url 'sop_public' %}" class="block py-2 px-3 rounded-lg text-emerald-100 hover:bg-emerald-600/50 text-sm">📄 SOP</a>
+      {% if request.user.is_authenticated %}
+        <hr class="border-emerald-600/40 my-1">
+        <a href="{% url 'dashboard' %}" class="block py-2 px-3 rounded-lg text-emerald-100 hover:bg-emerald-600/50 text-sm">⚙️ Panel Pengurus</a>
+        <a href="{% url 'logout' %}" class="block py-2 px-3 rounded-lg text-red-300 hover:bg-red-500/20 text-sm">🚪 Keluar</a>
+      {% else %}
+        <hr class="border-emerald-600/40 my-1">
+        <a href="{% url 'login' %}" class="block py-2 px-3 rounded-lg bg-white/20 text-white font-medium text-sm">🔐 Masuk Pengurus</a>
+      {% endif %}
     </div>
   </header>
 
-  <!-- QUICK ACCESS ICONS -->
-  <section class="bg-white/70 border-b">
-    <div class="max-w-6xl mx-auto px-4 py-4">
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+  <!-- QUICK ACCESS ICONS (Premium Capsule Bar for subpages only) -->
+  {% if request.path != '/' and request.path != '/home' and request.path != '/home/' %}
+  <section class="bg-emerald-950/5 border-b border-emerald-950/10 animate-fade-in">
+    <div class="max-w-6xl mx-auto px-4 py-3">
+      <div class="flex items-center gap-2 text-xs overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap">
+        <span class="text-[10px] font-extrabold text-emerald-900 uppercase tracking-widest mr-2 shrink-0 hidden sm:inline-block">⚡ Akses Cepat:</span>
 
-        <!-- (4) DIPERBAIKI: link Legalitas ke halaman /legalitas/ -->
         <a href="{% url 'legalitas_public' %}"
-           class="link-card bg-white border rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
-          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/>
-            <path d="M14 3v6h6"/>
-            <path d="M9 13h6M9 17h6"/>
-          </svg>
-          <div>
-            <div class="text-sm font-medium">Legalitas</div>
-            <div class="text-xs text-gray-500">Surat Wakaf, SK, NPWP</div>
-          </div>
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-full transition shadow-sm hover:shadow text-gray-700 font-medium">
+          <span>📁</span> Legalitas
         </a>
 
         <a href="{% url 'report_archive' %}"
-           class="link-card bg-white border rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
-          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path d="M3 7h18M5 7v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7"/>
-            <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
-            <path d="M8 12h8M8 16h6"/>
-          </svg>
-          <div>
-            <div class="text-sm font-medium">Arsip Laporan</div>
-            <div class="text-xs text-gray-500"></div>
-          </div>
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-full transition shadow-sm hover:shadow text-gray-700 font-medium">
+          <span>📄</span> Arsip Laporan
         </a>
 
         <a href="{% url 'cashflow_public' %}"
-           class="link-card bg-white border rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
-          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path d="M3 3v18h18"/>
-            <path d="m19 9-5 5-4-4-3 3"/>
-          </svg>
-          <div>
-            <div class="text-sm font-medium">Rekap Kas</div>
-            <div class="text-xs text-gray-500">Grafik Keuangan</div>
-          </div>
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-full transition shadow-sm hover:shadow text-gray-700 font-medium">
+          <span>📈</span> Rekap Kas
         </a>
 
         <a href="{% url 'sop_public' %}"
-           class="link-card bg-white border rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
-          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
-          </svg>
-          <div>
-            <div class="text-sm font-medium">SOP Masjid</div>
-            <div class="text-xs text-gray-500">Prosedur operasional</div>
-          </div>
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-full transition shadow-sm hover:shadow text-gray-700 font-medium">
+          <span>📋</span> SOP Masjid
         </a>
 
-<a href="{% url 'donation_page' %}"
-   class="link-card bg-white border rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
-  <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
-    <path d="M12 21C7 21 3 17 3 12a9 9 0 1 1 18 0c0 5-4 9-9 9z"/>
-    <path d="M12 8v8M9.5 10.5h5"/>
-  </svg>
-  <div>
-    <div class="text-sm font-medium">Donasi</div>
-    <div class="text-xs text-gray-500">Zakat, Infaq, Sedekah</div>
-  </div>
-</a>
+        <a href="{% url 'donation_page' %}"
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-full transition shadow-sm hover:shadow text-emerald-800 font-bold">
+          <span>🤲</span> Donasi
+        </a>
 
         <a href="{% url 'home' %}#program"
-           class="link-card bg-white border rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
-          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path d="M8 2v4M16 2v4M4 10h16M5 22h14a1 1 0 0 0 1-1V10H4v11a1 1 0 0 0 1 1z"/>
-            <path d="M8 14h3v3H8z"/>
-          </svg>
-          <div>
-            <div class="text-sm font-medium">Program</div>
-            <div class="text-xs text-gray-500">Kajian & Kegiatan</div>
-          </div>
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-full transition shadow-sm hover:shadow text-gray-700 font-medium">
+          <span>📅</span> Program Kajian
         </a>
 
         <a href="{% url 'home' %}#pengurus"
-           class="link-card bg-white border rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
-          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"/>
-            <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
-          </svg>
-          <div>
-            <div class="text-sm font-medium">Pengurus</div>
-            <div class="text-xs text-gray-500">Struktur DKM</div>
-          </div>
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-full transition shadow-sm hover:shadow text-gray-700 font-medium">
+          <span>👥</span> DKM
         </a>
 
         <a href="{% url 'home' %}#kontak"
-           class="link-card bg-white border rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
-          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path d="M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 1 1 18 0z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          <div>
-            <div class="text-sm font-medium">Kontak & Alamat</div>
-            <div class="text-xs text-gray-500">Lokasi & info umum</div>
-          </div>
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-full transition shadow-sm hover:shadow text-gray-700 font-medium">
+          <span>📍</span> Lokasi
         </a>
 
+        {% if request.user.is_authenticated %}
+        <span class="text-emerald-300 px-1 hidden sm:inline">|</span>
         <a href="{% url 'dashboard' %}"
-           class="link-card bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
-          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path d="M3 13h8V3H3zM13 21h8v-8h-8zM3 21h8v-6H3zM13 11h8V3h-8z"/>
-          </svg>
-          <div>
-            <div class="text-sm font-semibold">Panel Pengurus</div>
-            <div class="text-xs text-emerald-700">Kelola data</div>
-          </div>
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 border border-emerald-600 rounded-full transition shadow-sm hover:shadow text-white font-bold">
+          <span>⚡</span> Panel Kelola
         </a>
 
-        <!-- Upload Laporan: teks netral (Excel/PDF) -->
         <a href="{% url 'report_upload' %}"
-           class="link-card bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-3 shadow-sm transition">
-          <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path d="M12 16V4M7 9l5-5 5 5"/>
-            <path d="M20 16v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2"/>
-          </svg>
-          <div>
-            <div class="text-sm font-semibold">Upload Laporan</div>
-            <div class="text-xs text-emerald-700">PDF (.pdf)</div>
-          </div>
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 border border-teal-600 rounded-full transition shadow-sm hover:shadow text-white font-bold">
+          <span>📤</span> Upload PDF
         </a>
+        {% endif %}
 
       </div>
     </div>
   </section>
+  {% endif %}
 
-  <!-- FLASH & KONTEN HALAMAN -->
-  <main class="max-w-6xl mx-auto p-4">
+  <!-- MAIN CONTENT -->
+  <main class="max-w-6xl mx-auto px-4 py-6">
     {% for m in messages %}
-      <div class="mb-3 p-3 rounded bg-emerald-100 border border-emerald-300 text-emerald-800">{{ m }}</div>
+      <div class="mb-4 p-3 rounded-xl border text-sm flex items-center gap-2
+        {% if 'success' in m.tags %}bg-emerald-50 border-emerald-200 text-emerald-800
+        {% elif 'error' in m.tags %}bg-red-50 border-red-200 text-red-800
+        {% else %}bg-blue-50 border-blue-200 text-blue-800{% endif %}">
+        {% if 'success' in m.tags %}✅{% elif 'error' in m.tags %}❌{% else %}ℹ️{% endif %}
+        {{ m }}
+      </div>
     {% endfor %}
     {% block content %}{% endblock %}
   </main>
 
   <!-- FOOTER -->
-  <footer class="mt-10 border-t">
-    <div class="max-w-6xl mx-auto px-4 py-6 text-sm text-gray-600">
-      <div>© {{ now|date:"Y" }} Masjid Al Huda – Bekasi, Tambun Utara.</div>
-      <div class="text-xs">Portal ini memudahkan jamaah melihat informasi umum masjid, arsip laporan, dan saluran donasi.</div>
+  <footer class="mt-16 bg-gradient-to-b from-emerald-950 to-black text-emerald-100 border-t border-emerald-500/20">
+    <div class="max-w-6xl mx-auto px-6 py-12 grid md:grid-cols-3 gap-8">
+      
+      <!-- Kolom 1: Branding -->
+      <div>
+        <div class="flex items-center gap-2.5 mb-4">
+          <span class="text-3xl drop-shadow-[0_2px_10px_rgba(16,185,129,0.3)]">🕌</span>
+          <span class="font-extrabold text-white text-xl tracking-tight bg-gradient-to-r from-emerald-50 to-emerald-300 bg-clip-text text-transparent">Masjid Al Huda</span>
+        </div>
+        <p class="text-xs text-emerald-300/80 leading-relaxed max-w-sm">
+          Portal Layanan & Transparansi Keuangan Terbuka Masjid Al Huda, Tambun Utara, Bekasi. Mewujudkan pengelolaan DKM yang akuntabel, modern, dan berkah.
+        </p>
+      </div>
+
+      <!-- Kolom 2: Navigasi Cepat -->
+      <div>
+        <h3 class="font-bold text-white mb-4 text-xs uppercase tracking-widest border-b border-emerald-500/10 pb-2">Navigasi Portal</h3>
+        <ul class="grid grid-cols-2 gap-2 text-xs text-emerald-300/80">
+          <li><a href="{% url 'home' %}" class="hover:text-emerald-400 transition flex items-center gap-1">🌿 Beranda</a></li>
+          <li><a href="{% url 'report_archive' %}" class="hover:text-emerald-400 transition flex items-center gap-1">📁 Arsip Laporan</a></li>
+          <li><a href="{% url 'cashflow_public' %}" class="hover:text-emerald-400 transition flex items-center gap-1">📈 Rekap Kas</a></li>
+          <li><a href="{% url 'sop_public' %}" class="hover:text-emerald-400 transition flex items-center gap-1">📋 SOP Masjid</a></li>
+          <li><a href="{% url 'legalitas_public' %}" class="hover:text-emerald-400 transition flex items-center gap-1">🔑 Legalitas</a></li>
+          <li><a href="{% url 'donation_page' %}" class="hover:text-emerald-400 transition flex items-center gap-1">🤲 Layanan Donasi</a></li>
+        </ul>
+      </div>
+
+      <!-- Kolom 3: Kontak & Informasi -->
+      <div>
+        <h3 class="font-bold text-white mb-4 text-xs uppercase tracking-widest border-b border-emerald-500/10 pb-2">Hubungi Kami</h3>
+        <ul class="space-y-2.5 text-xs text-emerald-300/80">
+          <li class="flex items-start gap-2">
+            <span class="text-emerald-400 shrink-0">📍</span>
+            <span>Tambun Utara, Bekasi, Jawa Barat, Indonesia</span>
+          </li>
+          {% if mosque.contact_phone %}
+          <li class="flex items-center gap-2">
+            <span class="text-emerald-400 shrink-0">📞</span>
+            <span>{{ mosque.contact_phone }}</span>
+          </li>
+          {% endif %}
+          {% if mosque.email %}
+          <li class="flex items-center gap-2">
+            <span class="text-emerald-400 shrink-0">✉️</span>
+            <span>{{ mosque.email }}</span>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+
+    </div>
+    
+    <div class="border-t border-emerald-950 py-6 text-center text-[10px] font-medium text-emerald-600 uppercase tracking-widest bg-black/40">
+      © {{ now|date:"Y" }} DKM {{ mosque.name|default:"Masjid Al Huda" }}.
     </div>
   </footer>
 
+  <script>
+    // Hamburger Menu Toggle
+    const btn = document.getElementById('hamburger');
+    const menu = document.getElementById('mobile-menu');
+    const iconOpen = document.getElementById('icon-open');
+    const iconClose = document.getElementById('icon-close');
+    btn.addEventListener('click', () => {
+      menu.classList.toggle('open');
+      iconOpen.classList.toggle('hidden');
+      iconClose.classList.toggle('hidden');
+    });
+  </script>
 </body>
 </html>

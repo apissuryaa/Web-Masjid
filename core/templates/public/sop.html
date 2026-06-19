@@ -2,28 +2,36 @@
 {% block title %}Standar Operasional Prosedur – Masjid Al Huda{% endblock %}
 
 {% block content %}
-<section class="bg-white rounded-2xl border p-6 shadow-sm">
-  <div class="flex items-start justify-between gap-4 mb-4">
-    <div>
-      <h1 class="text-2xl font-bold text-emerald-700 mb-1">Standar Operasional Prosedur (SOP)</h1>
-      {% if mosque %}
-        <p class="text-sm text-gray-600">
-          SOP Masjid <strong>{{ mosque.name }}</strong>
-          {% if mosque.city %}– {{ mosque.city }}{% endif %}{% if mosque.province %}, {{ mosque.province }}{% endif %}.
+<div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+  
+  <!-- Header -->
+  <div class="bg-emerald-700 px-6 py-5 flex items-center justify-between flex-wrap gap-3">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">📋</span>
+      <div>
+        <h1 class="text-lg font-bold text-white">Standar Operasional Prosedur (SOP)</h1>
+        <p class="text-emerald-200 text-xs mt-0.5">
+          {% if mosque %}
+            Panduan operasional resmi {{ mosque.name }}
+          {% else %}
+            Panduan operasional resmi masjid
+          {% endif %}
         </p>
-      {% endif %}
+      </div>
     </div>
     
     {% if sop_doc %}
-      <div class="shrink-0 flex items-center gap-3">
-        <a href="{{ sop_doc.file.url }}" download class="px-4 py-2 bg-emerald-100 text-emerald-800 rounded-lg text-sm font-medium hover:bg-emerald-200 transition">
+      <div class="flex items-center gap-2">
+        <a href="{{ sop_doc.file.url }}" download 
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white text-emerald-800 rounded-lg hover:bg-emerald-50 transition shadow-sm">
           ⬇️ Unduh PDF
         </a>
         {% if request.user.is_authenticated %}
           <form method="post" action="{% url 'document_delete' sop_doc.pk %}"
-                onsubmit="return confirm('Yakin ingin menghapus dokumen SOP ini? Tindakan tidak bisa dibatalkan.');" class="inline-block">
+                onsubmit="return confirm('Yakin ingin menghapus dokumen SOP ini?');" class="inline">
             {% csrf_token %}
-            <button type="submit" class="px-4 py-2 bg-red-100 text-red-800 hover:bg-red-200 rounded-lg text-sm font-medium transition">
+            <button type="submit" 
+                    class="px-3 py-1.5 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg transition shadow-sm">
               🗑 Hapus SOP
             </button>
           </form>
@@ -32,18 +40,31 @@
     {% endif %}
   </div>
 
-  {% if sop_doc %}
-    <div class="w-full bg-gray-100 rounded-xl overflow-hidden border">
-      <!-- Penampil PDF bawaan browser -->
-      <iframe src="{{ sop_doc.file.url }}" class="w-full h-[600px] border-none" title="SOP Masjid">
-        Browser Anda tidak mendukung penampil PDF. Silakan unduh file melalui tombol di atas.
-      </iframe>
-    </div>
-    <div class="text-xs text-gray-400 mt-2 text-right">
-      Diunggah: {{ sop_doc.uploaded_at|date:"d M Y H:i" }} | {{ sop_doc.title }}
-    </div>
-  {% else %}
-    <p class="text-gray-500 bg-gray-50 p-6 rounded-lg border text-center">Belum ada dokumen SOP yang dipublikasikan.</p>
-  {% endif %}
-</section>
+  <!-- Content PDF View -->
+  <div class="p-6">
+    {% if sop_doc %}
+      <div class="w-full bg-gray-50 rounded-xl overflow-hidden border border-gray-200 shadow-inner">
+        <!-- Penampil PDF bawaan browser -->
+        <iframe src="{{ sop_doc.file.url }}" class="w-full h-[600px] border-none" title="SOP Masjid">
+          Browser Anda tidak mendukung penampil PDF. Silakan unduh file melalui tombol di atas.
+        </iframe>
+      </div>
+      <div class="text-xs text-gray-400 mt-3 text-right">
+        Diunggah: {{ sop_doc.uploaded_at|date:"d M Y H:i" }} | <span class="font-medium text-gray-500">{{ sop_doc.title }}</span>
+      </div>
+    {% else %}
+      <div class="py-16 text-center">
+        <div class="text-4xl mb-3">📭</div>
+        <p class="text-gray-400 italic text-sm">Belum ada dokumen SOP yang dipublikasikan.</p>
+        {% if request.user.is_authenticated %}
+          <a href="{% url 'sop_upload' %}" 
+             class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg transition">
+            ⬆️ Upload Sekarang
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+</div>
 {% endblock %}

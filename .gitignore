@@ -61,7 +61,9 @@ db.sqlite3-journal
 
 # Environment variables (jangan pernah di-commit ke Git!)
 .env
-.env.*
+.env.local
+.env.production
+# CATATAN: .env.example boleh di-commit (isinya hanya template, bukan nilai asli)
 
 # Static files hasil collectstatic (di-generate otomatis saat deploy)
 staticfiles/

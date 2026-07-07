@@ -3,6 +3,13 @@ import os
 import mimetypes
 import dj_database_url
 
+# Load environment variables dari file .env (untuk PythonAnywhere & development lokal)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # python-dotenv tidak wajib jika env vars sudah diset manual
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # =======================
@@ -16,7 +23,15 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 if ALLOWED_HOSTS_ENV:
     ALLOWED_HOSTS += [h.strip() for h in ALLOWED_HOSTS_ENV.split(',') if h.strip()]
 
-# Izinkan semua subdomain Render secara otomatis
+# Izinkan subdomain PythonAnywhere secara otomatis
+PYTHONANYWHERE_HOST = os.environ.get('PYTHONANYWHERE_HOST')
+if PYTHONANYWHERE_HOST:
+    ALLOWED_HOSTS.append(PYTHONANYWHERE_HOST)
+else:
+    # Fallback: izinkan semua subdomain pythonanywhere.com
+    ALLOWED_HOSTS.append('.pythonanywhere.com')
+
+# Izinkan subdomain Render (jika suatu saat pindah ke Render)
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
@@ -65,7 +80,7 @@ WSGI_APPLICATION = 'WebMasjid.wsgi.application'
 # =======================
 # ✅ DATABASE
 # =======================
-# Di production (Render): baca dari env var DATABASE_URL → PostgreSQL Supabase
+# Di production (PythonAnywhere/Render): baca dari env var DATABASE_URL → PostgreSQL Supabase
 # Di local: fallback ke SQLite
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
@@ -160,7 +175,10 @@ SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 # ✅ Security tambahan di production
 # =========================================
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    # PythonAnywhere menangani SSL termination sendiri di proxy mereka,
+    # sehingga SECURE_SSL_REDIRECT harus False (hindari redirect loop).
+    # HTTPS tetap dipaksakan melalui SECURE_PROXY_SSL_HEADER.
+    SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000

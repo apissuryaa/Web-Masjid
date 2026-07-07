@@ -177,12 +177,12 @@
                 <div class="flex items-center gap-2 truncate">
                   <span class="text-xs text-gray-400 font-medium shrink-0">{{ cf.date|date:"d M" }}</span>
                   {% if cf.flow_type == 'IN' %}
-                    <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/60 truncate max-w-[150px]" title="{{ cf.category.name }}">
-                      <i data-lucide='arrow-down-left' class='inline-block w-1em h-1em text-green-500'></i> {{ cf.category.name|default:"Masuk" }}
+                    <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/60 truncate max-w-[185px]" title="{% if cf.category.code %}[{{ cf.category.code }}] {% endif %}{{ cf.category.name }}">
+                      <i data-lucide='arrow-down-left' class='inline-block w-1em h-1em text-green-500'></i> {% if cf.category.code %}[{{ cf.category.code }}] {% endif %}{{ cf.category.name|default:"Masuk" }}
                     </span>
                   {% else %}
-                    <span class="text-xs font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded-full border border-red-100/60 truncate max-w-[150px]" title="{{ cf.category.name }}">
-                      <i data-lucide='arrow-up-right' class='inline-block w-1em h-1em text-red-500'></i> {{ cf.category.name|default:"Keluar" }}
+                    <span class="text-xs font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded-full border border-red-100/60 truncate max-w-[185px]" title="{% if cf.category.code %}[{{ cf.category.code }}] {% endif %}{{ cf.category.name }}">
+                      <i data-lucide='arrow-up-right' class='inline-block w-1em h-1em text-red-500'></i> {% if cf.category.code %}[{{ cf.category.code }}] {% endif %}{{ cf.category.name|default:"Keluar" }}
                     </span>
                   {% endif %}
                 </div>
@@ -550,16 +550,16 @@
           </thead>
           <tbody id="cf-table-body" class="divide-y divide-gray-100">
             {% for cf in cashflows %}
-              <tr class="cf-row hover:bg-gray-50 transition" data-date="{{ cf.date|date:'Y-m-d' }}" data-search="{{ cf.category.name|default:'Umum' }} {{ cf.description }} Rp {{ cf.amount|floatformat:0 }}">
+              <tr class="cf-row hover:bg-gray-50 transition" data-date="{{ cf.date|date:'Y-m-d' }}" data-search="{% if cf.category.code %}{{ cf.category.code }} {% endif %}{{ cf.category.name|default:'Umum' }} {{ cf.description }} Rp {{ cf.amount|floatformat:0 }}">
                 <td class="px-4 py-2.5 whitespace-nowrap text-gray-600">{{ cf.date|date:"d M Y" }}</td>
                 <td class="px-4 py-2.5 font-semibold text-gray-700">
                   {% if cf.flow_type == 'IN' %}
                     <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
-                      <i data-lucide='arrow-down-left' class='inline-block w-1em h-1em text-green-500'></i> {{ cf.category.name|default:"Pemasukan Umum" }}
+                      <i data-lucide='arrow-down-left' class='inline-block w-1em h-1em text-green-500'></i> {% if cf.category.code %}[{{ cf.category.code }}] {% endif %}{{ cf.category.name|default:"Pemasukan Umum" }}
                     </span>
                   {% else %}
                     <span class="inline-flex items-center gap-1 text-xs font-semibold text-red-700 bg-red-50 px-2.5 py-0.5 rounded-full border border-red-100">
-                      <i data-lucide='arrow-up-right' class='inline-block w-1em h-1em text-red-500'></i> {{ cf.category.name|default:"Pengeluaran Umum" }}
+                      <i data-lucide='arrow-up-right' class='inline-block w-1em h-1em text-red-500'></i> {% if cf.category.code %}[{{ cf.category.code }}] {% endif %}{{ cf.category.name|default:"Pengeluaran Umum" }}
                     </span>
                   {% endif %}
                 </td>

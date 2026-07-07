@@ -120,7 +120,8 @@ class ReportFile(models.Model):
         super().save(*args, **kwargs)
         try:
             h = hashlib.sha256()
-            with open(self.file.path, 'rb') as f:
+            # Gunakan .open() agar kompatibel dengan local storage maupun cloud (Supabase S3)
+            with self.file.open('rb') as f:
                 for chunk in iter(lambda: f.read(8192), b''):
                     h.update(chunk)
             ReportFile.objects.filter(pk=self.pk).update(sha256=h.hexdigest())
@@ -200,10 +201,13 @@ class CashCategory(models.Model):
         ('OUT', 'Pengeluaran'),
     ]
     name = models.CharField('Nama Kategori', max_length=100)
+    code = models.CharField('Kode Akun', max_length=20, blank=True, null=True)
     activity_type = models.CharField('Jenis Aktivitas', max_length=15, choices=ACTIVITY_CHOICES, default='OPERASI')
     flow_type = models.CharField('Tipe Arus', max_length=5, choices=FLOW_CHOICES, default='IN')
 
     def __str__(self):
+        if self.code:
+            return f"[{self.code}] {self.name} ({self.get_flow_type_display()})"
         return f"{self.name} ({self.get_flow_type_display()})"
 
 

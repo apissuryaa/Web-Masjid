@@ -39,46 +39,59 @@ def log(request, action, detail=""):
 def ensure_categories():
     """Otomatis inisialisasi daftar kategori kas ramah pengguna yang siap pakai."""
     defaults = [
+        # Saldo Awal / Modal
+        ('Saldo Awal', 'PENDANAAN', 'IN', '3100'),
         # Pemasukan - Operasi
-        ('Kotak Amal / Infak / Sedekah', 'OPERASI', 'IN'),
-        ('Penerimaan Donasi CSR', 'OPERASI', 'IN'),
-        ('Pendapatan Sewa (Aula/Peralatan)', 'OPERASI', 'IN'),
-        ('Penerimaan Zakat', 'OPERASI', 'IN'),
-        ('Penerimaan Dana Pembangunan', 'OPERASI', 'IN'),
-        ('Pemasukan Lain-lain', 'OPERASI', 'IN'),
+        ('Kotak Amal / Infak / Sedekah', 'OPERASI', 'IN', '4101'),
+        ('Penerimaan Donasi CSR', 'OPERASI', 'IN', '4102'),
+        ('Pendapatan Sewa (Aula/Peralatan)', 'OPERASI', 'IN', '4103'),
+        ('Penerimaan Zakat', 'OPERASI', 'IN', '4104'),
+        ('Penerimaan Dana Pembangunan', 'OPERASI', 'IN', '4105'),
+        ('Pemasukan Lain-lain', 'OPERASI', 'IN', '4109'),
         # Pengeluaran - Operasi
-        ('Beban Listrik, Air & Internet', 'OPERASI', 'OUT'),
-        ('Beban Kebersihan & K3', 'OPERASI', 'OUT'),
-        ('Beban Kegiatan Kajian & Program', 'OPERASI', 'OUT'),
-        ('Beban Pemeliharaan & Perbaikan Gedung', 'OPERASI', 'OUT'),
-        ('Beban Gaji, Honor Ustadz & Marbot', 'OPERASI', 'OUT'),
-        ('Beban Konsumsi Kegiatan', 'OPERASI', 'OUT'),
-        ('Beban Transportasi & Akomodasi', 'OPERASI', 'OUT'),
-        ('Beban Administrasi & Umum', 'OPERASI', 'OUT'),
-        ('Pengeluaran Lain-lain', 'OPERASI', 'OUT'),
+        ('Beban Listrik, Air & Internet', 'OPERASI', 'OUT', '5101'),
+        ('Beban Kebersihan & K3', 'OPERASI', 'OUT', '5102'),
+        ('Beban Kegiatan Kajian & Program', 'OPERASI', 'OUT', '5103'),
+        ('Beban Pemeliharaan & Perbaikan Gedung', 'OPERASI', 'OUT', '5104'),
+        ('Beban Gaji, Honor Ustadz & Marbot', 'OPERASI', 'OUT', '5105'),
+        ('Beban Konsumsi Kegiatan', 'OPERASI', 'OUT', '5106'),
+        ('Beban Transportasi & Akomodasi', 'OPERASI', 'OUT', '5107'),
+        ('Beban Administrasi & Umum', 'OPERASI', 'OUT', '5108'),
+        ('Pengeluaran Lain-lain', 'OPERASI', 'OUT', '5109'),
         # Investasi
-        ('Pembelian Aset Tetap (Karpet/AC/Inventaris)', 'INVESTASI', 'OUT'),
-        ('Penjualan Aset Tetap Bekas', 'INVESTASI', 'IN'),
+        ('Pembelian Aset Tetap (Karpet/AC/Inventaris)', 'INVESTASI', 'OUT', '5201'),
+        ('Penjualan Aset Tetap Bekas', 'INVESTASI', 'IN', '4201'),
         # Pendanaan
-        ('Penerimaan Wakaf Uang', 'PENDANAAN', 'IN'),
-        ('Dana Talangan / Hutang Diterima', 'PENDANAAN', 'IN'),
-        ('Pengembalian Hutang / Pinjaman', 'PENDANAAN', 'OUT'),
+        ('Penerimaan Wakaf Uang', 'PENDANAAN', 'IN', '4301'),
+        ('Dana Talangan / Hutang Diterima', 'PENDANAAN', 'IN', '4302'),
+        ('Pengembalian Hutang / Pinjaman', 'PENDANAAN', 'OUT', '5301'),
     ]
-    for name, act, flow in defaults:
-        CashCategory.objects.get_or_create(
+    for name, act, flow, code in defaults:
+        cat, created = CashCategory.objects.get_or_create(
             name=name,
-            defaults={'activity_type': act, 'flow_type': flow}
+            defaults={'activity_type': act, 'flow_type': flow, 'code': code}
         )
+        if not created and not cat.code:
+            cat.code = code
+            cat.save()
     
     # Otomatis migrasikan transaksi kas lama yang tidak berkategori
-    default_cat_in, _ = CashCategory.objects.get_or_create(
+    default_cat_in, created_in = CashCategory.objects.get_or_create(
         name='Pemasukan Umum',
-        defaults={'activity_type': 'OPERASI', 'flow_type': 'IN'}
+        defaults={'activity_type': 'OPERASI', 'flow_type': 'IN', 'code': '4100'}
     )
-    default_cat_out, _ = CashCategory.objects.get_or_create(
+    if not created_in and not default_cat_in.code:
+        default_cat_in.code = '4100'
+        default_cat_in.save()
+
+    default_cat_out, created_out = CashCategory.objects.get_or_create(
         name='Pengeluaran Umum',
-        defaults={'activity_type': 'OPERASI', 'flow_type': 'OUT'}
+        defaults={'activity_type': 'OPERASI', 'flow_type': 'OUT', 'code': '5100'}
     )
+    if not created_out and not default_cat_out.code:
+        default_cat_out.code = '5100'
+        default_cat_out.save()
+
     CashFlow.objects.filter(category__isnull=True, flow_type='IN').update(category=default_cat_in)
     CashFlow.objects.filter(category__isnull=True, flow_type='OUT').update(category=default_cat_out)
 
@@ -175,9 +188,18 @@ def sop_public(request):
     Halaman publik: menampilkan dokumen SOP (is_public=True).
     """
     mosque = Mosque.objects.first()
-    sop_doc = Document.objects.filter(doc_type='SOP', is_public=True).order_by('-uploaded_at').first()
+    sop_docs = Document.objects.filter(doc_type='SOP', is_public=True).order_by('-uploaded_at')
+    
+    selected_id = request.GET.get('id')
+    sop_doc = None
+    if selected_id:
+        sop_doc = sop_docs.filter(pk=selected_id).first()
+    if not sop_doc:
+        sop_doc = sop_docs.first()
+
     return render(request, 'public/sop.html', {
         'mosque': mosque,
+        'sop_docs': sop_docs,
         'sop_doc': sop_doc,
     })
 
@@ -471,16 +493,9 @@ def sop_upload(request):
             obj = form.save(commit=False)
             obj.mosque = mosque
             obj.doc_type = 'SOP'
-            
-            # Jika hanya boleh 1 SOP, hapus yang lama
-            old_sops = Document.objects.filter(mosque=mosque, doc_type='SOP')
-            for old_sop in old_sops:
-                delete_filefield(old_sop.file)
-                old_sop.delete()
-                
             obj.save()
             log(request, 'UPLOAD', f'SOP {obj.title}')
-            messages.success(request, 'SOP berhasil diunggah dan menggantikan yang lama.')
+            messages.success(request, 'SOP berhasil diunggah.')
             return redirect('/dashboard/?tab=dokumen')
         else:
             messages.error(request, 'Gagal mengunggah SOP. Periksa isian.')
@@ -857,15 +872,59 @@ def cashflow_print(request):
         
     first_day_of_month = datetime.date(year, month, 1)
     
-    # Saldo Awal (kumulatif sebelum bulan berjalan)
-    cf_prev = CashFlow.objects.filter(date__lt=first_day_of_month)
-    prev_in = sum(cf.amount for cf in cf_prev if cf.flow_type == 'IN') or 0
-    prev_out = sum(cf.amount for cf in cf_prev if cf.flow_type == 'OUT') or 0
-    saldo_awal = prev_in - prev_out
-
     # Transaksi bulan terpilih
-    cfs = CashFlow.objects.filter(date__year=year, date__month=month).order_by('date')
+    cfs_all = CashFlow.objects.filter(date__year=year, date__month=month).order_by('date')
     
+    # Tentukan bulan pertama pembukuan secara otomatis dari data transaksi paling awal
+    first_tx = CashFlow.objects.all().order_by('date').first()
+    if first_tx:
+        initial_year = first_tx.date.year
+        initial_month = first_tx.date.month
+    else:
+        initial_year = year
+        initial_month = month
+
+    # Transaksi Saldo Awal hanya valid pada bulan pertama pembukuan
+    is_initial_month = (year == initial_year and month == initial_month)
+    if is_initial_month:
+        saldo_awal_trans = sum(
+            cf.amount for cf in cfs_all 
+            if cf.category and (cf.category.code == '3100' or cf.category.name.strip().lower() == 'saldo awal')
+        ) or 0
+    else:
+        saldo_awal_trans = 0
+    
+    # Filter transaksi bulan ini untuk mengeluarkan Saldo Awal dari pergerakan kas bulanan
+    cfs = cfs_all.exclude(category__code='3100').exclude(category__name__iexact='saldo awal')
+
+    # Saldo Awal (kumulatif sebelum bulan berjalan)
+    cf_prev_all = CashFlow.objects.filter(date__lt=first_day_of_month)
+    
+    # 1. Transaksi non-Saldo Awal
+    cf_prev_normal = cf_prev_all.exclude(category__code='3100').exclude(category__name__iexact='saldo awal')
+    
+    # 2. Transaksi Saldo Awal yang valid (hanya yang terjadi di bulan pertama pembukuan)
+    cf_prev_initial_sb = cf_prev_all.filter(
+        category__code='3100',
+        date__year=initial_year,
+        date__month=initial_month
+    ) | cf_prev_all.filter(
+        category__name__iexact='saldo awal',
+        date__year=initial_year,
+        date__month=initial_month
+    )
+
+    prev_in = (
+        sum(cf.amount for cf in cf_prev_normal if cf.flow_type == 'IN') +
+        sum(cf.amount for cf in cf_prev_initial_sb if cf.flow_type == 'IN')
+    ) or 0
+    prev_out = (
+        sum(cf.amount for cf in cf_prev_normal if cf.flow_type == 'OUT') +
+        sum(cf.amount for cf in cf_prev_initial_sb if cf.flow_type == 'OUT')
+    ) or 0
+    
+    saldo_awal = (prev_in - prev_out) + saldo_awal_trans
+
     total_in = sum(cf.amount for cf in cfs if cf.flow_type == 'IN') or 0
     total_out = sum(cf.amount for cf in cfs if cf.flow_type == 'OUT') or 0
     saldo_akhir = saldo_awal + total_in - total_out
@@ -877,14 +936,14 @@ def cashflow_print(request):
     for cat in CashCategory.objects.filter(activity_type='OPERASI', flow_type='IN'):
         cat_sum = sum(cf.amount for cf in ops_in if cf.category == cat) or 0
         if cat_sum > 0:
-            ops_in_list.append({'name': cat.name, 'amount': cat_sum})
+            ops_in_list.append({'code': cat.code, 'name': cat.name, 'amount': cat_sum})
             
     ops_out = cfs.filter(category__activity_type='OPERASI', category__flow_type='OUT')
     ops_out_list = []
     for cat in CashCategory.objects.filter(activity_type='OPERASI', flow_type='OUT'):
         cat_sum = sum(cf.amount for cf in ops_out if cf.category == cat) or 0
         if cat_sum > 0:
-            ops_out_list.append({'name': cat.name, 'amount': cat_sum})
+            ops_out_list.append({'code': cat.code, 'name': cat.name, 'amount': cat_sum})
             
     net_ops = sum(x['amount'] for x in ops_in_list) - sum(x['amount'] for x in ops_out_list)
 
@@ -894,14 +953,14 @@ def cashflow_print(request):
     for cat in CashCategory.objects.filter(activity_type='INVESTASI', flow_type='IN'):
         cat_sum = sum(cf.amount for cf in inv_in if cf.category == cat) or 0
         if cat_sum > 0:
-            inv_in_list.append({'name': cat.name, 'amount': cat_sum})
+            inv_in_list.append({'code': cat.code, 'name': cat.name, 'amount': cat_sum})
             
     inv_out = cfs.filter(category__activity_type='INVESTASI', category__flow_type='OUT')
     inv_out_list = []
     for cat in CashCategory.objects.filter(activity_type='INVESTASI', flow_type='OUT'):
         cat_sum = sum(cf.amount for cf in inv_out if cf.category == cat) or 0
         if cat_sum > 0:
-            inv_out_list.append({'name': cat.name, 'amount': cat_sum})
+            inv_out_list.append({'code': cat.code, 'name': cat.name, 'amount': cat_sum})
             
     net_inv = sum(x['amount'] for x in inv_in_list) - sum(x['amount'] for x in inv_out_list)
 
@@ -911,14 +970,14 @@ def cashflow_print(request):
     for cat in CashCategory.objects.filter(activity_type='PENDANAAN', flow_type='IN'):
         cat_sum = sum(cf.amount for cf in fin_in if cf.category == cat) or 0
         if cat_sum > 0:
-            fin_in_list.append({'name': cat.name, 'amount': cat_sum})
+            fin_in_list.append({'code': cat.code, 'name': cat.name, 'amount': cat_sum})
             
     fin_out = cfs.filter(category__activity_type='PENDANAAN', category__flow_type='OUT')
     fin_out_list = []
     for cat in CashCategory.objects.filter(activity_type='PENDANAAN', flow_type='OUT'):
         cat_sum = sum(cf.amount for cf in fin_out if cf.category == cat) or 0
         if cat_sum > 0:
-            fin_out_list.append({'name': cat.name, 'amount': cat_sum})
+            fin_out_list.append({'code': cat.code, 'name': cat.name, 'amount': cat_sum})
             
     net_fin = sum(x['amount'] for x in fin_in_list) - sum(x['amount'] for x in fin_out_list)
 

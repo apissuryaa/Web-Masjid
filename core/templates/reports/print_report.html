@@ -16,22 +16,61 @@
       body {
         background-color: #ffffff;
         color: #000000;
+        padding: 0 !important;
+        margin: 0 !important;
       }
       .no-print {
         display: none !important;
       }
-      .print-border {
-        border-color: #000000 !important;
-      }
-      .print-shadow-none {
+      /* Remove card styling on print to make it clean on paper */
+      .print-border-none {
+        border: none !important;
         box-shadow: none !important;
-      }
-      .print-p-0 {
+        border-radius: 0 !important;
         padding: 0 !important;
+        margin: 0 auto !important;
+        max-width: 100% !important;
+      }
+      /* Compact spacing on print so it fits nicely on one page */
+      .print-compact-space > * + * {
+        margin-top: 0.6rem !important;
+      }
+      .print-compact-items > * + * {
+        margin-top: 0.1rem !important;
+      }
+      .print-header {
+        margin-bottom: 0.75rem !important;
+      }
+      .print-mb-double {
+        margin-bottom: 0.75rem !important;
+      }
+      .print-calk-note {
+        margin-top: 0.75rem !important;
+        margin-bottom: 0.75rem !important;
+      }
+      .print-signature-section {
+        margin-top: 0.75rem !important;
+        break-inside: avoid;
+      }
+      .print-signature-gap {
+        margin-bottom: 2.2rem !important;
+      }
+      .print-footer {
+        margin-top: 1rem !important;
+      }
+      /* Improve text contrast on print */
+      .text-gray-900, .text-gray-800, .text-gray-700, .text-gray-500 {
+        color: #000000 !important;
+      }
+      .text-gray-400 {
+        color: #555555 !important;
+      }
+      .text-red-700 {
+        color: #b91c1c !important;
       }
       @page {
         size: A4;
-        margin: 1.5cm;
+        margin: 0.8cm 1.2cm;
       }
     }
   </style>
@@ -83,7 +122,7 @@
   <div class="max-w-3xl mx-auto bg-white p-8 sm:p-16 rounded-2xl border border-gray-200 shadow-sm print-shadow-none print-p-0 print-border-none">
 
     <!-- REPORT HEADER (ISAK 35 STYLE) -->
-    <div class="text-center mb-8">
+    <div class="text-center mb-8 print-header">
       <h2 class="text-base font-bold text-gray-900 tracking-wider uppercase">{{ mosque.name }}</h2>
       <h1 class="text-lg font-bold text-gray-900 tracking-widest uppercase mt-0.5">Laporan Arus Kas</h1>
       <p class="text-sm text-gray-800 mt-1">Untuk Bulan yang Berakhir Pada Tanggal {{ month_name }} {{ year }}</p>
@@ -92,7 +131,7 @@
 
     <!-- DOUBLE HORIZONTAL LINE -->
     <div class="border-t border-black mb-1"></div>
-    <div class="border-t-4 border-double border-black mb-6"></div>
+    <div class="border-t-4 border-double border-black mb-6 print-mb-double"></div>
 
     <!-- HEADER COLUMNS -->
     <div class="flex justify-between font-bold text-xs uppercase tracking-wider mb-4 border-b border-gray-200 pb-2">
@@ -101,17 +140,17 @@
     </div>
 
     <!-- MAIN ISAK 35 CASH FLOW CONTENT -->
-    <div class="text-xs space-y-6">
+    <div class="text-xs space-y-6 print-compact-space">
 
       <!-- 1. ARUS KAS DARI AKTIVITAS OPERASI -->
       <div>
         <h3 class="font-bold text-gray-900 uppercase tracking-wide mb-2">ARUS KAS DARI AKTIVITAS OPERASI</h3>
         
-        <div class="space-y-1.5 pl-4">
+        <div class="space-y-1.5 pl-4 print-compact-items">
           <!-- Inflows (Pemasukan) -->
           {% for item in ops_in_list %}
             <div class="flex justify-between text-gray-700">
-              <span>Kas dari {{ item.name }}</span>
+              <span>Kas dari {% if item.code %}[{{ item.code }}] {% endif %}{{ item.name }}</span>
               <span class="w-32 text-right">Rp {{ item.amount|floatformat:0|intcomma }}</span>
             </div>
           {% empty %}
@@ -125,7 +164,7 @@
           <!-- Outflows (Pengeluaran - Formatted as (Amount) representing negative) -->
           {% for item in ops_out_list %}
             <div class="flex justify-between text-gray-700">
-              <span>Kas untuk {{ item.name }}</span>
+              <span>Kas untuk {% if item.code %}[{{ item.code }}] {% endif %}{{ item.name }}</span>
               <span class="w-32 text-right">(Rp {{ item.amount|floatformat:0|intcomma }})</span>
             </div>
           {% empty %}
@@ -149,17 +188,17 @@
       <div>
         <h3 class="font-bold text-gray-900 uppercase tracking-wide mb-2">ARUS KAS DARI AKTIVITAS INVESTASI</h3>
         
-        <div class="space-y-1.5 pl-4">
+        <div class="space-y-1.5 pl-4 print-compact-items">
           {% for item in inv_in_list %}
             <div class="flex justify-between text-gray-700">
-              <span>Kas dari {{ item.name }}</span>
+              <span>Kas dari {% if item.code %}[{{ item.code }}] {% endif %}{{ item.name }}</span>
               <span class="w-32 text-right">Rp {{ item.amount|floatformat:0|intcomma }}</span>
             </div>
           {% endfor %}
 
           {% for item in inv_out_list %}
             <div class="flex justify-between text-gray-700">
-              <span>Kas untuk {{ item.name }}</span>
+              <span>Kas untuk {% if item.code %}[{{ item.code }}] {% endif %}{{ item.name }}</span>
               <span class="w-32 text-right">(Rp {{ item.amount|floatformat:0|intcomma }})</span>
             </div>
           {% empty %}
@@ -183,17 +222,17 @@
       <div>
         <h3 class="font-bold text-gray-900 uppercase tracking-wide mb-2">ARUS KAS DARI AKTIVITAS PENDANAAN</h3>
         
-        <div class="space-y-1.5 pl-4">
+        <div class="space-y-1.5 pl-4 print-compact-items">
           {% for item in fin_in_list %}
             <div class="flex justify-between text-gray-700">
-              <span>Kas dari {{ item.name }}</span>
+              <span>Kas dari {% if item.code %}[{{ item.code }}] {% endif %}{{ item.name }}</span>
               <span class="w-32 text-right">Rp {{ item.amount|floatformat:0|intcomma }}</span>
             </div>
           {% endfor %}
 
           {% for item in fin_out_list %}
             <div class="flex justify-between text-gray-700">
-              <span>Kas untuk {{ item.name }}</span>
+              <span>Kas untuk {% if item.code %}[{{ item.code }}] {% endif %}{{ item.name }}</span>
               <span class="w-32 text-right">(Rp {{ item.amount|floatformat:0|intcomma }})</span>
             </div>
           {% empty %}
@@ -235,16 +274,12 @@
 
     </div>
 
-    <!-- CALK NOTE -->
-    <div class="text-center text-[10px] text-gray-500 font-medium italic mt-12 mb-12">
-      "Catatan atas laporan keuangan merupakan bagian yang tidak terpisahkan dari laporan keuangan secara keseluruhan"
-    </div>
 
     <!-- SIGNATURE BLOCKS (PENGESAHAN LAPORAN) -->
-    <div class="grid grid-cols-2 gap-8 text-center text-xs mt-12">
+    <div class="grid grid-cols-2 gap-8 text-center text-xs mt-12 print-signature-section">
       <div>
         <span class="text-gray-500 block mb-1">Mengetahui & Menyetujui,</span>
-        <span class="font-bold text-gray-800 block uppercase tracking-wider mb-20">Ketua DKM {{ mosque.name }}</span>
+        <span class="font-bold text-gray-800 block uppercase tracking-wider mb-20 print-signature-gap">Ketua DKM {{ mosque.name }}</span>
         
         <div class="inline-block border-b border-gray-600 px-8 pb-1 font-bold text-gray-900 uppercase">
           {{ ketua.name|default:"........................................" }}
@@ -256,7 +291,7 @@
       
       <div>
         <span class="text-gray-500 block mb-1">{{ mosque.city|default:"Bekasi" }}, {{ print_date|date:"d F Y" }}</span>
-        <span class="font-bold text-gray-800 block uppercase tracking-wider mb-20">Bendahara DKM</span>
+        <span class="font-bold text-gray-800 block uppercase tracking-wider mb-20 print-signature-gap">Bendahara DKM</span>
         
         <div class="inline-block border-b border-gray-600 px-8 pb-1 font-bold text-gray-900 uppercase">
           {{ bendahara.name|default:"........................................" }}
@@ -268,7 +303,7 @@
     </div>
 
     <!-- PRINT FOOTER METADATA -->
-    <div class="mt-16 pt-3 border-t border-gray-200 flex justify-between text-[8px] text-gray-400">
+    <div class="mt-16 pt-3 border-t border-gray-200 flex justify-between text-[8px] text-gray-400 print-footer">
       <span>Dokumen ini dihasilkan secara otomatis oleh Portal Informasi {{ mosque.name }} sesuai format standar akuntansi nonlaba (ISAK 35).</span>
       <span>Tgl Cetak: {{ print_date|date:"d/m/Y H:i" }}</span>
     </div>

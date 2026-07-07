@@ -7,7 +7,7 @@
   <!-- Header -->
   <div class="bg-emerald-700 px-6 py-5 flex items-center justify-between flex-wrap gap-3">
     <div class="flex items-center gap-3">
-      <span class="text-2xl"><i data-lucide='clipboard' class='inline-block w-1em h-1em'></i></span>
+      <span class="text-2xl text-white"><i data-lucide='clipboard' class='inline-block w-1em h-1em'></i></span>
       <div>
         <h1 class="text-lg font-bold text-white">Standar Operasional Prosedur (SOP)</h1>
         <p class="text-emerald-200 text-xs mt-0.5">
@@ -19,42 +19,90 @@
         </p>
       </div>
     </div>
-    
-    {% if sop_doc %}
-      <div class="flex items-center gap-2">
-        <a href="{{ sop_doc.file.url }}" download 
-           class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white text-emerald-800 rounded-lg hover:bg-emerald-50 transition shadow-sm">
-          <i data-lucide='download' class='inline-block w-1em h-1em'></i> Unduh PDF
-        </a>
-        {% if request.user.is_authenticated %}
-          <form method="post" action="{% url 'document_delete' sop_doc.pk %}"
-                onsubmit="return confirm('Yakin ingin menghapus dokumen SOP ini?');" class="inline">
-            {% csrf_token %}
-            <button type="submit" 
-                    class="px-3 py-1.5 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg transition shadow-sm">
-              <i data-lucide='trash-2' class='inline-block w-1em h-1em'></i> Hapus SOP
-            </button>
-          </form>
-        {% endif %}
-      </div>
-    {% endif %}
   </div>
 
-  <!-- Content PDF View -->
+  <!-- Content PDF View / Selector List -->
   <div class="p-6">
-    {% if sop_doc %}
-      <div class="w-full bg-gray-50 rounded-xl overflow-hidden border border-gray-200 shadow-inner">
-        <!-- Penampil PDF bawaan browser -->
-        <iframe src="{{ sop_doc.file.url }}" class="w-full h-[600px] border-none" title="SOP Masjid">
-          Browser Anda tidak mendukung penampil PDF. Silakan unduh file melalui tombol di atas.
-        </iframe>
-      </div>
-      <div class="text-xs text-gray-400 mt-3 text-right">
-        Diunggah: {{ sop_doc.uploaded_at|date:"d M Y H:i" }} | <span class="font-medium text-gray-500">{{ sop_doc.title }}</span>
+    {% if sop_docs %}
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left Side: List of SOPs -->
+        <div class="lg:col-span-1 space-y-3">
+          <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <i data-lucide="list" class="w-4 h-4 text-emerald-600"></i> Daftar SOP Tersedia
+          </h2>
+          <div class="flex flex-col gap-2 max-h-[600px] overflow-y-auto pr-1">
+            {% for d in sop_docs %}
+              <a href="?id={{ d.pk }}" 
+                 data-id="{{ d.pk }}"
+                 data-title="{{ d.title }}"
+                 data-url="{{ d.file.url }}"
+                 data-uploaded="{{ d.uploaded_at|date:'d M Y H:i' }}"
+                 {% if request.user.is_authenticated %}
+                 data-delete-url="{% url 'document_delete' d.pk %}"
+                 {% endif %}
+                 class="sop-item-btn p-3.5 rounded-xl border text-left transition duration-200 flex items-start gap-3 group/item
+                        {% if d.pk == sop_doc.pk %}
+                          bg-emerald-50/80 border-emerald-500 text-emerald-900 shadow-sm
+                        {% else %}
+                          bg-white border-gray-200 hover:bg-gray-50 text-gray-700 hover:border-emerald-200
+                        {% endif %}">
+                <span class="text-xl mt-0.5 shrink-0 text-emerald-600 group-hover/item:scale-110 transition duration-200">
+                  <i data-lucide="file-text" class="w-5 h-5"></i>
+                </span>
+                <div class="min-w-0 flex-1">
+                  <p class="font-semibold text-xs md:text-sm leading-snug break-words line-clamp-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ d.title }}</p>
+                  <p class="text-[10px] text-gray-400 mt-1.5 flex items-center gap-1">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-gray-400"></i>
+                    {{ d.uploaded_at|date:"d M Y" }}
+                  </p>
+                </div>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Right Side: PDF Viewer -->
+        <div class="lg:col-span-2 flex flex-col">
+          <div class="flex items-center justify-between bg-gray-50 p-4 border border-gray-200 rounded-t-xl flex-wrap gap-2">
+            <div class="min-w-0 flex-1">
+              <p class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Sedang Dibuka</p>
+              <h2 id="active-sop-title" class="font-bold text-gray-800 text-sm md:text-base truncate" title="{{ sop_doc.title }}">{{ sop_doc.title }}</h2>
+            </div>
+            
+            <div class="flex items-center gap-2 shrink-0">
+              <a id="download-sop-btn" href="{{ sop_doc.file.url }}" download 
+                 class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition shadow-sm">
+                <i data-lucide='download' class='inline-block w-1em h-1em'></i> Unduh PDF
+              </a>
+              {% if request.user.is_authenticated %}
+                <form id="delete-sop-form" method="post" action="{% url 'document_delete' sop_doc.pk %}"
+                      onsubmit="return confirm('Yakin ingin menghapus dokumen SOP ini?');" class="inline">
+                  {% csrf_token %}
+                  <button type="submit" 
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg transition shadow-sm">
+                    <i data-lucide='trash-2' class='inline-block w-1em h-1em'></i> Hapus SOP
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="w-full bg-gray-50 rounded-b-xl overflow-hidden border-x border-b border-gray-200 shadow-inner">
+            <!-- Penampil PDF bawaan browser -->
+            <iframe id="sop-iframe" src="{{ sop_doc.file.url }}" class="w-full h-[600px] border-none" title="SOP Masjid">
+              Browser Anda tidak mendukung penampil PDF. Silakan unduh file melalui tombol di atas.
+            </iframe>
+          </div>
+          <div id="sop-footer-info" class="text-xs text-gray-400 mt-3 text-right">
+            Diunggah: {{ sop_doc.uploaded_at|date:"d M Y H:i" }} | <span class="font-medium text-gray-500">{{ sop_doc.title }}</span>
+          </div>
+        </div>
+
       </div>
     {% else %}
       <div class="py-16 text-center">
-        <div class="text-4xl mb-3"><i data-lucide='inbox' class='inline-block w-1em h-1em'></i></div>
+        <div class="text-4xl mb-3 text-gray-300"><i data-lucide='inbox' class='inline-block w-1em h-1em'></i></div>
         <p class="text-gray-400 italic text-sm">Belum ada dokumen SOP yang dipublikasikan.</p>
         {% if request.user.is_authenticated %}
           <a href="{% url 'sop_upload' %}" 
@@ -67,4 +115,64 @@
   </div>
 
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const items = document.querySelectorAll('.sop-item-btn');
+    const iframe = document.getElementById('sop-iframe');
+    const titleEl = document.getElementById('active-sop-title');
+    const downloadBtn = document.getElementById('download-sop-btn');
+    const deleteForm = document.getElementById('delete-sop-form');
+    const footerInfo = document.getElementById('sop-footer-info');
+
+    items.forEach(item => {
+      item.addEventListener('click', function(e) {
+        // Hanya cegah reload jika iframe dan elements yang diperlukan ada
+        if (iframe) {
+          e.preventDefault();
+          
+          // Hapus kelas aktif dari semua tombol
+          items.forEach(btn => {
+            btn.classList.remove('bg-emerald-50/80', 'border-emerald-500', 'text-emerald-900', 'shadow-sm');
+            btn.classList.add('bg-white', 'border-gray-200', 'text-gray-700');
+          });
+
+          // Tambahkan kelas aktif ke tombol yang diklik
+          this.classList.remove('bg-white', 'border-gray-200', 'text-gray-700');
+          this.classList.add('bg-emerald-50/80', 'border-emerald-500', 'text-emerald-900', 'shadow-sm');
+
+          // Dapatkan data-attributes
+          const title = this.getAttribute('data-title');
+          const url = this.getAttribute('data-url');
+          const uploaded = this.getAttribute('data-uploaded');
+          const deleteUrl = this.getAttribute('data-delete-url');
+
+          // Update penampil PDF
+          iframe.src = url;
+          if (titleEl) {
+            titleEl.textContent = title;
+            titleEl.setAttribute('title', title);
+          }
+          if (downloadBtn) downloadBtn.setAttribute('href', url);
+          
+          if (deleteForm) {
+            if (deleteUrl) {
+              deleteForm.setAttribute('action', deleteUrl);
+              deleteForm.classList.remove('hidden');
+            } else {
+              deleteForm.classList.add('hidden');
+            }
+          }
+          if (footerInfo) {
+            footerInfo.innerHTML = `Diunggah: ${uploaded} | <span class="font-medium text-gray-500">${title}</span>`;
+          }
+
+          // Perbarui URL browser tanpa reload halaman penuh
+          const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?id=" + this.getAttribute('data-id');
+          window.history.pushState({ path: newUrl }, '', newUrl);
+        }
+      });
+    });
+  });
+</script>
 {% endblock %}

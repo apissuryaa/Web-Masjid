@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: web-masjid
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn WebMasjid.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
+    plan: free
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true          # Render akan auto-generate random secret key
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        sync: false                  # Anda isi manual di Render Dashboard dari Supabase
+      - key: USE_SUPABASE_STORAGE
+        value: "True"
+      - key: SUPABASE_URL
+        sync: false                  # Anda isi manual di Render Dashboard
+      - key: SUPABASE_S3_KEY
+        sync: false                  # Anda isi manual di Render Dashboard
+      - key: SUPABASE_S3_SECRET
+        sync: false                  # Anda isi manual di Render Dashboard
+      - key: SUPABASE_BUCKET
+        value: "media"
+      - key: SUPABASE_REGION
+        value: "ap-southeast-1"
+      - key: PYTHON_VERSION
+        value: "3.13.0"

@@ -59,6 +59,17 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
+# Environment variables (jangan pernah di-commit ke Git!)
+.env
+.env.*
+
+# Static files hasil collectstatic (di-generate otomatis saat deploy)
+staticfiles/
+
+# Media uploads lokal (di production disimpan di Supabase)
+# media/
+
+
 # Flask stuff:
 instance/
 .webassets-cache
